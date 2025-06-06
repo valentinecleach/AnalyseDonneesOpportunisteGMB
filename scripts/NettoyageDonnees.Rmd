@@ -14,6 +14,7 @@ library(sf)
 
 Données du 22 et 29
 ```{r, include = FALSE}
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
 data_original_22_29 <- read_delim("GeoN_22-29_2025-06-05T09_18_37.225Z.csv", 
                          delim = ";", 
                          escape_double = FALSE, 
@@ -85,6 +86,8 @@ GeoN_22_29 <- data_original_22_29%>%
 
 Données du 35 et 36
 ```{r}
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
+
 data_original_35_56 <- read_delim("GeoN_35-56_2025-06-05T09_21_08.380Z.csv", 
                             delim = ";", 
                             escape_double = FALSE, 
@@ -156,6 +159,8 @@ GeoN_34_56 <- data_original_35_56%>%
 
 Donnees du 44.
 ```{r}
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
+
 data_original_44 <- read_delim("GeoN_44_2025-06-05T09_22_40.948Z.csv", 
                                   delim = ";", 
                                   escape_double = FALSE, 
@@ -233,6 +238,8 @@ GeoN <- rbind(GeoN_22_29, GeoN_34_56, GeoN_44)
 
 ```{r, include = FALSE}
 
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
+
 donnes_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
                                  delim = ";", 
                                  escape_double = FALSE,
@@ -306,4 +313,13 @@ VisioN_FB <- VisioN_FB%>%
 
 ```{r}
 summary(VisioN_FB)
+```
+
+Exportation des données nettoyés:
+```{r}
+write.csv(VisioN_FB,
+          "~/work/AnalyseDonneesOpportunisteGMB/donnees/VisioN_FB.csv")
+
+write.csv(GeoN,
+          "~/work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv")
 ```

@@ -1,0 +1,17 @@
+To do:
+
+Priorité
+
+- Décider la date avant laquelle supprimer les données? 
+(Comparer histogrammes, voir quelles données sont le + utiles?)
+
+Stats desc.
+- répartition selon quels facteurs? 
+
+Cartographie:
+- essayer avec QGIS? -> + facile? en discuter ce week-end
+- rester avec geom_sf ? -> mieux pour avoir tt au même endroit, partager résultats...?
+
+Tester rpubs / apprendre a utiliser 
+
+Contacter Marie-Pierre Etienne. 
