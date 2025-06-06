@@ -51,7 +51,7 @@ GeoN_22_29 <- GeoN_22_29 %>%
 GeoN_22_29%>%
   select(observateurs, nombre_min, nombre_max)%>%
   filter(nombre_max != nombre_min)
-# Seule Enora observe des animaux sans savoir combien ils sont
+# prendre median est okay
 
 GeoN_22_29%>%
   select(nom_valide, nom_vernaculaire)%>%
@@ -75,8 +75,6 @@ GeoN_22_29 <- GeoN_22_29 %>%
   )
 
 
-# Putain y'a un loup dans le jardin quoi
-# qqun a mis 1000 lapins d'un coup ca m'embête
 
 
 GeoN_22_29 <- GeoN_22_29 %>%
