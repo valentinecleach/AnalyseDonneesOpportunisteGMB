@@ -1,0 +1,31 @@
+# Statistiques Descriptives
+
+
+ggplot(GeoN, aes(technique_observation, fill=ordre))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "Barplot de la technique d'observation selon l'ordre",
+       subtitle = "Données de GeoNature")
+
+ggplot(GeoN, 
+       aes(technique_observation, 
+           fill=etat_biologique
+           )
+       )+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "Barplot de la techique d'observation selon l'état biologique",
+       subtitle = "Données de GeoNature")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")
+
+GeoN_sans_1000 <- GeoN%>%
+  filter(nombre_min!=1000)
