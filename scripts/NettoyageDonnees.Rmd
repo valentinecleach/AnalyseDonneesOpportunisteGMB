@@ -1,5 +1,384 @@
 # Nettoyage des données
 
+
+```{r, include = FALSE}
+# Packages
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringi)
+library(sf)
+```
+
 ## GeoNature
+
+Données du 22 et 29
+```{r, include = FALSE}
+data_original_22_29 <- read_delim("GeoN_22-29_2025-06-05T09_18_37.225Z.csv", 
+                         delim = ";", 
+                         escape_double = FALSE, 
+                         trim_ws = TRUE)
+
+GeoN_22_29 <- data_original_22_29%>%
+  select("id_synthese",
+         "date_debut", 
+         "cd_nom", 
+         "nom_valide",	"nom_vernaculaire",
+         "ordre",
+         "famille",	"rang_taxo",
+         "nombre_min",
+         "nombre_max",
+         "observateurs",
+         "communes",	
+         "geometrie_wkt_4326",	
+         "x_centroid_4326",
+         "y_centroid_4326",
+         "comment_occurrence",
+         "niveau_validation",
+         "jdd_nom",
+         "jdd_uuid",
+         "jdd_id",
+         "ca_nom"	,
+         "ca_uuid",	
+         "ca_id",
+         "technique_observation",
+         "etat_biologique"
+  )%>%
+  mutate(date_debut = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         technique_observation,
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom)
+  )%>%
+  filter(jdd_nom !=  "Données faunebretagne.org" )%>%
+  mutate(
+      nom_vernaculaire = ifelse(
+      is.na(nom_vernaculaire),
+      nom_valide,
+      nom_vernaculaire
+    ),
+    nom_valide = as.factor(nom_valide),
+    nom_vernaculaire = as.factor(nom_vernaculaire),
+    nombre_min = ifelse(nombre_max != nombre_min, 
+                        median(c(nombre_max,nombre_min)),
+                        nombre_min)
+  )%>%  
+  mutate(technique_observation = ifelse(
+    technique_observation %in% c("Fèces/Guano/Epreintes", 
+                                 "Empreintes", "Coulée",
+                                 "Galerie/terrier", 
+                                 "Hutte (Castor, Rat musqué)", "Nid/Gîte",
+                                 "Indices de présence divers",
+                                 "Restes de repas",
+                                 "Empreintes et fèces",
+                                 "Restes dans pelote de réjection"
+                                 ),
+    "Indices",
+    ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
+           "Entendu/Ultasons",
+           technique_observation)
+  ))%>%
+  mutate(technique_observation = as.factor(technique_observation))
+```
+
+Données du 35 et 36
+```{r}
+data_original_35_56 <- read_delim("GeoN_35-56_2025-06-05T09_21_08.380Z.csv", 
+                            delim = ";", 
+                            escape_double = FALSE, 
+                            trim_ws = TRUE)
+
+GeoN_34_56 <- data_original_35_56%>%
+  select("id_synthese",
+         "date_debut", 
+         "cd_nom", 
+         "nom_valide",	"nom_vernaculaire",
+         "ordre",
+         "famille",	"rang_taxo",
+         "nombre_min",
+         "nombre_max",
+         "observateurs",
+         "communes",	
+         "geometrie_wkt_4326",	
+         "x_centroid_4326",
+         "y_centroid_4326",
+         "comment_occurrence",
+         "niveau_validation",
+         "jdd_nom",
+         "jdd_uuid",
+         "jdd_id",
+         "ca_nom"	,
+         "ca_uuid",	
+         "ca_id",
+         "technique_observation",
+         "etat_biologique"
+  )%>%
+  mutate(date_debut = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         technique_observation,
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom)
+  )%>%
+  filter(jdd_nom !=  "Données faunebretagne.org" )%>%
+  mutate(
+    nom_vernaculaire = ifelse(
+      is.na(nom_vernaculaire),
+      nom_valide,
+      nom_vernaculaire
+    ),
+    nom_valide = as.factor(nom_valide),
+    nom_vernaculaire = as.factor(nom_vernaculaire),
+    nombre_min = ifelse(nombre_max != nombre_min, 
+                        median(c(nombre_max,nombre_min)),
+                        nombre_min)
+  )%>%  
+  mutate(technique_observation = ifelse(
+    technique_observation %in% c("Fèces/Guano/Epreintes", 
+                                 "Empreintes", "Coulée",
+                                 "Galerie/terrier", 
+                                 "Hutte (Castor, Rat musqué)", "Nid/Gîte",
+                                 "Indices de présence divers",
+                                 "Restes de repas",
+                                 "Empreintes et fèces",
+                                 "Restes dans pelote de réjection"
+    ),
+    "Indices",
+    ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
+           "Entendu/Ultasons",
+           technique_observation)
+  ))%>%
+  mutate(technique_observation = as.factor(technique_observation))
+```
+
+Donnees du 44.
+```{r}
+data_original_44 <- read_delim("GeoN_44_2025-06-05T09_22_40.948Z.csv", 
+                                  delim = ";", 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)
+GeoN_44 <- data_original_44%>%
+  select("id_synthese",
+         "date_debut", 
+         "cd_nom", 
+         "nom_valide",	"nom_vernaculaire",
+         "ordre",
+         "famille",	"rang_taxo",
+         "nombre_min",
+         "nombre_max",
+         "observateurs",
+         "communes",	
+         "geometrie_wkt_4326",	
+         "x_centroid_4326",
+         "y_centroid_4326",
+         "comment_occurrence",
+         "niveau_validation",
+         "jdd_nom",
+         "jdd_uuid",
+         "jdd_id",
+         "ca_nom"	,
+         "ca_uuid",	
+         "ca_id",
+         "technique_observation",
+         "etat_biologique"
+  )%>%
+  mutate(date_debut = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         technique_observation,
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom)
+  )%>%
+  filter(jdd_nom !=  "Données faunebretagne.org" )%>%
+  mutate(
+    nom_vernaculaire = ifelse(
+      is.na(nom_vernaculaire),
+      nom_valide,
+      nom_vernaculaire
+    ),
+    nom_valide = as.factor(nom_valide),
+    nom_vernaculaire = as.factor(nom_vernaculaire),
+    nombre_min = ifelse(nombre_max != nombre_min, 
+                        median(c(nombre_max,nombre_min)),
+                        nombre_min)
+  )%>%  
+  mutate(technique_observation = ifelse(
+    technique_observation %in% c("Fèces/Guano/Epreintes", 
+                                 "Empreintes", "Coulée",
+                                 "Galerie/terrier", 
+                                 "Hutte (Castor, Rat musqué)", "Nid/Gîte",
+                                 "Indices de présence divers",
+                                 "Restes de repas",
+                                 "Empreintes et fèces",
+                                 "Restes dans pelote de réjection"
+    ),
+    "Indices",
+    ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
+           "Entendu/Ultasons",
+           technique_observation)
+  ))%>%
+  mutate(technique_observation = as.factor(technique_observation))
+```
+Création d'une base de données commune avec tous les départements (22, 29, 34, 56, 44) :
+```{r}
+GeoN <- rbind(GeoN_22_29, GeoN_34_56, GeoN_44)
+
+``` 
+
+```
+
+A faire:
+
+- regarder BDD de faune bretagne
+- plus de stats desc (representation graphique du territoire, les îles etc..)
+
+```{r, include = FALSE}
+
+# Importation de Faune Bretagne
+
+donnes_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
+                                 delim = ";", 
+                                 escape_double = FALSE,
+                                 trim_ws = TRUE)
+
+VisioN_FB <- donnes_VisioNature_FB %>%
+  dplyr::select(id_synthese,
+         date_debut,
+         cd_nom,
+         cd_ref,
+         nom_valide,
+         nom_vernaculaire,
+         ordre,
+         famille,
+         rang_taxo,
+         nombre_min, # nbre_min=nbre_max
+         observateurs,
+         communes,
+         geometrie_wkt_4326,
+         x_centroid_4326,
+         y_centroid_4326,
+         comment_occurrence,
+         technique_observation,
+         etat_biologique
+         )%>%
+  dplyr::mutate(etat_biologique = as.factor(etat_biologique),
+         nom_valide=as.factor(nom_valide),
+         nom_vernaculaire=as.factor(nom_vernaculaire),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         rang_taxo=as.factor(rang_taxo)
+         )%>%
+  dplyr::filter(technique_observation != "Restes dans pelote de réjection")
+
+
+VisioN_FB <- VisioN_FB%>%
+  dplyr::mutate(technique_observation = ifelse(
+    !is.na(comment_occurrence) & technique_observation == "Inconnu",
+    ifelse(any(grepl("TAUPINIERE", toupper(gsub("[[:punct:]]", 
+                                                "", 
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  "Latin-ASCII")
+                                                )
+                                           )
+                     ),
+               grepl("EMPREINTES", toupper(gsub(":punct:]]",
+                                                "",
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  "Latin-ASCII")
+                                                ))
+                     ),
+               grepl("TRACE", toupper(gsub(":punct:]]",
+                                                "",
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  "Latin-ASCII"
+                                                  )
+                                           )
+                                      )
+               )
+               ),
+           "Indices",
+           technique_observation),
+    technique_observation
+    )
+    )
+
+```
+
+
+```{r}
+
+dim(VisioN_FB)
+
+summary(VisioN_FB)
+ 
+ggplot(VisioN_FB, aes(date_debut))+
+  geom_histogram()+
+  labs(title = "Distribution des la quantité d'observations",
+       x = "date",subtitle = "Données de VisioNature")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")
+
+ggplot(GeoN, aes(date_debut))+
+  geom_histogram()+
+  labs(title = "Distribution des la quantité d'observations",
+       x = "date",subtitle = "Données de GeoNature")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")
+```
+
+```{r ggplot2, warning = FALSE, echo=FALSE, out.width="50%"}
+
+ggplot(VisioN_FB, aes(technique_observation, fill=etat_biologique
+))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "Barplot de la techique d'observation selon l'état biologique",
+       subtitle = "Données de VisioNature")
+
+
+ggplot(GeoN, aes(technique_observation, fill=etat_biologique
+))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "Barplot de la techique d'observation selon l'état biologique",
+       subtitle = "Données de GeoNature")
+
+ggplot(VisioN_FB, aes(date_debut, nombre_min))+
+  geom_point()+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(subtitle="Données de VisioNature")
+
+ggplot(GeoN_sans_1000, aes(date_debut, nombre_min))+
+  geom_point()+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(subtitle="Données de GeoNature")
+
+
+```
+
+
 
 ## VisioNature
