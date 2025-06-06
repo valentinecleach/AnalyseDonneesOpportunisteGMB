@@ -1,5 +1,19 @@
 # Statistiques Descriptives
 
+```{r, include = FALSE}
+# Packages
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringi)
+library(sf)
+
+# Importations
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+GeoN <- read_csv("GeoN.csv")
+VisioN_FB <- read_csv("VisioN_FB.csv")
+```
+
 ```{r}
 ggplot(GeoN, aes(technique_observation, fill=ordre))+
   geom_bar(position="dodge")+
