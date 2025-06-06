@@ -1,6 +1,6 @@
 # Statistiques Descriptives
 
-
+```{r}
 ggplot(GeoN, aes(technique_observation, fill=ordre))+
   geom_bar(position="dodge")+
   theme_bw()+
@@ -29,3 +29,65 @@ ggplot(GeoN,
 
 GeoN_sans_1000 <- GeoN%>%
   filter(nombre_min!=1000)
+
+
+ggplot(VisioN_FB, aes(date_debut))+
+  geom_histogram()+
+  labs(title = "Distribution des la quantité d'observations",
+       x = "date",subtitle = "Données de VisioNature")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")
+
+ggplot(GeoN, aes(date_debut))+
+  geom_histogram()+
+  labs(title = "Distribution des la quantité d'observations",
+       x = "date",subtitle = "Données de GeoNature")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")
+```
+
+```{r ggplot2, warning = FALSE, echo=FALSE, out.width="50%"}
+
+ggplot(VisioN_FB, aes(technique_observation, fill=etat_biologique
+))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "Barplot de la techique d'observation selon l'état biologique",
+       subtitle = "Données de VisioNature")
+
+
+ggplot(GeoN, aes(technique_observation, fill=etat_biologique
+))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "Barplot de la techique d'observation selon l'état biologique",
+       subtitle = "Données de GeoNature")
+
+ggplot(VisioN_FB, aes(date_debut, nombre_min))+
+  geom_point()+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(subtitle="Données de VisioNature")
+
+ggplot(GeoN_sans_1000, aes(date_debut, nombre_min))+
+  geom_point()+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(subtitle="Données de GeoNature")
+
+
+```
