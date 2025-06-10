@@ -255,3 +255,8 @@ Total_B%>%
   filter(technique_observation == "Inconnu")%>%
   print(n=3000)
 
+
+
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+GeoN <- read_csv("GeoN.csv")
+VisioN_FB <- read_csv("VisioN_FB.csv")

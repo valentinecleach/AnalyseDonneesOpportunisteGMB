@@ -15,16 +15,7 @@ GeoN <- read_csv("GeoN.csv")
 VisioN_FB <- read_csv("VisioN_FB.csv")
 ```
 
-```{r}
-ggplot(GeoN, aes(technique_observation, fill=ordre))+
-  geom_bar(position="dodge")+
-  theme_bw()+
-  scale_fill_grey(start = 0.2,
-                  end = 0.8, 
-                  na.value = "red")+
-  labs(title = "Barplot de la technique d'observation selon l'ordre",
-       subtitle = "Données de GeoNature")
-
+```{r,  warning = FALSE}
 ggplot(GeoN, 
        aes(technique_observation, 
            fill=etat_biologique
@@ -41,10 +32,29 @@ ggplot(GeoN,
   scale_fill_grey(start = 0.2,
                   end = 0.8, 
                   na.value = "red")
+# Etonnant de savoir qu'il est vivant quand on a uniquement indice. Sinon rien a dire?
 
+
+ggplot(VisioN_FB, 
+       aes(technique_observation, 
+           fill=etat_biologique
+           )
+       )+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "Barplot de la techique d'observation selon l'état biologique",
+       subtitle = "Données de VisioNature")
+
+
+```
+
+Quantité d'observations GeoNature Et VisioNature
+```{r NbrObs-Date, warning = FALSE, echo=FALSE, out.width="50%"}
 GeoN_sans_1000 <- GeoN%>%
   filter(nombre_min!=1000)
-
 
 ggplot(VisioN_FB, aes(date_debut))+
   geom_histogram()+
@@ -77,7 +87,6 @@ ggplot(VisioN_FB, aes(technique_observation, fill=etat_biologique
   labs(title = "Barplot de la techique d'observation selon l'état biologique",
        subtitle = "Données de VisioNature")
 
-
 ggplot(GeoN, aes(technique_observation, fill=etat_biologique
 ))+
   geom_bar(position="dodge")+
@@ -87,7 +96,10 @@ ggplot(GeoN, aes(technique_observation, fill=etat_biologique
                   na.value = "red")+
   labs(title = "Barplot de la techique d'observation selon l'état biologique",
        subtitle = "Données de GeoNature")
+```
+Les lapins & lièvres sont peu remarqués avec les indices comparé aux autres dans VisioNature
 
+```{r nmbre-données, warning = FALSE, echo=FALSE, out.width="50%"}
 ggplot(VisioN_FB, aes(date_debut, nombre_min))+
   geom_point()+
   theme_bw()+
@@ -108,34 +120,31 @@ ggplot(GeoN_sans_1000, aes(date_debut, nombre_min))+
 ```
 
 ```{r, include = FALSE}
-# trie selon les années
-GeoN_new <- GeoN %>%
-  filter(date_debut > as.Date("2005-01-01"))
-
-VisioN_FB_new <- VisioN_FB %>%
-  filter(date_debut > as.Date("2005-01-01"))
-
 # on remodifie c'etait parti 
 GeoN <- GeoN %>%
   mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
               "ordre", "famille", "observateurs"), 
-            .funs = as.factor)
+            .funs = as.factor)%>%
+  filter(date_debut > as.Date("2005-01-01"))
 
-VisioN_FB_new <- VisioN_FB_new %>%
+
+VisioN_FB <- VisioN_FB %>%
   mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
               "ordre", "famille", "observateurs"), 
-            .funs = as.factor)
+            .funs = as.factor)%>%
+  filter(date_debut > as.Date("2005-01-01"))
+
 ```
 
 ```{r}
-ggplot(GeoN_new, aes(date_debut)) +
+ggplot(GeoN, aes(date_debut)) +
   geom_bar() +
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="GeoN") + facet_grid(ordre ~ .) +
   ylim(0, 30)+
   theme_bw()
 
-ggplot(VisioN_FB_new, aes(date_debut))+
+ggplot(VisioN_FB, aes(date_debut))+
   geom_bar()+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="VisioN_FB") + facet_grid(ordre ~ .) +
@@ -154,18 +163,18 @@ Calcul des correlations selon moyenne mobile?
 ```
 
 
+....
+
 ```{r, include=FALSE}
 Total_B <- VisioN_FB %>%
   mutate(bdd = "VisioN_FB")%>%
   bind_rows(GeoN %>%
-              mutate(bdd = "GeoN"))
-
-Total_B_new <- Total_B %>%
+              mutate(bdd = "GeoN")) %>%
   filter(date_debut > as.Date("2005-01-01"))
 ```
 
 ```{r}
-ggplot(Total_B_new, aes(date_debut))+
+ggplot(Total_B, aes(date_debut))+
   geom_bar()+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="Total_B")+ facet_grid(ordre ~ .)+
@@ -344,3 +353,11 @@ ggplot(GeoN, aes(ordre))+
   geom_bar()+
   labs(title="Répartition des differents ordres",
        subtitle="GeoN")
+ggplot(VisioN_FB, aes(ordre))+
+  geom_bar()+
+  labs(title="Répartition des differents ordres",
+       subtitle="VisioN_FB")
+ggplot(Total_B, aes(ordre))+
+  geom_bar()+
+  labs(title="Répartition des differents ordres",
+       subtitle="Total_B")
