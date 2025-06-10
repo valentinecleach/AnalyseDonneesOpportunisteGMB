@@ -7,6 +7,7 @@ library(ggplot2)
 library(dplyr)
 library(stringi)
 library(sf)
+library(rsample)
 
 # Importations
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
@@ -107,7 +108,14 @@ ggplot(GeoN_sans_1000, aes(date_debut, nombre_min))+
 ```
 
 ```{r, include = FALSE}
+# trie selon les années
+GeoN_new <- GeoN %>%
+  filter(date_debut > as.Date("2005-01-01"))
 
+VisioN_FB_new <- VisioN_FB %>%
+  filter(date_debut > as.Date("2005-01-01"))
+
+# on remodifie c'etait parti 
 GeoN <- GeoN %>%
   mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
               "ordre", "famille", "observateurs"), 
@@ -117,13 +125,6 @@ VisioN_FB_new <- VisioN_FB_new %>%
   mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
               "ordre", "famille", "observateurs"), 
             .funs = as.factor)
-
-GeoN_new <- GeoN %>%
-  filter(date_debut > as.Date("2005-01-01"))
-
-VisioN_FB_new <- VisioN_FB %>%
-  filter(date_debut > as.Date("2005-01-01"))
-
 ```
 
 ```{r}
@@ -155,7 +156,9 @@ Calcul des correlations selon moyenne mobile?
 
 ```{r, include=FALSE}
 Total_B <- VisioN_FB %>%
-  bind_rows(GeoN)
+  mutate(bdd = "VisioN_FB")%>%
+  bind_rows(GeoN %>%
+              mutate(bdd = "GeoN"))
 
 Total_B_new <- Total_B %>%
   filter(date_debut > as.Date("2005-01-01"))
@@ -179,7 +182,8 @@ Si une observation de 2 lapins => 2 observations.
 ```{r}
 
 # Carte bretagne
-carte_bretagne <- st_read("donnees/LIM_ADM_DepartementsOuest.shp")
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
 carte_bretagne <- st_set_crs(carte_bretagne, 2154)
 carte_bretagne <- st_transform(carte_bretagne, 4326)
 
@@ -216,7 +220,100 @@ ggplot() +
   geom_sf(data = Geo_VisioN, size=0.01) +
   theme_bw() + facet_grid(. ~ ordre)
 
-
 ```
+https://www.data.gouv.fr/fr/datasets/departements-de-louest/  <- ref de ma carte
+Peut etre regarder les espèces a travers les années?
+Comme on commence 2010, -> 2010-2015, 2015-2020, 2020-2025
+
+```{r}
+GeoN_1 <- GeoN %>%
+  mutate(
+    grp_date = case_when(
+      date_debut >= as.Date("2010-01-01") & date_debut <= as.Date("2014-12-31") ~ "1. Entre 2010 et 2015",
+      date_debut >= as.Date("2015-01-01") & date_debut <= as.Date("2019-12-31") ~ "2. Entre 2015 et 2020",
+      date_debut > as.Date("2019-12-31") ~ "3. Après 2020",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(date_debut > as.Date("2010-01-01"))
 
 
+
+carte_carnivora <- GeoN_1 %>%
+  dplyr::select(x_centroid_4326,
+                y_centroid_4326,
+                grp_date,
+                ordre,
+                date_debut) %>% 
+  sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+               crs = sf::st_crs(4326))%>%
+  filter(ordre == "Carnivora")
+
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Carte des observations en Bretagne des Carnivora",
+       subtitle = "Geo_Nature") +
+  geom_sf(data = carte_carnivora, size=0.01) +
+  theme_bw() + facet_grid(. ~ grp_date)
+```
+En vrai ca veut pas dire trop trop grand chose, on savait qu'on voyait en tout moins d'animaux avec les années donc logique ca se réflète ici aussi (Sutout bcp + en T1)
+On voit quand même un peu de déplacements. A voir plus tard.
+
+Même chose pour les autres espèces?
+Ou alors je prends la BDD avec tout et je selectionne "aléatoirement" 40 000 ou 50 000 données avec les proportions? 
+
+Idée 2:
+
+```{r}
+set.seed(12345)
+
+graph_ordre_tranche_annee <- function(ordre_voulu){
+  # Creation de la BDD
+  ordre_data <- Total_B %>% filter(ordre == ordre_voulu)
+  bdd_props <- prop.table(table(ordre_data$bdd))
+  n_bdd1 <- round(5000 * bdd_props[1])
+  n_bdd2 <- 5000 - n_bdd1
+  bdd1 <- ordre_data %>% 
+    filter(bdd == "GeoN") %>% 
+    sample_n(min(n_bdd1, n()))
+  bdd2 <- ordre_data %>% 
+    filter(bdd == "VisioN_FB") %>% 
+    sample_n(min(n_bdd2, n()))
+  
+  ordre_graph <- bind_rows(bdd1, bdd2) %>%
+    mutate(
+      grp_date = case_when(
+        date_debut >= as.Date("2010-01-01") & date_debut <= as.Date("2014-12-31") ~ "1. Entre 2010 et 2015",
+        date_debut >= as.Date("2015-01-01") & date_debut <= as.Date("2019-12-31") ~ "2. Entre 2015 et 2020",
+        date_debut > as.Date("2019-12-31") ~ "3. Après 2020",
+        TRUE ~ NA_character_
+      )
+    ) %>%
+    filter(date_debut > as.Date("2010-01-01")) %>%
+    sample_frac(1)
+  
+  # Transformation pour des données de la carte
+  carte_ordre <- ordre_graph %>%
+    dplyr::select(x_centroid_4326, y_centroid_4326, 
+                  grp_date, ordre, date_debut) %>%
+    sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+                 crs = sf::st_crs(4326)) %>%
+    filter(ordre == ordre_voulu)
+  
+  # Plot
+  ggplot() +
+    geom_sf(data = carte_bretagne) + 
+    labs(
+      title = paste("Carte des observations en Bretagne des", ordre_voulu),
+      subtitle = "Toutes données"
+    ) +
+    geom_sf(data = carte_ordre, size = 0.01) +
+    theme_bw() + 
+    facet_grid(. ~ grp_date)
+}
+
+graph_ordre_tranche_annee("Carnivora")
+graph_ordre_tranche_annee("Cetartiodactyla")
+graph_ordre_tranche_annee("Eulipotyphla")
+graph_ordre_tranche_annee("Lagomorpha")
+graph_ordre_tranche_annee("Rodentia")
