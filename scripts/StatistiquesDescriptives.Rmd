@@ -171,6 +171,25 @@ ggplot(Total_B_new, aes(date_debut))+
        subtitle="Total_B")+ facet_grid(ordre ~ .)+
   ylim(0, 30)+
   theme_bw()
+
+ggplot(VisioN_FB, aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="Total VisioNature depuis 2010")+ facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
+
+ggplot(GeoN, aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="Total GeoNature depuis 2010")+ facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
+
+
+ggplot(Total_B, aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="Total Bretagne depuis 2010")+ facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
 ```
 A mon gout couper avant 2010 pour eviter de trop changer les données
 Et voir par rapport aux observateurs ce que ca donne 
@@ -238,7 +257,6 @@ GeoN_1 <- GeoN %>%
   filter(date_debut > as.Date("2010-01-01"))
 
 
-
 carte_carnivora <- GeoN_1 %>%
   dplyr::select(x_centroid_4326,
                 y_centroid_4326,
@@ -256,15 +274,15 @@ ggplot() +
   geom_sf(data = carte_carnivora, size=0.01) +
   theme_bw() + facet_grid(. ~ grp_date)
 ```
-En vrai ca veut pas dire trop trop grand chose, on savait qu'on voyait en tout moins d'animaux avec les années donc logique ca se réflète ici aussi (Sutout bcp + en T1)
+
+En vrai ca veut pas dire  trop grand chose, on savait qu'on voyait en tout moins d'animaux avec les années donc logique ca se réflète ici aussi (Sutout bcp + en T1)
 On voit quand même un peu de déplacements. A voir plus tard.
 
-Même chose pour les autres espèces?
-Ou alors je prends la BDD avec tout et je selectionne "aléatoirement" 40 000 ou 50 000 données avec les proportions? 
+Ou alors je prends la BDD avec toutes les données et je selectionne "aléatoirement" 40 000 ou 50 000 données avec les proportions? 
 
 Idée 2:
 
-```{r}
+```{r GraphiquesDateEtOrdre}
 set.seed(12345)
 
 graph_ordre_tranche_annee <- function(ordre_voulu){
@@ -317,3 +335,12 @@ graph_ordre_tranche_annee("Cetartiodactyla")
 graph_ordre_tranche_annee("Eulipotyphla")
 graph_ordre_tranche_annee("Lagomorpha")
 graph_ordre_tranche_annee("Rodentia")
+```
+
+
+Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformement les 4 autres ordres.
+```{r Repartition des ordes}
+ggplot(GeoN, aes(ordre))+
+  geom_bar()+
+  labs(title="Répartition des differents ordres",
+       subtitle="GeoN")

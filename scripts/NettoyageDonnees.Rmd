@@ -309,7 +309,9 @@ VisioN_FB <- VisioN_FB%>%
     )
     )
 ```
-
+Il ne reste plus que 264 dont la technique d'observation est "Inconnus" et il y a un commentaire.
+Les commentaires sont assez aléatoire et beaucoup ne donnent pas d'infos supplémentaire.
+On se contente ici de rester là dessus.
 
 ```{r}
 summary(VisioN_FB)
@@ -323,3 +325,8 @@ write.csv(VisioN_FB,
 write.csv(GeoN,
           "~/work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv")
 ```
+
+```{r}
+any(duplicated(Total_B))
+```
+Pas de duplicats.
