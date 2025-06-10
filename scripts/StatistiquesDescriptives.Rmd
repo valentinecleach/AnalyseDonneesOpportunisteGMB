@@ -105,3 +105,75 @@ ggplot(GeoN_sans_1000, aes(date_debut, nombre_min))+
 
 
 ```
+
+```{r, include = FALSE}
+
+GeoN <- GeoN %>%
+  mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
+              "ordre", "famille", "observateurs"), 
+            .funs = as.factor)
+
+VisioN_FB_new <- VisioN_FB_new %>%
+  mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
+              "ordre", "famille", "observateurs"), 
+            .funs = as.factor)
+
+GeoN_new <- GeoN %>%
+  filter(date_debut > as.Date("2005-01-01"))
+
+VisioN_FB_new <- VisioN_FB %>%
+  filter(date_debut > as.Date("2005-01-01"))
+
+```
+
+```{r}
+ggplot(GeoN_new, aes(date_debut)) +
+  geom_bar() +
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="GeoN") + facet_grid(ordre ~ .) +
+  ylim(0, 30)+
+  theme_bw()
+
+ggplot(VisioN_FB_new, aes(date_debut))+
+  geom_bar()+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="VisioN_FB") + facet_grid(ordre ~ .) +
+  ylim(0, 30)+
+  theme_bw()
+```
+
+On a des données a differentes périodes entre ces deux bases de données. 
+Essayer de les rassembler pour savoir si ca peut compenser entre eux.
+(en esperant que ce soit des differences de données non pas du a un réel 
+changement des population a ces moments là mais du a plus d'observateurs) 
+
+Calcul des correlations selon moyenne mobile?
+```{r}
+
+```
+
+
+```{r, include=FALSE}
+Total_B <- VisioN_FB %>%
+  bind_rows(GeoN)
+
+Total_B_new <- Total_B %>%
+  filter(date_debut > as.Date("2005-01-01"))
+```
+
+```{r}
+ggplot(Total_B_new, aes(date_debut))+
+  geom_bar()+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="Total_B")+ facet_grid(ordre ~ .)+
+  ylim(0, 30)+
+  theme_bw()
+```
+A mon gout couper avant 2010 pour eviter de trop changer les données
+Et voir par rapport aux observateurs ce que ca donne 
+Ie + d'observateurs => plus d'observations car ils les voyaient sans les inscrire avant?
+Créer colonne observations = somme des observations 
+Si une observation de 2 lapins => 2 observations.
+
+```
+
