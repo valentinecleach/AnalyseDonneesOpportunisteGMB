@@ -9,6 +9,9 @@ library(sf)
 library(dplyr)
 
 
+any(duplicated(Total_B))
+
+##################
 GeoN <- GeoN %>%
   mutate_at(c("communes", "nom_valide", 
                   "nom_vernaculaire",
@@ -182,4 +185,78 @@ ggplot(VisioN_FB_new, aes(date_debut))+
   ylim(0, 30)+
   theme_bw()
 
+####################
+
+
+#################### Rep Cartographique ###############"
+
+library(sf)
+library(ggplot2)
+library(rnaturalearth)
+
+# Carte bretagne
+carte_bretagne <- st_read("donnees/LIM_ADM_DepartementsOuest.shp")
+carte_bretagne <- st_set_crs(carte_bretagne, 2154)
+carte_bretagne <- st_transform(carte_bretagne, 4326)
+
+# Données geographique
+Geo_VisioN <- VisioN_FB_new %>% 
+  dplyr::select(x_centroid_4326,
+                y_centroid_4326,
+                ordre,
+                date_debut) %>% 
+  sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+               crs = sf::st_crs(4326))
+
+Geo_GeoN <- GeoN_new %>% 
+  dplyr::select(x_centroid_4326,
+                y_centroid_4326,
+                ordre,
+                date_debut) %>% 
+  sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+               crs = sf::st_crs(4326))
+
+
+ggplot() +
+  geom_sf(data = Geo_VisioN, aes(color = ordre)) +
+  labs(title = "Carte des observations en bretagne",
+       color = "Ordre") +
+  theme_bw()
+
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Carte des observations en Bretagne selon les ordres",
+       subtitle = "VisioNature Bretagne") +
+  geom_sf(data = Geo_VisioN, aes(color = ordre)) +
+  theme_bw()
+
+
+
+
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Carte des observations en Bretagne selon les ordres",
+       subtitle = "GeoNature") +
+  geom_sf(data = Geo_GeoN, aes(color = ordre)) +
+  theme_bw()
+
+
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Carte des observations en Bretagne selon les ordres",
+       subtitle = "GeoNature") +
+  geom_sf(data = Geo_GeoN, size=0.01) +
+  theme_bw() + facet_grid(. ~ ordre)
+
+
+
+library(tidyverse)
+library(gridExtra)
+library(lubridate)
+library(sf)
+library(mapview)
+library(maptiles)
+library(tidyterra)
+library(kableExtra)
+library(knitr)
 
