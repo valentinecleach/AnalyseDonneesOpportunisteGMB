@@ -260,3 +260,21 @@ library(tidyterra)
 library(kableExtra)
 library(knitr)
 
+
+summary(GeoN$ordre)
+GeoN_1 <- GeoN %>%
+  mutate(
+    grp_date = case_when(
+      date_debut >= as.Date("2010-01-01") & date_debut <= as.Date("2014-12-31") ~ "T1",
+      date_debut >= as.Date("2015-01-01") & date_debut <= as.Date("2019-12-31") ~ "T2",
+      date_debut > as.Date("2019-12-31") ~ "T3",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(date_debut > as.Date("2010-01-01"))
+
+
+
+ordre_data <- Total_B %>% filter(ordre == "Carnivora")
+bdd_props <- prop.table(table(ordre_data$bdd))
+
