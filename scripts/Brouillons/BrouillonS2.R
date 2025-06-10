@@ -58,7 +58,7 @@ Total_B <- VisioN_FB %>%
   bind_rows(GeoN)
 
 Total_B_new <- Total_B %>%
-  filter(date_debut > as.Date("2005-01-01"))
+  filter(date_debut > as.Date("2010-01-01"))
   
 ggplot(Total_B_new, aes(date_debut))+
   geom_bar()+
@@ -66,6 +66,24 @@ ggplot(Total_B_new, aes(date_debut))+
        subtitle="Total_B")+ facet_grid(ordre ~ .)+
   ylim(0, 30)+
   theme_bw()
+
+ggplot(Total_B_new, aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="Total Bretagne depuis 2010")+ facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
+
+ggplot(VisioN_FB_new, aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="Total VisioNature depuis 2010")+ facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
+
+ggplot(GeoN_new, aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="Total GeoNature depuis 2010")+ facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
 
 # A mon gout couper avant 2010 pour eviter de trop changer les données
 # voir par rapport aux observateurs ce que ca donne 
@@ -137,4 +155,31 @@ ggplot(Total_B_new, aes(date_debut,moyenne_mobile_obs))+
   theme_bw()
 
 cor(Total_B_new$date_debut, Total_B_new$moyenne_mobile_obs)
+
+summary(Total_B_new)
+ggplot(Total_B_new, aes(date_debut))+
+  geom_bar()+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="Total Bretagne")+ facet_grid(technique_observation  ~ .)+
+  ylim(0, 30)+
+  theme_bw()
+
+GeoN_new <- GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"))
+ggplot(GeoN_new, aes(date_debut))+
+  geom_bar()+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="GeoNature")+ facet_grid(technique_observation  ~ .)+
+  ylim(0, 30)+
+  theme_bw()
+
+VisioN_FB_new <- VisioN_FB %>%
+  filter(date_debut > as.Date("2010-01-01"))
+ggplot(VisioN_FB_new, aes(date_debut))+
+  geom_bar()+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="VisioNature Bretagne")+ facet_grid(technique_observation  ~ .)+
+  ylim(0, 30)+
+  theme_bw()
+
 
