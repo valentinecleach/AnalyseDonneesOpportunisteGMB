@@ -7,29 +7,26 @@ library(stringi)
 library(sf)
 # library(corrplot)
 library(dplyr)
-
+library(tidyverse)
+library(gridExtra)
+library(lubridate)
+library(sf)
+library(mapview)
+library(maptiles)
+library(tidyterra)
+library(kableExtra)
+library(knitr)
 
 any(duplicated(Total_B))
 
-##################
-GeoN <- GeoN %>%
-  mutate_at(c("communes", "nom_valide", 
-                  "nom_vernaculaire",
-                  "ordre", 
-                  "famille",
-                  "observateurs"), .funs = as.factor)
-
-summary(GeoN)
+####################
+#################### Regarder la période ############
+####################
 
 ggplot(GeoN, aes(ordre))+
   geom_bar()+
   labs(title="Répartition des differents ordres",
        subtitle="GeoN")
-
-str(GeoN)
-
-GeoN_new <- GeoN %>%
-  filter(date_debut > as.Date("2005-01-01"))
 
 ggplot(GeoN_new, aes(date_debut))+
   geom_bar()+
@@ -38,63 +35,49 @@ ggplot(GeoN_new, aes(date_debut))+
   ylim(0, 30)+
   theme_bw()
 
-
-VisioN_FB_new <- VisioN_FB %>%
-  filter(date_debut > as.Date("2005-01-01"))
-
-ggplot(VisioN_FB_new, aes(date_debut))+
+ggplot(VisioN_FB, aes(date_debut))+
   geom_bar()+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="VisioN_FB")+ facet_grid(ordre ~ .)+
   ylim(0, 30)+
   theme_bw()
 
-summary(VisioN_FB_new)
-VisioN_FB_new <- VisioN_FB_new %>%
-  mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
-              "ordre", "famille", "observateurs"), 
-            .funs = as.factor)
-
 # On a des données a differentes périodes entre ces deux bases de données
 
 Total_B <- VisioN_FB %>%
   bind_rows(GeoN)
 
-Total_B_new <- Total_B %>%
-  filter(date_debut > as.Date("2010-01-01"))
-  
-ggplot(Total_B_new, aes(date_debut))+
+ggplot(Total_B, aes(date_debut))+
   geom_bar()+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="Total_B")+ facet_grid(ordre ~ .)+
   ylim(0, 30)+
   theme_bw()
 
-ggplot(Total_B_new, aes(date_debut))+
-  labs(title="Répartition des dates selon les differents ordres",
-       subtitle="Total Bretagne depuis 2010")+ facet_grid(ordre ~ .)+
-  theme_bw()+
-  geom_line(stat="density")
 
-ggplot(VisioN_FB_new, aes(date_debut))+
+ggplot(VisioN_FB, aes(date_debut))+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="Total VisioNature depuis 2010")+ facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")
 
-ggplot(GeoN_new, aes(date_debut))+
+ggplot(GeoN, aes(date_debut))+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="Total GeoNature depuis 2010")+ facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")
 
-# A mon gout couper avant 2010 pour eviter de trop changer les données
-# voir par rapport aux observateurs ce que ca donne 
-# Ie + d'observateurs => plus d'observations car ils les voyaient sans les inscrire avant?
-# Créer colonne observations = somme des observations 
-# Si une observation de 2 lapins => 2 observations.
 
-# voir corrélation sur differentes moyennes mobiles?
+ggplot(Total_B, aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="Total Bretagne depuis 2010")+ facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
+
+
+####################
+#################### Moyennes Mobiles ###############
+####################
 
 
 #' Moving Average (Moyenne Mobile)
@@ -135,7 +118,6 @@ Total_B_new2 <- dates %>%
     mutate(moyenne_mobile_obs = ma(nombre_obs_jour, n = 10)) %>%
     ungroup()
   
-summary(Total_B_new2)
 
 Total_B_new <- Total_B_new %>%
   filter(date_debut > as.Date("2010-01-01")) %>%
@@ -185,10 +167,10 @@ ggplot(VisioN_FB_new, aes(date_debut))+
   ylim(0, 30)+
   theme_bw()
 
+
 ####################
-
-
-#################### Rep Cartographique ###############"
+#################### Rep Cartographique #############
+####################
 
 library(sf)
 library(ggplot2)
@@ -250,18 +232,8 @@ ggplot() +
 
 
 
-library(tidyverse)
-library(gridExtra)
-library(lubridate)
-library(sf)
-library(mapview)
-library(maptiles)
-library(tidyterra)
-library(kableExtra)
-library(knitr)
 
-
-summary(GeoN$ordre)
+# Ajouter des libelés
 GeoN_1 <- GeoN %>%
   mutate(
     grp_date = case_when(
@@ -274,7 +246,12 @@ GeoN_1 <- GeoN %>%
   filter(date_debut > as.Date("2010-01-01"))
 
 
-
-ordre_data <- Total_B %>% filter(ordre == "Carnivora")
-bdd_props <- prop.table(table(ordre_data$bdd))
+# regarder les commentaires
+Total_B%>%
+  mutate(comment_occurrence= as.factor(comment_occurrence),
+         technique_observation= as.factor(technique_observation))%>%
+  select(technique_observation, comment_occurrence)%>%
+  filter(!is.na(comment_occurrence))%>%
+  filter(technique_observation == "Inconnu")%>%
+  print(n=3000)
 
