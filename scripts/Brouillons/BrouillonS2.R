@@ -316,24 +316,35 @@ GeoN %>%
 
 # Lets see the distribution of the observateurs
 
-library(ggplot2)
 
 GeoN_summary <- GeoN %>%
   group_by(observateurs) %>%
-  summarize(nbr_obs_obr = n())%>%
-  mutate(nbr_obs_obr = fct_reorder(nbr_obs_obr, observateurs)) %>%
-  
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 200) %>%
+  arrange(nbr_obs_obr)
 
-GeoN_summary <- GeoN_summary%>%
-  filter(nbr_obs_obr>200)
-dim(GeoN_summary)
+GeoN_summary$observateurs <- factor(GeoN_summary$observateurs,
+                                    levels = GeoN_summary$observateurs)
 
 ggplot(GeoN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
   geom_point() + 
   geom_segment( aes(x=observateurs, xend=observateurs, 
                     y=0, yend=nbr_obs_obr))+
-  coord_flip()
+  coord_flip()+
+  labs(title="Principaux observateurs",
+       subtitle="GeoNature")
+
+# Il faudra faire gaffe a pas biaser les résultats car certains participe 
+# très grandement au receuil des données donc un changement de leur comportement
+# implique également un changement du comportement de la base de donnée
+
+# Regarder les dates des principaux observateurs ainsi que leurs espèces, et les lieux?
+# des biais pour un endroit du territoire?
+# des biais pour une espece?
+# déplacement donc refletement dans les observations?
+# Arrêt des déclarations pendant un moment?
+
+# Observons t-on la même chose avec VisioNature?
 
 
-mutate(name = fct_reorder(name, val)) %>%
-  
+
