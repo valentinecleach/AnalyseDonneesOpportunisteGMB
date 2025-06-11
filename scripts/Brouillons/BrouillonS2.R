@@ -420,9 +420,34 @@ VisioN_FB %>%
        subtitle = paste("Données de ", "BELLIER DANIEL")) +
   theme_bw()
 
-############
-#Géographie# 
-############
+##############
+#Cartographie# 
+##############
+
+
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
+carte_bretagne <- st_set_crs(carte_bretagne, 2154)
+carte_bretagne <- st_transform(carte_bretagne, 4326)
+
+# Données geographique
+geo_bellier <- VisioN_FB %>% 
+  filter(date_debut > as.Date("2010-01-01")) %>%
+  filter(observateurs == toupper("BELLIER DANIEL")) %>%
+  dplyr::select(x_centroid_4326,
+                y_centroid_4326,
+                ordre,
+                date_debut) %>% 
+  sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+               crs = sf::st_crs(4326))
+
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Carte des observations",
+       subtitle = paste("Données de ", "BELLIER DANIEL")) +
+  geom_sf(data = geo_bellier, size=0.01) +
+  theme_bw()
+
 
 
 
