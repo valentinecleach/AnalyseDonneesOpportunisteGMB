@@ -260,3 +260,80 @@ Total_B%>%
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
 GeoN <- read_csv("GeoN.csv")
 VisioN_FB <- read_csv("VisioN_FB.csv")
+
+####################
+#################### Les observateurs #############
+####################
+
+str(GeoN$observateurs)
+summary(as.factor(GeoN$observateurs))
+
+GeoN %>% 
+  summarize(nb_observateurs = n_distinct(observateurs))
+# 2778 observateurs dans la BDD
+# 1 ou pls observateurs a la fois
+
+VisioN_FB %>% 
+  summarize(nb_observateurs = n_distinct(observateurs))
+# 3662 observateurs, 1813 NA
+# Pas même format -> Nom de famille a mettre en majuscule
+
+summary(as.factor(VisioN_FB_modif$observateurs))
+
+library(dplyr)
+library(stringr)
+
+VisioN_FB_modif <- VisioN_FB %>%
+  mutate(
+    observateurs = na_if(observateurs, "NA"),
+    observateurs = na_if(observateurs, "NA NA")
+  )
+
+
+VisioN_FB_modif %>%
+  filter(!is.na(observateurs) & !str_starts(observateurs, "Anonyme")) %>%
+  select(observateurs)
+
+# cant really change just surname => capitilise everything
+
+VisioN_FB <- VisioN_FB %>%
+  mutate(
+    observateurs = na_if(observateurs, "NA"),
+    observateurs = na_if(observateurs, "NA NA"),
+    observateurs = toupper(observateurs)
+  )
+
+GeoN <- GeoN %>% 
+  mutate(observateurs = toupper(observateurs))
+
+prop.table(table(GeoN$observateurs))
+
+GeoN %>%
+  group_by(observateurs) %>%
+  summarize(nbr_obversations_par_observateur = count(n_distinct(observateurs)))%>%
+  mutate(name = fct_reorder(name, val)) %>%
+  
+
+# Lets see the distribution of the observateurs
+
+library(ggplot2)
+
+GeoN_summary <- GeoN %>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n())%>%
+  mutate(nbr_obs_obr = fct_reorder(nbr_obs_obr, observateurs)) %>%
+  
+
+GeoN_summary <- GeoN_summary%>%
+  filter(nbr_obs_obr>200)
+dim(GeoN_summary)
+
+ggplot(GeoN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()
+
+
+mutate(name = fct_reorder(name, val)) %>%
+  
