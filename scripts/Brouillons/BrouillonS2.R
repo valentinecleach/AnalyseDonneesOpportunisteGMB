@@ -507,3 +507,146 @@ stats_observateur(nom_obs="BELLIER DANIEL",
                   carte=carte_bretagne)
 
 
+GeoN%>%
+  filter(etat_biologique == "Trouvé mort : impact routier",
+         date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(class=etat_biologique, x=nombre_min))+
+  geom_boxplot()
+
+
+GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"),
+         nombre_min <1000) %>%
+  ggplot(aes(x = etat_biologique, y = nombre_min)) +
+  geom_boxplot()
+# More frequent to see animals together alive than on road?
+GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"),
+         nombre_min <1000,
+         etat_biologique != "NSP") %>%
+  ggplot(aes(x = etat_biologique, y = nombre_min)) +
+  geom_boxplot()
+
+GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(x=etat_biologique))+
+  geom_bar()+
+  theme_bw()+
+  labs(title="Repartition des etats biologique",
+       subtitle="GeoN")
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(x=etat_biologique))+
+  geom_bar()+
+  theme_bw()+
+  labs(title="Repartition des etats biologique",
+       subtitle="VisioN_FB")
+
+GeoN %>%
+  mutate(communes_clean = stri_trans_general(communes, 
+                                             "Latin-ASCII"),
+         communes_clean = gsub("[[:punct:]]", 
+                               "", 
+                               communes_clean)) %>%
+  filter(str_detect(communes_clean, 
+                    regex("\\b(ile de|lile|ile )", 
+                          ignore_case = TRUE))) %>%
+  select(communes)
+  
+library(dplyr)
+library(stringi)
+library(stringr)
+
+GeoN <- read_csv("GeoN.csv")
+
+Ile_GeoN <- GeoN %>%
+  mutate(
+    communes_clean = stri_trans_general(communes, "Latin-ASCII"),
+    communes_clean = gsub("[[:punct:]]", " ", communes_clean),
+  )%>%
+  filter(str_detect(communes_clean, 
+                    regex("\\b(ile de|ile|lile)\\b", 
+                          ignore_case = TRUE))
+         )
+
+SansIles_GeoN <- GeoN %>%
+  mutate(
+    communes_clean = stri_trans_general(communes, "Latin-ASCII"),
+    communes_clean = gsub("[[:punct:]]", " ", communes_clean),
+  )%>%
+  filter(!str_detect(communes_clean, 
+                    regex("\\b(ile de|ile|lile)\\b", 
+                          ignore_case = TRUE))
+  )
+
+Ile_GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(ordre))+geom_bar()+theme_bw()
+# comme attendu bcp de lapins/lièvres, 
+# et peu de carnivores qui pourraient les manger
+Ile_GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(etat_biologique))+geom_bar()+theme_bw()
+# pas de ecrasé par les voitures
+Ile_GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(nom_vernaculaire))+geom_bar()+theme_bw()+
+  labs(title="nom vernaculaire sur les iles de GeoNature")
+Ile_GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(technique_observation))+geom_bar()+theme_bw()+
+  labs(title="technique observation sur les iles de GeoNature")
+
+SansIles_GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(ordre))+geom_bar()+theme_bw() +labs(title = "hors ile")
+# Surtout carnivores
+SansIles_GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(etat_biologique))+geom_bar()+theme_bw()+labs(title = "hors ile")
+# plus de morts par impact routiers
+SansIles_GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"),
+         ordre == "Rodentia")%>%
+  ggplot(aes(nom_vernaculaire))+geom_bar()+theme_bw()+
+  labs(title="nom vernaculaire des rodentia hors des iles. GeoNature")
+# voir les tops animaux par catégorie après
+SansIles_GeoN %>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(technique_observation))+geom_bar()+theme_bw()+
+  labs(title="technique observation hors iles de GeoNature")
+
+#verif que hors ile, il n'y a bien pas d'iles?
+
+
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
+carte_bretagne <- st_set_crs(carte_bretagne, 2154)
+carte_bretagne <- st_transform(carte_bretagne, 4326)
+geo_horsile <- SansIles_GeoN %>% 
+  filter(date_debut > as.Date("2010-01-01")) %>%
+  dplyr::select(x_centroid_4326,
+                y_centroid_4326,
+                ordre,
+                date_debut) %>% 
+  sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+               crs = sf::st_crs(4326))
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Carte des observations",
+       subtitle = paste("Données hors îles")) +
+  geom_sf(data = geo_horsile, size=0.01) +
+  theme_bw()
+
+# Il reste des îles
+
+
+library(sf)
+bzh <- st_read("bretagne-latest-free.shp.zip")
+# The shapefile includes layers like 'natural' and 'waterway'.
+:contentReference[oaicite:5]{index=5}
+:contentReference[oaicite:6]{index=6}
+:contentReference[oaicite:7]{index=7}
+:contentReference[oaicite:8]{index=8}
+

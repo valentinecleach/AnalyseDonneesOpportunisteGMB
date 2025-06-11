@@ -2,21 +2,16 @@ To do:
 
 Priorité
 
-- les observateurs
-
-- transferer le brouillon
-
 - continuer le truc de moyennes mobiles
 
-- enlever les îles -> peut etre un filtre avec commune ne commencant pas par une variante de île?
+- séparer les îles 
+-> Une bdd îles et une sans les îles?
+-> peut etre un filtre avec commune ne commencant pas par une variante de île?
 
+- corrélations entre les variables?
 
 Stats desc.
 - répartition selon quels facteurs? 
-
-Cartographie:
-- essayer avec QGIS? -> + facile? en discuter ce week-end
-- supprimer les îles
 
 Tester rpubs / apprendre a utiliser 
 
