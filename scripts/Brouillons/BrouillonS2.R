@@ -270,7 +270,7 @@ summary(as.factor(GeoN$observateurs))
 
 GeoN %>% 
   summarize(nb_observateurs = n_distinct(observateurs))
-# 2778 observateurs dans la BDD
+# 2778 observateurs dans la GeoNature
 # 1 ou pls observateurs a la fois
 
 VisioN_FB %>% 
@@ -331,8 +331,9 @@ ggplot(GeoN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
   geom_segment( aes(x=observateurs, xend=observateurs, 
                     y=0, yend=nbr_obs_obr))+
   coord_flip()+
-  labs(title="Principaux observateurs",
-       subtitle="GeoNature")
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="GeoNature")+
+  theme_bw()
 
 # Il faudra faire gaffe a pas biaser les résultats car certains participe 
 # très grandement au receuil des données donc un changement de leur comportement
@@ -345,6 +346,45 @@ ggplot(GeoN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
 # Arrêt des déclarations pendant un moment?
 
 # Observons t-on la même chose avec VisioNature?
+VisioN_summary <- VisioN_FB %>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 200) %>%
+  arrange(nbr_obs_obr)
 
+VisioN_summary$observateurs <- factor(VisioN_summary$observateurs,
+                                    levels = VisioN_summary$observateurs)
+
+ggplot(VisioN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()+
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="VisioNature")+
+  theme_bw()
+
+# Encore pire
+# Bcp de NA aussi -> pas tant que ca un problème je penses
+
+VisioN_summary <- VisioN_FB %>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 400) %>%
+  arrange(nbr_obs_obr)
+
+VisioN_summary$observateurs <- factor(VisioN_summary$observateurs,
+                                      levels = VisioN_summary$observateurs)
+
+ggplot(VisioN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()+
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="VisioNature")+
+  theme_bw()
+
+# Faire att a Belier Daniel
 
 

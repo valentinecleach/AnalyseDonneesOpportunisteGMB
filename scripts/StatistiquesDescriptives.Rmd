@@ -6,6 +6,7 @@ library(readr)
 library(ggplot2)
 library(dplyr)
 library(stringi)
+library(stringr)
 library(sf)
 library(rsample)
 
@@ -15,6 +16,7 @@ GeoN <- read_csv("GeoN.csv")
 VisioN_FB <- read_csv("VisioN_FB.csv")
 ```
 
+# TECHNIQUE D'OBSERVATION
 ```{r,  warning = FALSE}
 ggplot(GeoN, 
        aes(technique_observation, 
@@ -136,6 +138,7 @@ VisioN_FB <- VisioN_FB %>%
 
 ```
 
+# LES DATES SELON LES ORDRES
 ```{r}
 ggplot(GeoN, aes(date_debut)) +
   geom_bar() +
@@ -206,7 +209,7 @@ Ie + d'observateurs => plus d'observations car ils les voyaient sans les inscrir
 Créer colonne observations = somme des observations 
 Si une observation de 2 lapins => 2 observations.
 
-# Representation visuelle:
+# REP CARTOGRAPHIQUE DES DONNEES
 ```{r}
 
 # Carte bretagne
@@ -346,7 +349,7 @@ graph_ordre_tranche_annee("Lagomorpha")
 graph_ordre_tranche_annee("Rodentia")
 ```
 
-
+# REPARTITION DES ORDRES
 Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformement les 4 autres ordres.
 ```{r Repartition des ordes}
 ggplot(GeoN, aes(ordre))+
@@ -361,3 +364,84 @@ ggplot(Total_B, aes(ordre))+
   geom_bar()+
   labs(title="Répartition des differents ordres",
        subtitle="Total_B")
+```
+
+# ETUDE DES PRINCIPAUX OBSERVATEURS
+
+
+```{r}
+GeoN %>% 
+  summarize(nb_observateurs = n_distinct(observateurs))
+
+VisioN_FB %>% 
+  summarize(nb_observateurs = n_distinct(observateurs))
+```
+Pour GeoNature, il y a en tout 2778 observateurs qui peuvent être une ou 2 personnes
+
+Pour VisioNature, il y a 3662 observateurs. 1813 des observations n'ont pas d'observateurs attribué.
+
+On transforme tous les noms en majuscule pour éviter des pb si on regroupe les BDD par la suite.
+
+```{r, include = FALSE}
+VisioN_FB <- VisioN_FB %>%
+  mutate(
+#    observateurs = na_if(observateurs, "NA"),
+#    observateurs = na_if(observateurs, "NA NA"),
+    observateurs = toupper(observateurs)
+  )
+
+GeoN <- GeoN %>% 
+  mutate(observateurs = toupper(observateurs))
+```
+
+```{r, lollipop-plot-observateurs}
+GeoN_summary <- GeoN %>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 200) %>%
+  arrange(nbr_obs_obr)
+
+GeoN_summary$observateurs <- factor(GeoN_summary$observateurs,
+                                    levels = GeoN_summary$observateurs)
+
+VisioN_summary <- VisioN_FB %>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 400) %>%
+  arrange(nbr_obs_obr)
+
+VisioN_summary$observateurs <- factor(VisioN_summary$observateurs,
+                                      levels = VisioN_summary$observateurs)
+
+ggplot(GeoN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()+
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="GeoNature")+
+  theme_bw()
+
+ggplot(VisioN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()+
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="VisioNature")+
+  theme_bw()
+
+```
+
+
+Il faudra faire gaffe a pas biaser les résultats car certains participe très grandement au receuil des données donc un changement de leur comportement implique également un changement du comportement de la base de donnée
+
+ Regarder les dates des principaux observateurs ainsi que leurs espèces, et les lieux?
+- des biais pour un endroit du territoire?
+- des biais pour une espece?
+- déplacement donc refletement dans les observations?
+- Arrêt des déclarations pendant un moment?
+
+On se dit peut etre que les gros observateurs sont ceux avec plus de 1500 observations?
+Faire des fonctions qui permettent d'étudier simplement ces cas.
+
