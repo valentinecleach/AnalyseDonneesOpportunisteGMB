@@ -448,8 +448,62 @@ ggplot() +
   geom_sf(data = geo_bellier, size=0.01) +
   theme_bw()
 
+library(patchwork)
 
+stats_observateur <- function(nom_obs, bdd, carte){
+  
+  # Date
+  p1 <- bdd %>%
+    filter(observateurs == toupper(nom_obs),
+           date_debut > as.Date("2010-01-01")) %>%
+    ggplot(aes(date_debut))+
+    labs(title="Répartition des dates",
+         subtitle = paste("Données de ", nom_obs)) + 
+    theme_bw()+
+    geom_line(stat="density")+
+    scale_x_date(breaks = seq(from = min(bdd$date_debut), 
+                              to = max(bdd$date_debut), 
+                              by = "2 years"),               
+                 labels = date_format("%Y")) 
+  
+  # Ordres
+  p2 <- bdd %>%
+    filter(observateurs == toupper(nom_obs)) %>%
+    ggplot(aes(x = ordre)) +  
+    geom_bar() + 
+    labs(title = "Répartition des differents ordres", 
+         subtitle = paste("Données de ", nom_obs)) +
+    theme_bw()
+  
+  # Carte
+  geo_obsteur <- bdd %>% 
+      filter(date_debut > as.Date("2010-01-01")) %>%
+      filter(observateurs == toupper(nom_obs)) %>%
+      dplyr::select(x_centroid_4326,
+                    y_centroid_4326,
+                    ordre,
+                    date_debut) %>% 
+      sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+                   crs = sf::st_crs(4326))
+  p3 <- ggplot() +
+      geom_sf(data = carte) + 
+      labs(title = "Carte des observations",
+           subtitle = paste("Données de ", nom_obs)) +
+      geom_sf(data = geo_obsteur, size=0.01) +
+      theme_bw()
+  
 
+  # Affichage des plots
+  p1 + p2 + p3
+  }
 
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
+carte_bretagne <- st_set_crs(carte_bretagne, 2154)
+carte_bretagne <- st_transform(carte_bretagne, 4326)
+
+stats_observateur(nom_obs="BELLIER DANIEL", 
+                  bdd=VisioN_FB, 
+                  carte=carte_bretagne)
 
 
