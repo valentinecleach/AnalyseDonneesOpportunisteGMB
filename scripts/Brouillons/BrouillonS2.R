@@ -387,4 +387,44 @@ ggplot(VisioN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
 
 # Faire att a Belier Daniel
 
+###################
+#DatesObservations# 
+###################
+
+# Exemple
+
+VisioN_FB %>%
+  filter(observateurs == toupper("BELLIER DANIEL"),
+         date_debut > as.Date("2010-01-01")) %>%
+  ggplot(aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle = paste("Données de ", "BELLIER DANIEL")) + 
+  theme_bw()+
+  geom_line(stat="density")+
+  scale_x_date(breaks = seq(from = min(VisioN_FB$date_debut), 
+                            to = max(VisioN_FB$date_debut), 
+                            by = "2 years"),               
+               labels = date_format("%Y")) 
+
+########
+#Ordres# 
+########
+
+# exemple
+
+VisioN_FB %>%
+  filter(observateurs == toupper("BELLIER DANIEL")) %>%
+  ggplot(aes(x = ordre)) +  
+  geom_bar() + 
+  labs(title = "Répartition des differents ordres", 
+       subtitle = paste("Données de ", "BELLIER DANIEL")) +
+  theme_bw()
+
+############
+#Géographie# 
+############
+
+
+
+
 
