@@ -17,6 +17,9 @@ library(tidyterra)
 library(kableExtra)
 library(knitr)
 
+GeoN <- read_csv("donnees/GeoN.csv")
+VisioN_FB <- read_csv("donnees/VisioN_FB.csv")
+
 any(duplicated(Total_B))
 
 ####################
@@ -28,12 +31,16 @@ ggplot(GeoN, aes(ordre))+
   labs(title="Répartition des differents ordres",
        subtitle="GeoN")
 
-ggplot(GeoN_new, aes(date_debut))+
+
+GeoN%>%
+  filter(date_debut > as.Date("2010-01-01"))%>%
+  ggplot(aes(date_debut))+
   geom_bar()+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="GeoN")+ facet_grid(ordre ~ .)+
   ylim(0, 30)+
   theme_bw()
+
 
 ggplot(VisioN_FB, aes(date_debut))+
   geom_bar()+
@@ -45,7 +52,8 @@ ggplot(VisioN_FB, aes(date_debut))+
 # On a des données a differentes périodes entre ces deux bases de données
 
 Total_B <- VisioN_FB %>%
-  bind_rows(GeoN)
+  bind_rows(GeoN)%>%
+  filter(date_debut > as.Date("2010-01-01"))
 
 ggplot(Total_B, aes(date_debut))+
   geom_bar()+
@@ -79,6 +87,9 @@ ggplot(Total_B, aes(date_debut))+
 #################### Moyennes Mobiles ###############
 ####################
 
+Total_B <- VisioN_FB %>%
+  bind_rows(GeoN)
+
 
 #' Moving Average (Moyenne Mobile)
 #' 
@@ -93,13 +104,13 @@ ma <- function(x, n = 5){
 
 dates <- data.frame(date_debut = seq(
   from = min(as.Date("2010-01-01")),
-  to = max(Total_B_new$date_debut),
+  to = max(Total_B$date_debut),
   by = "day"
 ))
 
-Total_B_new <- Total_B_new %>%
+Total_B_new <- Total_B %>%
   arrange(date_debut) %>%
-  left_join(Total_B_new, by = "date_debut") %>%
+  left_join(Total_B, by = "date_debut") %>%
   mutate(nombre_min = ifelse(is.na(nombre_min), 0, nombre_min))%>%
   filter(date_debut > as.Date("2010-01-01")) %>%
   # need to sum all observations if same day
@@ -108,8 +119,8 @@ Total_B_new <- Total_B_new %>%
   library(dplyr)
   
   
-Total_B_new2 <- dates %>%
-    left_join(Total_B_new, by = "date_debut") %>%
+Total_B <- dates %>%
+    left_join(Total_B, by = "date_debut") %>%
     arrange(date_debut) %>%
     mutate(nombre_min = ifelse(is.na(nombre_min), 0, nombre_min)) %>%
     filter(date_debut > as.Date("2010-01-01")) %>%
@@ -119,7 +130,12 @@ Total_B_new2 <- dates %>%
     ungroup()
   
 
-Total_B_new <- Total_B_new %>%
+Total_B <- VisioN_FB %>%
+  bind_rows(GeoN)%>%
+  filter(date_debut > as.Date("2010-01-01"))
+
+
+Total_B <- Total_B %>%
   filter(date_debut > as.Date("2010-01-01")) %>%
   select(date_debut, ordre, nombre_min, observateurs) %>%
   mutate(nombre_min = ifelse(is.na(nombre_min), 0, nombre_min)) %>%
@@ -132,17 +148,17 @@ Total_B_new <- Total_B_new %>%
   mutate(ordre = as.factor(ordre))
 
 
-ggplot(Total_B_new, aes(date_debut,moyenne_mobile_obs))+
+ggplot(Total_B, aes(date_debut,moyenne_mobile_obs))+
   geom_bar()+
   labs(title="Répartition des MM (de 10) selon les differents ordres",
        subtitle="Total_B")+ facet_grid(ordre ~ .)+
   ylim(0, 30)+
   theme_bw()
 
-cor(Total_B_new$date_debut, Total_B_new$moyenne_mobile_obs)
 
-summary(Total_B_new)
-ggplot(Total_B_new, aes(date_debut))+
+
+summary(Total_B)
+ggplot(Total_B, aes(date_debut))+
   geom_bar()+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="Total Bretagne")+ facet_grid(technique_observation  ~ .)+
@@ -558,7 +574,6 @@ library(dplyr)
 library(stringi)
 library(stringr)
 
-GeoN <- read_csv("GeoN.csv")
 
 Ile_GeoN <- GeoN %>%
   mutate(
