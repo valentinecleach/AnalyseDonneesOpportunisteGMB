@@ -14,9 +14,11 @@ library(scales)
 
 
 # Importations
+
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
-GeoN <- read_csv("GeoN.csv")
-VisioN_FB <- read_csv("VisioN_FB.csv")
+GeoN <- read_csv("GeoN_Conti.csv")
+VisioN_FB <- read_csv("VisioN_FB_Conti.csv")
+
 ```
 
 ## TECHNIQUE D'OBSERVATION
@@ -231,7 +233,7 @@ Si une observation de 2 lapins => 2 observations.
 ```{r carte-bzh-geonat-visionat}
 
 # Carte bretagne
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
 carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
 carte_bretagne <- st_set_crs(carte_bretagne, 2154)
 carte_bretagne <- st_transform(carte_bretagne, 4326)
@@ -573,7 +575,7 @@ stats_observateur <- function(nom_obs, bdd, carte){
   p1 + p2 + p3
   }
 
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
 carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
 carte_bretagne <- st_set_crs(carte_bretagne, 2154)
 carte_bretagne <- st_transform(carte_bretagne, 4326)
@@ -608,15 +610,3 @@ stats_observateur(nom_obs="le campion thomas",
 Les données de VisioNature sont - aléatoires que c'elle de GeoNature..
 Biaisé a cause de eux ou alors simplement + de données a ces endroits là?
 ....
-
-On retire les îles a l'aide d'une intersection avec notre BDD et une maps de la bretagne continentale sur QGIS. On se retrouve avec: 
-
-VisioNature obs supprimés:
-```{r}
-82344-79064
-```
-
-GeoNature obs supprimés:
-```{r}
-82344-79064
-```
