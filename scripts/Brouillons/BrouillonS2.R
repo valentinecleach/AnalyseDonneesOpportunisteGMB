@@ -994,6 +994,30 @@ VisioN_FB %>%
     plot.subtitle = element_text(size = 12)
   )
 
+
+GeoN %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "GeoNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+
+summary(as.factor(VisioN_FB$nom_vernaculaire))
+
 VisioN_FB %>%
   count(nom_vernaculaire, ordre, sort = TRUE) %>%
   ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
@@ -1057,9 +1081,9 @@ Faune Bretagne
 GeoN_sf <- st_as_sf(GeoN, 
                   coords = c("x_centroid_4326", "y_centroid_4326"), 
                   crs = 4326)
-grid <- st_make_grid(GeoN_sf, 
-                     cellsize = c(4.185144/50, 2.008047/50))
-grid_sf <- st_sf(geometry = grid)
+grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+                                         cellsize = c(0.12, 0.09))
+              )
 grid_sf$density <- lengths(st_intersects(grid_sf, GeoN_sf))
 grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
@@ -1067,18 +1091,16 @@ ggplot() +
   labs(title = "Densité des observations en bretagne",
        subtitle = "GeoNature avec îles") +
   geom_sf(data = grid_sf, aes(fill = density)) +
-  scale_fill_gradient(low="white", high="gray4") +
+  scale_fill_gradient(low="gray97", high="gray15") +
   theme_bw()
 # C'est pas sizun le gros point noir?
 
-
 # VisioNature
-VisioN_FB <- st_as_sf(VisioN_FB, 
+VisioN_FB_sf <- st_as_sf(VisioN_FB, 
                     coords = c("x_centroid_4326", "y_centroid_4326"), 
                     crs = 4326)
-grid <- st_make_grid(VisioN_FB, 
-                     cellsize = c(4.185144/50, 2.008047/50))
-grid_sf <- st_sf(geometry = grid)
+grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+                                         cellsize = c(0.12, 0.09)))
 grid_sf$density <- lengths(st_intersects(grid_sf, VisioN_FB))
 grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
@@ -1086,55 +1108,98 @@ ggplot() +
   labs(title = "Densité des observations en bretagne",
        subtitle = "VisioNature avec îles") +
   geom_sf(data = grid_sf, aes(fill = density)) +
-  scale_fill_gradient(low="white", high="gray4") +
+  scale_fill_gradient(low="grey97", high="gray15") +
   theme_bw()
 
-CHAPUIS MARTINE 
-BELLIER DANIEL
-# En voyant cette carte, on aimerait bien supprimer Martine et Daniel Bellier...
-VisioN_FB_modif <- VisioN_FB%>%
-  filter(observateurs != toupper("BELLIER DANIEL"))%>% 
-  filter(observateurs != toupper("CHAPUIS MARTINE"))
 
+# En voyant cette carte, on aimerait bien supprimer Martine et Daniel Bellier...
+
+VisioN_FB_modif <- VisioN_FB%>%
+  mutate(observateurs = toupper(observateurs))%>%
+  filter(!observateurs %in% c("BELLIER DANIEL", "CHAPUIS MARTINE"))
+  
 VisioN_FB_sf <- st_as_sf(VisioN_FB_modif, 
                       coords = c("x_centroid_4326", "y_centroid_4326"), 
                       crs = 4326)
-grid <- st_make_grid(VisioN_FB_sf, 
-                     cellsize = c(4.185144/50, 2.008047/50))
-grid_sf <- st_sf(geometry = grid)
+grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+                                         cellsize = c(0.12, 0.09))
+)
 grid_sf$density <- lengths(st_intersects(grid_sf, VisioN_FB_sf))
 grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densité des observations en bretagne",
-       subtitle = "VisioNature avec îles") +
+       subtitle = "VisioNature avec îles, sans Daniel et Martine") +
   geom_sf(data = grid_sf, aes(fill = density)) +
-  scale_fill_gradient(low="white", high="gray4") +
+  scale_fill_gradient(low="grey97", high="gray15") +
   theme_bw()
 
 
-VisioN_summary <- VisioN_FB_modif %>%
-  group_by(observateurs) %>%
-  summarize(nbr_obs_obr = n()) %>%
-  filter(nbr_obs_obr > 400) %>%
-  arrange(nbr_obs_obr)
-
-VisioN_summary <- VisioN_FB %>%
-  filter(!observateurs %in% c("BELLIER DANIEL", "CHAPUIS MARTINE")) %>%
-  count(observateurs, name = "nbr_obs_obr") %>%
-  filter(nbr_obs_obr > 400) %>%
-  arrange(nbr_obs_obr)
-
-VisioN_summary$observateurs <- factor(VisioN_summary$observateurs,
-                                      levels = VisioN_summary$observateurs)
 
 
-ggplot(VisioN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
-  geom_point() + 
-  geom_segment( aes(x=observateurs, xend=observateurs, 
-                    y=0, yend=nbr_obs_obr))+
-  coord_flip()+
-  labs(title="Lollipop plot des principaux observateurs",
-       subtitle="VisioNature")+
-  theme_bw()
+stats_observateur <- function(nom_obs, bdd, carte){
+  
+  # Date
+  p1 <- bdd %>%
+    filter(observateurs == toupper(nom_obs),
+           date_debut > as.Date("2010-01-01")) %>%
+    ggplot(aes(date_debut))+
+    labs(title="Répartition des dates",
+         subtitle = paste("Données de ", toupper(nom_obs))) + 
+    theme_bw()+
+    geom_line(stat="density")+
+    scale_x_date(
+      breaks = seq(from = min(bdd$date_debut), 
+                   to = max(bdd$date_debut), 
+                   by = "2 years"),               
+      labels = scales::label_date("%Y")
+    )
+  
+  # Ordres
+  p2 <- bdd %>%
+    filter(observateurs == toupper(nom_obs)) %>%
+    ggplot(aes(x = ordre)) +  
+    geom_bar() + 
+    labs(title = "Répartition des differents ordres", 
+         subtitle = paste("Données de ", toupper(nom_obs))) +
+    theme_bw()
+  
+  # Carte
+  geo_obsteur <- bdd %>% 
+    filter(date_debut > as.Date("2010-01-01")) %>%
+    filter(observateurs == toupper(nom_obs)) %>%
+    dplyr::select(x_centroid_4326,
+                  y_centroid_4326,
+                  ordre,
+                  date_debut) %>% 
+    sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+                 crs = sf::st_crs(4326))
+  p3 <- ggplot() +
+    geom_sf(data = carte) + 
+    labs(title = "Carte des observations",
+         subtitle = paste("Données de ", toupper(nom_obs))) +
+    geom_sf(data = geo_obsteur, size=0.01) +
+    theme_bw()
+  
+  
+  grid_sf <- st_sf(geometry = st_make_grid(carte, cellsize = c(0.12, 0.09)))
+  grid_sf$density <- lengths(st_intersects(grid_sf, geo_obsteur))
+  grid_sf <- st_intersection(grid_sf, carte)
+  p4 <- ggplot() +
+    geom_sf(data = carte) + 
+    labs(title = "Densité des observations en bretagne",
+         subtitle = "VisioNature avec îles, sans Daniel et Martine") +
+    geom_sf(data = grid_sf, aes(fill = density)) +
+    scale_fill_gradient(low="grey97", high="gray15") +
+    theme_bw()
+  
+  
+  # Affichage des plots
+  p1 + p2 + p3 + p4
+}
+
+stats_observateur(nom_obs="simonnet franck", 
+                  bdd=GeoN, 
+                  carte=carte_bretagne)
+
 

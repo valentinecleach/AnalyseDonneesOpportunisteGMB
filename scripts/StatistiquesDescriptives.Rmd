@@ -231,7 +231,7 @@ Si une observation de 2 lapins => 2 observations.
 ```{r carte-bzh-geonat-visionat}
 
 # Carte bretagne
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
 carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
 carte_bretagne <- st_set_crs(carte_bretagne, 2154)
 carte_bretagne <- st_transform(carte_bretagne, 4326)
@@ -363,6 +363,68 @@ graph_ordre_tranche_annee("Eulipotyphla")
 graph_ordre_tranche_annee("Lagomorpha")
 graph_ordre_tranche_annee("Rodentia")
 ```
+
+```{r cartes-densite}
+# GeoNature
+
+GeoN_sf <- st_as_sf(GeoN, 
+                  coords = c("x_centroid_4326", "y_centroid_4326"), 
+                  crs = 4326)
+grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+                                         cellsize = c(0.12, 0.09))
+              )
+grid_sf$density <- lengths(st_intersects(grid_sf, GeoN_sf))
+grid_sf <- st_intersection(grid_sf, carte_bretagne)
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Densité des observations en bretagne",
+       subtitle = "GeoNature avec îles") +
+  geom_sf(data = grid_sf, aes(fill = density)) +
+  scale_fill_gradient(low="gray97", high="gray15") +
+  theme_bw()
+# C'est pas sizun le gros point noir?
+
+# VisioNature
+VisioN_FB_sf <- st_as_sf(VisioN_FB, 
+                         coords = c("x_centroid_4326", "y_centroid_4326"), 
+                         crs = 4326)
+grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+                                         cellsize = c(0.12, 0.09)))
+grid_sf$density <- lengths(st_intersects(grid_sf, VisioN_FB_sf))
+grid_sf <- st_intersection(grid_sf, carte_bretagne)
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Densité des observations en bretagne",
+       subtitle = "VisioNature avec îles") +
+  geom_sf(data = grid_sf, aes(fill = density)) +
+  scale_fill_gradient(low="grey97", high="gray15") +
+  theme_bw()
+
+
+# En voyant cette carte, on aimerait bien supprimer Martine et Daniel Bellier...
+
+VisioN_FB_modif <- VisioN_FB%>%
+  mutate(observateurs = toupper(observateurs))%>%
+  filter(!observateurs %in% c("BELLIER DANIEL", "CHAPUIS MARTINE"))
+  
+VisioN_FB_sf <- st_as_sf(VisioN_FB_modif, 
+                      coords = c("x_centroid_4326", "y_centroid_4326"), 
+                      crs = 4326)
+grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+                                         cellsize = c(0.12, 0.09))
+)
+grid_sf$density <- lengths(st_intersects(grid_sf, VisioN_FB_sf))
+grid_sf <- st_intersection(grid_sf, carte_bretagne)
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Densité des observations en bretagne",
+       subtitle = "VisioNature avec îles, sans Daniel et Martine") +
+  geom_sf(data = grid_sf, aes(fill = density)) +
+  scale_fill_gradient(low="grey97", high="gray15") +
+  theme_bw()
+
+```
+
 
 ## REPARTITION DES ORDRES
 Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformement les 4 autres ordres. On se dit que c'est peut être du au fort intéret de GMB pour la loutre, mais pas tant que ca le cas (voir figure de la répartition des ordres sans le loutres.s)
@@ -573,7 +635,7 @@ stats_observateur <- function(nom_obs, bdd, carte){
   p1 + p2 + p3
   }
 
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
 carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
 carte_bretagne <- st_set_crs(carte_bretagne, 2154)
 carte_bretagne <- st_transform(carte_bretagne, 4326)
