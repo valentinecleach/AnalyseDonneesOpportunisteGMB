@@ -2,6 +2,11 @@ To do:
 
 Priorité
 
+- Faire un s + geom_bar(position = "fill") 
+ des differentes proportion des espèces par an
+
+- Envoyer résultats Lundi a Pascal et demander réu dans la semaine..  
+
 - travail sur les especes
 - cartographie non pas avec les points mais la densité par secteurs
 
