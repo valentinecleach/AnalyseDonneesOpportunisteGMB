@@ -1052,3 +1052,89 @@ VisioN_FB
 Faune Bretagne
 52553 - 51949
 604 obs supprimés
+
+# GeoNature
+GeoN_sf <- st_as_sf(GeoN, 
+                  coords = c("x_centroid_4326", "y_centroid_4326"), 
+                  crs = 4326)
+grid <- st_make_grid(GeoN_sf, 
+                     cellsize = c(4.185144/50, 2.008047/50))
+grid_sf <- st_sf(geometry = grid)
+grid_sf$density <- lengths(st_intersects(grid_sf, GeoN_sf))
+grid_sf <- st_intersection(grid_sf, carte_bretagne)
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Densité des observations en bretagne",
+       subtitle = "GeoNature avec îles") +
+  geom_sf(data = grid_sf, aes(fill = density)) +
+  scale_fill_gradient(low="white", high="gray4") +
+  theme_bw()
+# C'est pas sizun le gros point noir?
+
+
+# VisioNature
+VisioN_FB <- st_as_sf(VisioN_FB, 
+                    coords = c("x_centroid_4326", "y_centroid_4326"), 
+                    crs = 4326)
+grid <- st_make_grid(VisioN_FB, 
+                     cellsize = c(4.185144/50, 2.008047/50))
+grid_sf <- st_sf(geometry = grid)
+grid_sf$density <- lengths(st_intersects(grid_sf, VisioN_FB))
+grid_sf <- st_intersection(grid_sf, carte_bretagne)
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Densité des observations en bretagne",
+       subtitle = "VisioNature avec îles") +
+  geom_sf(data = grid_sf, aes(fill = density)) +
+  scale_fill_gradient(low="white", high="gray4") +
+  theme_bw()
+
+CHAPUIS MARTINE 
+BELLIER DANIEL
+# En voyant cette carte, on aimerait bien supprimer Martine et Daniel Bellier...
+VisioN_FB_modif <- VisioN_FB%>%
+  filter(observateurs != toupper("BELLIER DANIEL"))%>% 
+  filter(observateurs != toupper("CHAPUIS MARTINE"))
+
+VisioN_FB_sf <- st_as_sf(VisioN_FB_modif, 
+                      coords = c("x_centroid_4326", "y_centroid_4326"), 
+                      crs = 4326)
+grid <- st_make_grid(VisioN_FB_sf, 
+                     cellsize = c(4.185144/50, 2.008047/50))
+grid_sf <- st_sf(geometry = grid)
+grid_sf$density <- lengths(st_intersects(grid_sf, VisioN_FB_sf))
+grid_sf <- st_intersection(grid_sf, carte_bretagne)
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Densité des observations en bretagne",
+       subtitle = "VisioNature avec îles") +
+  geom_sf(data = grid_sf, aes(fill = density)) +
+  scale_fill_gradient(low="white", high="gray4") +
+  theme_bw()
+
+
+VisioN_summary <- VisioN_FB_modif %>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 400) %>%
+  arrange(nbr_obs_obr)
+
+VisioN_summary <- VisioN_FB %>%
+  filter(!observateurs %in% c("BELLIER DANIEL", "CHAPUIS MARTINE")) %>%
+  count(observateurs, name = "nbr_obs_obr") %>%
+  filter(nbr_obs_obr > 400) %>%
+  arrange(nbr_obs_obr)
+
+VisioN_summary$observateurs <- factor(VisioN_summary$observateurs,
+                                      levels = VisioN_summary$observateurs)
+
+
+ggplot(VisioN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()+
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="VisioNature")+
+  theme_bw()
+
