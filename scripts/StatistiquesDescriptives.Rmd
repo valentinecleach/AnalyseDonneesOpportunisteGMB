@@ -532,7 +532,7 @@ stats_observateur <- function(nom_obs, bdd, carte){
            date_debut > as.Date("2010-01-01")) %>%
     ggplot(aes(date_debut))+
     labs(title="Répartition des dates",
-         subtitle = paste("Données de ", nom_obs)) + 
+         subtitle = paste("Données de ", toupper(nom_obs))) + 
     theme_bw()+
     geom_line(stat="density")+
     scale_x_date(
@@ -548,7 +548,7 @@ stats_observateur <- function(nom_obs, bdd, carte){
     ggplot(aes(x = ordre)) +  
     geom_bar() + 
     labs(title = "Répartition des differents ordres", 
-         subtitle = paste("Données de ", nom_obs)) +
+         subtitle = paste("Données de ", toupper(nom_obs))) +
     theme_bw()
   
   # Carte
@@ -564,7 +564,7 @@ stats_observateur <- function(nom_obs, bdd, carte){
   p3 <- ggplot() +
       geom_sf(data = carte) + 
       labs(title = "Carte des observations",
-           subtitle = paste("Données de ", nom_obs)) +
+           subtitle = paste("Données de ", toupper(nom_obs))) +
       geom_sf(data = geo_obsteur, size=0.01) +
       theme_bw()
   
@@ -593,6 +593,8 @@ stats_observateur(nom_obs="SéITé FRANçOIS",
 stats_observateur(nom_obs="deleted deleted", 
                   bdd=VisioN_FB, 
                   carte=carte_bretagne)
+
+# Probablement tous les comptes qui ont été supprimés donc si important. -> plusieurs personnes
 
 stats_observateur(nom_obs="simonnet franck", 
                   bdd=GeoN, 
