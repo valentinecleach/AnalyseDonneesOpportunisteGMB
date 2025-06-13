@@ -1182,17 +1182,17 @@ stats_observateur <- function(nom_obs, bdd, carte){
     theme_bw()
   
   
-  grid_sf <- st_sf(geometry = st_make_grid(carte, cellsize = c(0.12, 0.09)))
+  grid_sf <- st_sf(geometry = st_make_grid(carte, 
+                                           cellsize = c(0.12, 0.09)))
   grid_sf$density <- lengths(st_intersects(grid_sf, geo_obsteur))
   grid_sf <- st_intersection(grid_sf, carte)
   p4 <- ggplot() +
     geom_sf(data = carte) + 
     labs(title = "Densité des observations en bretagne",
-         subtitle = "VisioNature avec îles, sans Daniel et Martine") +
+         subtitle = paste(bdd)) +
     geom_sf(data = grid_sf, aes(fill = density)) +
     scale_fill_gradient(low="grey97", high="gray15") +
     theme_bw()
-  
   
   # Affichage des plots
   p1 + p2 + p3 + p4
@@ -1202,4 +1202,111 @@ stats_observateur(nom_obs="simonnet franck",
                   bdd=GeoN, 
                   carte=carte_bretagne)
 
+library(patchwork)
 
+GeoN%>%
+  filter(date_debut > as.Date("1980-01-01"))%>%
+  mutate(year = format(date_debut,"%Y"))%>%
+  ggplot(aes(year, fill = nom_vernaculaire))+ 
+  geom_bar(position = "fill")+ 
+  scale_fill_grey(start = 0.2, end = 0.8)+
+  theme_bw()
+
+GeoN%>%
+  filter(date_debut > as.Date("1980-01-01"))%>%
+  mutate(year = format(date_debut,"%Y"))%>%
+  ggplot(aes(year, fill = ordre))+ 
+  geom_bar(position = "fill")+ 
+#  scale_fill_grey(start = 0.1, end = 0.9)+
+  theme_bw()+
+  scale_fill_brewer(palette = "BrBG")
+
+
+GeoN %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 5), 
+                     right = FALSE)
+  ) %>%
+  ggplot(aes(year_group, fill = ordre)) +
+  geom_bar(position = "fill") +
+  scale_fill_brewer(palette = "BrBG")
+
+GeoN %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 5), 
+                     right = FALSE)
+  ) %>%
+  ggplot(aes(year_group, fill = ordre)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "BrBG")
+
+
+GeoN %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 5), 
+                     right = FALSE)
+  ) %>%
+  ggplot(aes(year_group, fill = ordre)) +
+  geom_bar(position = "dodge") +
+  scale_fill_brewer(palette = "BrBG")
+
+
+GeoN %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 5), 
+                     right = FALSE)
+  ) %>%
+  ggplot(aes(year_group, fill = ordre)) +
+  geom_bar(position = "fill") +  
+  scale_fill_grey(start = 0.2, end = 0.8)
+
+GeoN %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 5), 
+                     right = FALSE)
+  ) %>%
+  ggplot(aes(year_group, fill = ordre)) +
+  geom_bar(position = "dodge") +
+  scale_fill_grey(start = 0.2, end = 0.8)
+
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 5), 
+                     right = FALSE)
+  ) %>%
+  ggplot(aes(year_group, fill = ordre)) +
+  geom_bar(position = "fill") +  
+  scale_fill_grey(start = 0.2, end = 0.8)
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 5), 
+                     right = FALSE)
+  ) %>%
+  ggplot(aes(year_group, fill = ordre)) +
+  geom_bar(position = "dodge") +
+  scale_fill_grey(start = 0.2, end = 0.8)
+
+RColorBrewer::display.brewer.all() 
