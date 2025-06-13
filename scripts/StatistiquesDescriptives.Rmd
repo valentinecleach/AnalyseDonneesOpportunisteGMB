@@ -20,7 +20,7 @@ GeoN <- read_csv("GeoN.csv")
 VisioN_FB <- read_csv("VisioN_FB.csv")
 ```
 
-# TECHNIQUE D'OBSERVATION
+## TECHNIQUE D'OBSERVATION
 ```{r,  warning = FALSE}
 ggplot(GeoN, 
        aes(technique_observation, 
@@ -82,9 +82,8 @@ ggplot(GeoN, aes(date_debut))+
 ```
 
 ```{r ggplot2, warning = FALSE, echo=FALSE, out.width="50%"}
-
-ggplot(VisioN_FB, aes(technique_observation, fill=etat_biologique
-))+
+VisioN_FB%>%
+  ggplot(aes(technique_observation, fill=etat_biologique))+
   geom_bar(position="dodge")+
   theme_bw()+
   scale_fill_grey(start = 0.2,
@@ -93,8 +92,10 @@ ggplot(VisioN_FB, aes(technique_observation, fill=etat_biologique
   labs(title = "Barplot de la techique d'observation selon l'état biologique",
        subtitle = "Données de VisioNature")
 
-ggplot(GeoN, aes(technique_observation, fill=etat_biologique
-))+
+GeoN%>%
+  filter(nombre_min!=1000)%>%
+  ggplot(aes(technique_observation, 
+             fill=etat_biologique))+
   geom_bar(position="dodge")+
   theme_bw()+
   scale_fill_grey(start = 0.2,
@@ -106,7 +107,8 @@ ggplot(GeoN, aes(technique_observation, fill=etat_biologique
 Les lapins & lièvres sont peu remarqués avec les indices comparé aux autres dans VisioNature
 
 ```{r nmbre-données, warning = FALSE, echo=FALSE, out.width="50%"}
-ggplot(VisioN_FB, aes(date_debut, nombre_min))+
+VisioN_FB %>%
+  ggplot(aes(date_debut, nombre_min))+
   geom_point()+
   theme_bw()+
   scale_fill_grey(start = 0.2,
@@ -114,7 +116,9 @@ ggplot(VisioN_FB, aes(date_debut, nombre_min))+
                   na.value = "red")+
   labs(subtitle="Données de VisioNature")
 
-ggplot(GeoN_sans_1000, aes(date_debut, nombre_min))+
+GeoN%>%
+  filter(nombre_min!=1000)%>%
+  ggplot(aes(date_debut, nombre_min))+
   geom_point()+
   theme_bw()+
   scale_fill_grey(start = 0.2,
@@ -142,16 +146,17 @@ VisioN_FB <- VisioN_FB %>%
 
 ```
 
-# LES DATES SELON LES ORDRES
+## LES DATES SELON LES ORDRES
 ```{r}
-ggplot(GeoN, aes(date_debut)) +
+GeoN%>%
+  ggplot(aes(date_debut)) +
   geom_bar() +
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="GeoN") + facet_grid(ordre ~ .) +
   ylim(0, 30)+
   theme_bw()
-
-ggplot(VisioN_FB, aes(date_debut))+
+VisioN_FB%>%
+  ggplot(aes(date_debut))+
   geom_bar()+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="VisioN_FB") + facet_grid(ordre ~ .) +
@@ -181,27 +186,30 @@ Total_B <- VisioN_FB %>%
 ```
 
 ```{r}
-ggplot(Total_B, aes(date_debut))+
+Total_B%>%
+  ggplot(aes(date_debut))+
   geom_bar()+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="Total_B")+ facet_grid(ordre ~ .)+
   ylim(0, 30)+
   theme_bw()
 
-ggplot(VisioN_FB, aes(date_debut))+
+VisioN_FB%>%
+  ggplot(aes(date_debut))+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="Total VisioNature depuis 2010")+ facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")
 
-ggplot(GeoN, aes(date_debut))+
+GeoN%>%
+  ggplot(aes(date_debut))+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="Total GeoNature depuis 2010")+ facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")
 
-
-ggplot(Total_B, aes(date_debut))+
+Total_B%>%
+  ggplot(aes(date_debut))+
   labs(title="Répartition des dates selon les differents ordres",
        subtitle="Total Bretagne depuis 2010")+ facet_grid(ordre ~ .)+
   theme_bw()+
@@ -213,8 +221,8 @@ Ie + d'observateurs => plus d'observations car ils les voyaient sans les inscrir
 Créer colonne observations = somme des observations 
 Si une observation de 2 lapins => 2 observations.
 
-# REP CARTOGRAPHIQUE DES DONNEES
-```{r}
+## REP CARTOGRAPHIQUE DES DONNEES
+```{r carte-bzh-geonat-visionat}
 
 # Carte bretagne
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
@@ -260,8 +268,8 @@ https://www.data.gouv.fr/fr/datasets/departements-de-louest/  <- ref de ma carte
 Peut etre regarder les espèces a travers les années?
 Comme on commence 2010, -> 2010-2015, 2015-2020, 2020-2025
 
-```{r}
-GeoN_1 <- GeoN %>%
+```{r carte-bzh-carni}
+carte_carnivora <- GeoN %>%
   mutate(
     grp_date = case_when(
       date_debut >= as.Date("2010-01-01") & date_debut <= as.Date("2014-12-31") ~ "1. Entre 2010 et 2015",
@@ -270,10 +278,7 @@ GeoN_1 <- GeoN %>%
       TRUE ~ NA_character_
     )
   ) %>%
-  filter(date_debut > as.Date("2010-01-01"))
-
-
-carte_carnivora <- GeoN_1 %>%
+  filter(date_debut > as.Date("2010-01-01")) %>%
   dplyr::select(x_centroid_4326,
                 y_centroid_4326,
                 grp_date,
@@ -298,7 +303,7 @@ Ou alors je prends la BDD avec toutes les données et je selectionne "aléatoire
 
 Idée 2:
 
-```{r GraphiquesDateEtOrdre}
+```{r graphiques-date-et-ordre}
 set.seed(12345)
 
 graph_ordre_tranche_annee <- function(ordre_voulu){
@@ -353,27 +358,90 @@ graph_ordre_tranche_annee("Lagomorpha")
 graph_ordre_tranche_annee("Rodentia")
 ```
 
-# REPARTITION DES ORDRES
-Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformement les 4 autres ordres.
-```{r Repartition des ordes}
-ggplot(GeoN, aes(ordre))+
+## REPARTITION DES ORDRES
+Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformement les 4 autres ordres. On se dit que c'est peut être du au fort intéret de GMB pour la loutre, mais pas tant que ca le cas (voir figure de la répartition des ordres sans le loutres.s)
+```{r repartition-des-ordes}
+GeoN %>%
+  ggplot(aes(ordre))+
   geom_bar()+
   labs(title="Répartition des differents ordres",
-       subtitle="GeoN")
-ggplot(VisioN_FB, aes(ordre))+
+       subtitle="GeoN")+
+  theme_bw()
+
+VisioN_FB %>%
+  ggplot(aes(ordre))+
   geom_bar()+
   labs(title="Répartition des differents ordres",
-       subtitle="VisioN_FB")
-ggplot(Total_B, aes(ordre))+
+       subtitle="VisioN_FB")+
+  theme_bw()
+
+Total_B %>%
+  ggplot(aes(ordre))+
   geom_bar()+
   labs(title="Répartition des differents ordres",
-       subtitle="Total_B")
+       subtitle="Total_B")+
+  theme_bw()
+
+GeoN %>%
+  filter(cd_nom != 60630)%>%
+  ggplot(aes(ordre))+
+  geom_bar()+
+  labs(title="Répartition des differents ordres",
+       subtitle="GeoNature sans les loutres")+
+  theme_bw()
+
 ```
 
-# ETUDE DES PRINCIPAUX OBSERVATEURS
+```{r repartition-especes}
+
+VisioN_FB %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "VisioNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+GeoN %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "GeoNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+```
 
 
-```{r}
+
+## ETUDE DES PRINCIPAUX OBSERVATEURS
+
+
+```{r nombre-total-observateurs}
 GeoN %>% 
   summarize(nb_observateurs = n_distinct(observateurs))
 
@@ -386,7 +454,7 @@ Pour VisioNature, il y a 3662 observateurs. 1813 des observations n'ont pas d'ob
 
 On transforme tous les noms en majuscule pour éviter des pb si on regroupe les BDD par la suite.
 
-```{r, include = FALSE}
+```{r modif-données, include = FALSE}
 VisioN_FB <- VisioN_FB %>%
   mutate(
 #    observateurs = na_if(observateurs, "NA"),
@@ -398,7 +466,7 @@ GeoN <- GeoN %>%
   mutate(observateurs = toupper(observateurs))
 ```
 
-```{r, lollipop-plot-observateurs}
+```{r lollipop-plot-observateurs}
 GeoN_summary <- GeoN %>%
   group_by(observateurs) %>%
   summarize(nbr_obs_obr = n()) %>%
@@ -534,47 +602,3 @@ stats_observateur(nom_obs="le campion thomas",
 Les données de VisioNature sont - aléatoires que c'elle de GeoNature..
 Biaisé a cause de eux ou alors simplement + de données a ces endroits là?
 ....
-```{r}
-
-VisioN_FB %>%
-  count(nom_vernaculaire, ordre, sort = TRUE) %>%
-  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
-  geom_col(fill = "grey30") +
-  coord_flip() +
-  facet_wrap(~ ordre, scales = "free_y") +
-  labs(
-    title = "Répartition des espèces",
-    subtitle = "VisioNature",
-    y = "Nombre d'observations", x = "Nom vernaculaire"
-  ) +
-  scale_x_discrete(labels = label_wrap(40)) +
-  theme_bw() +
-  theme(
-    axis.text.y = element_text(size = 8),
-    strip.text = element_text(face = "bold"),
-    plot.title = element_text(size = 16),
-    plot.subtitle = element_text(size = 12)
-  )
-
-GeoN %>%
-  count(nom_vernaculaire, ordre, sort = TRUE) %>%
-  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
-  geom_col(fill = "grey30") +
-  coord_flip() +
-  facet_wrap(~ ordre, scales = "free_y") +
-  labs(
-    title = "Répartition des espèces",
-    subtitle = "GeoNature",
-    y = "Nombre d'observations", x = "Nom vernaculaire"
-  ) +
-  scale_x_discrete(labels = label_wrap(40)) +
-  theme_bw() +
-  theme(
-    axis.text.y = element_text(size = 8),
-    strip.text = element_text(face = "bold"),
-    plot.title = element_text(size = 16),
-    plot.subtitle = element_text(size = 12)
-  )
-
-```
-
