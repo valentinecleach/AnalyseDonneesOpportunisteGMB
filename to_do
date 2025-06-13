@@ -7,10 +7,6 @@ Priorité
 
 - continuer le truc de moyennes mobiles
 
-- séparer les îles 
--> peut etre un filtre avec commune ne commencant pas par une variante de île? Marche pas
--> Une bdd îles et une sans les îles? BDD puis suppression avec GQIS. Franck me le fait :)
-
 - corrélations entre les variables? 
 
 Tester rpubs / apprendre a utiliser 

@@ -964,3 +964,91 @@ GeoN %>%
   theme(axis.text.x = element_text(angle = 90))+ 
   coord_flip()+
   scale_x_discrete(labels = label_wrap(40))
+
+
+
+GeoN_Conti <- read_csv("work/AnalyseDonneesOpportunisteGMB/donnees/GeoN_Conti.csv")
+GeoN <- read_csv("work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv")
+
+VisioN_FB_Conti <- read_csv("work/AnalyseDonneesOpportunisteGMB/donnees/VisioN_FB_Conti.csv")
+
+
+
+VisioN_FB %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "VisioNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+VisioN_FB %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "GeoNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+VisioN_FB_Conti %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "GeoNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+
+
+# Conti vs non conti:
+  
+# Hérisson d'Europe
+# Lapin de Garenne
+# Loutre -> etonnant en vrai non?
+# Chevreuil
+
+# nombre d'observations?
+
+VisioN_FB
+82344-79064
+3280 obs supprimés
+
+Faune Bretagne
+52553 - 51949
+604 obs supprimés
