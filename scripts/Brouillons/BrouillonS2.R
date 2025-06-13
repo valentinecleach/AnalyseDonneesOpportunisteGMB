@@ -639,6 +639,7 @@ setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
 carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
 carte_bretagne <- st_set_crs(carte_bretagne, 2154)
 carte_bretagne <- st_transform(carte_bretagne, 4326)
+
 geo_horsile <- SansIles_GeoN %>% 
   filter(date_debut > as.Date("2010-01-01")) %>%
   dplyr::select(x_centroid_4326,
@@ -665,3 +666,285 @@ bzh <- st_read("bretagne-latest-free.shp.zip")
 :contentReference[oaicite:7]{index=7}
 :contentReference[oaicite:8]{index=8}
 
+
+
+library(tidyverse) 
+library(sf)
+
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+carte_bretagne <- sf::read_sf("LIM_ADM_DepartementsOuest.shp")
+carte_bretagne <- st_set_crs(carte_bretagne, 2154)
+carte_bretagne <- st_transform(carte_bretagne, 4326)
+
+# Données geographique
+Geo_GeoN <- GeoN %>%
+  filter(date_debut > as.Date("2010-01-01")) %>%
+  dplyr::select(x_centroid_4326,
+                y_centroid_4326,
+                ordre,
+                etat_biologique,
+                date_debut) %>% 
+  sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+               crs = sf::st_crs(4326))
+
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Carte des observations en Bretagne selon les ordres",
+       subtitle = "GeoNature") +
+  theme_bw()+
+  geom_hex(data = Geo_GeoN, aes=())
+
+
+Geo_GeoN <- Geo_GeoN %>%
+  mutate(etat_biologique = as.factor(etat_biologique),
+         densite_obs_vivant = )
+
+Geo_GeoN$density_A <- ifelse(Geo_GeoN$etat_biologique == "Observé vivant", 1, 0)
+
+ggplot(carte_bretagne) +
+  geom_sf(data = Geo_GeoN, aes(fill = density_A)) +
+  facet_grid(. ~ etat_biologique) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  theme_bw()
+
+ggplot(carte_bretagne) +
+  geom_sf(data = Geo_GeoN, aes(fill = etat_biologique)) +
+  scale_fill_manual(
+    values = c("Observé vivant" = "blue", "NSP" = "green", "Trouvé mort" = "red"),
+    na.value = "white"
+  )
+
+
+
+ggplot(Geo_GeoN, aes(x=, y=ordre) ) +
+  geom_sf(data = carte_bretagne) +
+  geom_bin2d() +
+  theme_bw()
+
+?geom_hex
+
+
+# Step 1: Create a variable for each category as a dummy
+Geo_GeoN <- Geo_GeoN %>%
+  mutate(etat_biologique = as.factor(etat_biologique),
+         density_A = ifelse(etat_biologique == "Observé vivant", 1, 0))
+
+# Step 2: Aggregate (sum) by spatial unit (assuming polygons are in Geo_GeoN)
+Geo_density <- Geo_GeoN %>%
+  group_by(geometry) %>%
+  summarise(density_A = sum(density_A, na.rm = TRUE))
+
+# Step 3: Plot
+ggplot(carte_bretagne) +
+  geom_sf(data = Geo_density, 
+          aes(fill = density_A)
+          ) +
+  scale_fill_gradient(low = "lightblue", 
+                      high = "darkblue", 
+                      name = "Densité") +
+  theme_bw()
+
+ggplot(Geo_density) +
+  geom_sf(aes(fill = density_A)) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "lightblue") +
+  theme_bw()
+
+summary(as.factor(GeoN$ordre))
+
+GeoN %>%
+  filter(ordre == "Carnivora")%>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces parmi les carnivores",
+       subtitle = "GeoNature",
+       x="Nom Vernaculaire",
+       y="Nombre d'observations")+
+  geom_bar()+
+  theme_bw()+ 
+  theme(axis.text.x = element_text(angle = 90))+ 
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(40))
+
+
+GeoN %>%
+  filter(ordre == "Cetartiodactyla")%>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces parmi les cétartiodactyles",
+       subtitle = "GeoNature",
+       x="Nom Vernaculaire",
+       y="Nombre d'observations")+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90))+ 
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(30))
+
+
+
+GeoN %>%
+  filter(ordre == "Eulipotyphla")%>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces parmi les eulipotyphles",
+       subtitle = "GeoNature",
+       x="Nom Vernaculaire",
+       y="Nombre d'observations")+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90))+ 
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(40))
+
+
+
+GeoN %>%
+  filter(ordre == "Lagomorpha")%>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces parmi les lagomorphes",
+       subtitle = "GeoNature",
+       x="Nom Vernaculaire",
+       y="Nombre d'observations")+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90))+ 
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(40))
+
+
+
+GeoN %>%
+  filter(ordre == "Rodentia")%>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces parmi les rongeurs",
+       subtitle = "GeoNature",
+       y="Nombre d'observations",x="Nom Vernaculaire")+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90))+
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(40))
+
+
+VisioN_FB %>%
+  filter(ordre == "Carnivora")%>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces parmi les carnivores",
+       subtitle = "GeoNature",
+       x="Nom Vernaculaire",
+       y="Nombre d'observations")+
+  geom_bar()+
+  theme_bw()+ 
+  theme(axis.text.x = element_text(angle = 90))+ 
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(40))
+
+
+VisioN_FB %>%
+  filter(ordre == "Cetartiodactyla")%>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces parmi les cétartiodactyles",
+       subtitle = "GeoNature",
+       x="Nom Vernaculaire",
+       y="Nombre d'observations")+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90))+ 
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(30))
+
+
+
+VisioN_FB %>%
+  filter(ordre == "Eulipotyphla")%>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces parmi les eulipotyphles",
+       subtitle = "GeoNature",
+       x="Nom Vernaculaire",
+       y="Nombre d'observations")+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90))+ 
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(40))
+
+
+
+VisioN_FB %>%
+  filter(ordre == "Lagomorpha")%>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces parmi les lagomorphes",
+       subtitle = "GeoNature",
+       x="Nom Vernaculaire",
+       y="Nombre d'observations")+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90))+ 
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(40))
+
+VisioN_FB %>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces",
+       subtitle = "VisioNature",
+       y="Nombre d'observations",x="Nom Vernaculaire")+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90))+
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(40))+    
+  facet_grid(. ~ ordre)
+
+GeoN %>%
+  ggplot(aes(nom_vernaculaire))+
+  labs(title = "Répartition des espèces",
+       subtitle = "VisioNature",
+       y="Nombre d'observations",x="Nom Vernaculaire")+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90))+
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(40))+    
+  facet_grid(. ~ ordre)
+
+
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+VisioN_FB %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "VisioNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+GeoN %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "GeoNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )

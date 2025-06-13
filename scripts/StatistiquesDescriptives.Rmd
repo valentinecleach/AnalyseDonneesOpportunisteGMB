@@ -10,6 +10,8 @@ library(stringr)
 library(sf)
 library(rsample)
 library(patchwork)
+library(scales)
+
 
 
 # Importations
@@ -56,7 +58,7 @@ ggplot(VisioN_FB,
 ```
 
 Quantité d'observations GeoNature Et VisioNature
-```{r NbrObs-Date, warning = FALSE, echo=FALSE, out.width="50%"}
+```{r NbrObs-Date, warning = FALSE, echo=FALSE, out.width="50%", include = FALSE}
 GeoN_sans_1000 <- GeoN%>%
   filter(nombre_min!=1000)
 
@@ -532,4 +534,47 @@ stats_observateur(nom_obs="le campion thomas",
 Les données de VisioNature sont - aléatoires que c'elle de GeoNature..
 Biaisé a cause de eux ou alors simplement + de données a ces endroits là?
 ....
+```{r}
+
+VisioN_FB %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "VisioNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+GeoN %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    subtitle = "GeoNature",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+```
 
