@@ -606,19 +606,17 @@ data_original_44 &lt;- read_delim(&quot;GeoN_44_2025-06-05T09_22_40.948Z.csv&quo
            technique_observation)
   ))%&gt;%
   mutate(technique_observation = as.factor(technique_observation))</code></pre>
-<p>Rajout des Rodents:</p>
+<p>Rajout des Rodents: (Attention GN et VisioNature sont inversés)</p>
 <pre class="r"><code>setwd(&quot;~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes&quot;)
 
-data_original_GeoRodents &lt;- read_delim(&quot;GN_compl_Rodentia_2025-06-13T14_06_22.043Z.csv&quot;,
-                                  delim = &quot;;&quot;, 
-                                  escape_double = FALSE, 
-                                  trim_ws = TRUE)</code></pre>
-<pre><code>## Rows: 11267 Columns: 77
+data_original_GeoRodents &lt;- read_delim(&quot;VN_compl_Rodentia_2025-06-13T14_05_03.107Z.csv&quot;, 
+                          delim = &quot;;&quot;, escape_double = FALSE, trim_ws = TRUE)</code></pre>
+<pre><code>## Rows: 5673 Columns: 75
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
-## chr  (45): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group...
+## chr  (44): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group...
 ## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, al...
-## lgl  (14): prof_min, prof_max, determinateur, comment_releve, validateur, da...
+## lgl  (13): prof_min, prof_max, date_validation, comment_validation, preuve_n...
 ## dttm  (2): date_creation, date_modification
 ## date  (2): date_debut, date_fin
 ## time  (2): heure_debut, heure_fin
@@ -716,7 +714,10 @@ contente ici de rester là dessus.</p>
       )
   )
 
-any(duplicated(Total_B))</code></pre>
+summary(as.factor(Total_B$bdd))</code></pre>
+<pre><code>##      GeoN VisioN_FB 
+##     57517     93416</code></pre>
+<pre class="r"><code>any(duplicated(Total_B))</code></pre>
 <pre><code>## [1] FALSE</code></pre>
 </div>
 </div>
@@ -730,6 +731,8 @@ write.csv(GeoN,
 
 write.csv(Total_B,
           &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_B.csv&quot;)</code></pre>
+<p>On modifie ensuite ces fichiers avec QGIS en selectionnant uniquement
+les données sur la bretagne continentale.</p>
 </div>
 
 

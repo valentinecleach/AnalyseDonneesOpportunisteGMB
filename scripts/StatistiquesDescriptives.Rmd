@@ -12,15 +12,18 @@ library(rsample)
 library(patchwork)
 library(scales)
 
+set.seed(12345)
 
 # Importations
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
-GeoN <- read_csv("GeoN.csv")
-VisioN_FB <- read_csv("VisioN_FB.csv")
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/bretagne_conti")
+Total_B <- read_csv("Total_B_Conti.csv")
+GeoN <- read_csv("GeoN_Conti.csv")
+VisioN_FB <- read_csv("VisioN_FB_Conti.csv")
 ```
+Tous nos données sont sur la bretagne continentale.
 
 ## TECHNIQUE D'OBSERVATION
-```{r,  warning = FALSE}
+```{r,  warning = FALSE, out.width="50%"}
 ggplot(GeoN, 
        aes(technique_observation, 
            fill=etat_biologique)
@@ -53,8 +56,6 @@ ggplot(VisioN_FB,
 
 
 ```
-Les données avec une technique d'obs "Inconnu" et avec un commentaire contenant des mots clefs comme des variables d'empreintes, composent la technique d'observation "Indice". Après ce filtre, il ne reste plus que 264 dont nous avons a la fois une technique d'observation "Inconnus" et un commentaire non-vide. Ces commentaires sont assez aléatoire et beaucoup ne donnent pas d'infos supplémentaire. 
-
 
 Quantité d'observations GeoNature Et VisioNature
 ```{r NbrObs-Date, warning = FALSE, echo=FALSE, out.width="50%", include = FALSE}
@@ -113,7 +114,6 @@ VisioN_FB %>%
   labs(subtitle="Données de VisioNature")
 
 GeoN%>%
-  filter(nombre_min!=1000)%>%
   ggplot(aes(date_debut, nombre_min))+
   geom_point()+
   theme_bw()+
@@ -121,29 +121,26 @@ GeoN%>%
                   end = 0.8, 
                   na.value = "red")+
   labs(subtitle="Données de GeoNature")
-
-
 ```
+La plupart des observations ne contiennent que un animal mais certains en contiennent plusieurs.
+
+Il faudrait peut être les prendre en compte, mais les données avec beaucoup d'animaux observés (ex: 50 obs d'un coup) risquent de causer des problèmes pour créer un model.
 
 ```{r, include = FALSE}
 # on remodifie c'etait parti 
 GeoN <- GeoN %>%
   mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
               "ordre", "famille", "observateurs"), 
-            .funs = as.factor)%>%
-  filter(date_debut > as.Date("2005-01-01"))
-
+            .funs = as.factor)
 
 VisioN_FB <- VisioN_FB %>%
   mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
               "ordre", "famille", "observateurs"), 
-            .funs = as.factor)%>%
-  filter(date_debut > as.Date("2005-01-01"))
-
+            .funs = as.factor)
 ```
 
 ## LES DATES SELON LES ORDRES
-```{r}
+```{r, include = FALSE}
 GeoN%>%
   ggplot(aes(date_debut)) +
   geom_bar()+
@@ -168,23 +165,10 @@ Essayer de les rassembler pour savoir si ca peut compenser entre eux.
 (en esperant que ce soit des differences de données non pas du a un réel 
 changement des population a ces moments là mais du a plus d'observateurs) 
 
-Calcul des correlations selon moyenne mobile?
-```{r}
-
-```
-
-
 ....
 
-```{r, include=FALSE}
-Total_B <- VisioN_FB %>%
-  mutate(bdd = "VisioN_FB")%>%
-  bind_rows(GeoN %>%
-              mutate(bdd = "GeoN")) %>%
-  filter(date_debut > as.Date("2005-01-01"))
-```
 
-```{r}
+```{r, include=FALSE}
 Total_B%>%
   ggplot(aes(date_debut))+
   geom_bar()+
@@ -221,15 +205,54 @@ Total_B%>%
   theme_bw()+
   geom_line(stat="density")
 ```
-A mon gout couper avant 2010 pour eviter de trop changer les données
-Et voir par rapport aux observateurs ce que ca donne 
-Ie + d'observateurs => plus d'observations car ils les voyaient sans les inscrire avant?
-Créer colonne observations = somme des observations 
-Si une observation de 2 lapins => 2 observations.
+
+```{r}
+VisioN_FB%>%
+  ggplot(aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="VisioNature")+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
+
+GeoN%>%
+  ggplot(aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="GeoNature")+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
+
+VisioN_FB%>%
+  filter(date_debut > as.Date("2005-01-01"))%>%
+  ggplot(aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="VisioNature depuis 2005")+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
+
+GeoN%>%
+  filter(date_debut > as.Date("2005-01-01"))%>%
+  ggplot(aes(date_debut))+
+  labs(title="Répartition des dates selon les differents ordres",
+       subtitle="GeoNature depuis 2005")+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")
+```
+
+J'aurais focalisé l'étude sur la période [2010 - maintenant], car avant il y a peu de données.
+
+GéoNature a surtout des données entre 2010 et 2015, et VisioNature après 2015.
+
+Peut être regarder par rapport aux observateurs? 
+L'idée est que si il y a plus d'observateurs, alors il y aura plus d'observations.
+Peut être, qu'on pourra pondérer là dessus? 
+
 
 ## REP CARTOGRAPHIQUE DES DONNEES
 ```{r carte-bzh-geonat-visionat}
-
 # Carte bretagne
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
 carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
@@ -303,14 +326,13 @@ ggplot() +
 ```
 
 En vrai ca veut pas dire  trop grand chose, on savait qu'on voyait en tout moins d'animaux avec les années donc logique ca se réflète ici aussi (Sutout bcp + en T1)
-On voit quand même un peu de déplacements. A voir plus tard.
+On voit quand même un peu de déplacements.
 
-Ou alors je prends la BDD avec toutes les données et je selectionne "aléatoirement" 40 000 ou 50 000 données avec les proportions? 
+je prends la BDD avec toutes les données et je selectionne "aléatoirement" 40 000 ou 50 000 données avec les proportions.
 
-Idée 2:
 
+Pour info, la graine aléatoire est figée a 12345.
 ```{r graphiques-date-et-ordre}
-set.seed(12345)
 
 graph_ordre_tranche_annee <- function(ordre_voulu){
   # Creation de la BDD
@@ -457,8 +479,8 @@ GeoN %>%
   labs(title="Répartition des differents ordres",
        subtitle="GeoNature sans les loutres")+
   theme_bw()
-
 ```
+On s'est demandé a quoi ressemblerait la répartition des ordres sans la loutre car elle est une espèce dont se préoccupent beaucoup le GMB.
 
 ```{r repartition-especes}
 
