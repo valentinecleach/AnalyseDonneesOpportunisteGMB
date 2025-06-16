@@ -1,6 +1,5 @@
 # Nettoyage des données
 
-
 ```{r, include = FALSE}
 # Packages
 library(readr)
@@ -10,10 +9,10 @@ library(stringi)
 library(sf)
 ```
 
-## GeoNature
+## Importation des données de GeoNature
 
-Données du 22 et 29
-```{r, include = FALSE}
+Données du 22 et 29:
+```{r}
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
 data_original_22_29 <- read_delim("GeoN_22-29_2025-06-05T09_18_37.225Z.csv", 
                          delim = ";", 
@@ -84,7 +83,7 @@ GeoN_22_29 <- data_original_22_29%>%
   mutate(technique_observation = as.factor(technique_observation))
 ```
 
-Données du 35 et 36
+Données du 35 et 36:
 ```{r}
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
 
@@ -157,7 +156,7 @@ GeoN_34_56 <- data_original_35_56%>%
   mutate(technique_observation = as.factor(technique_observation))
 ```
 
-Donnees du 44.
+Donnees du 44:
 ```{r}
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
 
@@ -228,24 +227,114 @@ GeoN_44 <- data_original_44%>%
   ))%>%
   mutate(technique_observation = as.factor(technique_observation))
 ```
-Création d'une base de données commune avec tous les départements (22, 29, 34, 56, 44) :
-```{r}
-GeoN <- rbind(GeoN_22_29, GeoN_34_56, GeoN_44)
 
+Rajout des Rodents:
+```{r}
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
+
+data_original_GeoRodents <- read_delim("GN_compl_Rodentia_2025-06-13T14_06_22.043Z.csv",
+                                  delim = ";", 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)
+
+GeoRodents <- data_original_GeoRodents%>%
+  select("id_synthese",
+         "date_debut", 
+         "cd_nom", 
+         "nom_valide",	"nom_vernaculaire",
+         "ordre",
+         "famille",	"rang_taxo",
+         "nombre_min",
+         "nombre_max",
+         "observateurs",
+         "communes",	
+         "geometrie_wkt_4326",	
+         "x_centroid_4326",
+         "y_centroid_4326",
+         "comment_occurrence",
+         "niveau_validation",
+         "jdd_nom",
+         "jdd_uuid",
+         "jdd_id",
+         "ca_nom"	,
+         "ca_uuid",	
+         "ca_id",
+         "technique_observation",
+         "etat_biologique"
+  )%>%
+  mutate(date_debut = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         technique_observation,
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom)
+  )%>%
+  filter(jdd_nom !=  "Données faunebretagne.org" )%>%
+  mutate(
+    nom_vernaculaire = ifelse(
+      is.na(nom_vernaculaire),
+      nom_valide,
+      nom_vernaculaire
+    ),
+    nom_valide = as.factor(nom_valide),
+    nom_vernaculaire = as.factor(nom_vernaculaire),
+    nombre_min = ifelse(nombre_max != nombre_min, 
+                        median(c(nombre_max,nombre_min)),
+                        nombre_min)
+  )%>%  
+  mutate(technique_observation = ifelse(
+    technique_observation %in% c("Fèces/Guano/Epreintes", 
+                                 "Empreintes", "Coulée",
+                                 "Galerie/terrier", 
+                                 "Hutte (Castor, Rat musqué)", "Nid/Gîte",
+                                 "Indices de présence divers",
+                                 "Restes de repas",
+                                 "Empreintes et fèces",
+                                 "Restes dans pelote de réjection"
+    ),
+    "Indices",
+    ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
+           "Entendu/Ultasons",
+           technique_observation)
+  ))%>%
+  mutate(technique_observation = as.factor(technique_observation))
 ```
 
-# Importation des données VisioNature de Faune Bretagne
+Création d'une base de données commune avec tous les départements (22, 29, 34, 56, 44 et les rodents) :
+```{r}
+GeoN <- rbind(GeoN_22_29, GeoN_34_56, GeoN_44, GeoRodents)
+```
+
+On vérifie qu'il n'y a pas de doublons:
+```{r}
+any(duplicated(GeoN))
+```
+
+## Importation des données VisioNature de Faune Bretagne
 
 ```{r, include = FALSE}
 
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
 
-donnes_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
+donnees_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
                                  delim = ";", 
                                  escape_double = FALSE,
                                  trim_ws = TRUE)
 
-VisioN_FB <- donnes_VisioNature_FB %>%
+VN_Rodentia <- read_delim("VN_compl_Rodentia_2025-06-13T14_05_03.107Z.csv", 
+                          delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+
+donnees_VisioNature_FB <- donnees_VisioNature_FB %>%
+  mutate(bdd = "donnees_VisioNature_FB")%>%
+  bind_rows(VN_Rodentia %>%
+              mutate(bdd = "VN_Rodentia"))
+
+
+any(duplicated(donnees_VisioNature_FB))
+
+VisioN_FB <- donnees_VisioNature_FB %>%
   dplyr::select(id_synthese,
          date_debut,
          cd_nom,
@@ -313,20 +402,36 @@ Il ne reste plus que 264 dont la technique d'observation est "Inconnus" et il y 
 Les commentaires sont assez aléatoire et beaucoup ne donnent pas d'infos supplémentaire.
 On se contente ici de rester là dessus.
 
+## Toutes les données ensemble
 ```{r}
-summary(VisioN_FB)
+
+Total_B <- VisioN_FB %>%
+  mutate(
+    bdd = "VisioN_FB",
+    cd_nom = as.character(cd_nom)
+  ) %>%
+  bind_rows(
+    GeoN %>%
+      mutate(
+        bdd = "GeoN",
+        cd_nom = as.character(cd_nom)
+      )
+  )
+
+any(duplicated(Total_B))
 ```
 
-Exportation des données nettoyés:
+# Exportation des données nettoyés:
+
 ```{r}
 write.csv(VisioN_FB,
           "~/work/AnalyseDonneesOpportunisteGMB/donnees/VisioN_FB.csv")
 
 write.csv(GeoN,
           "~/work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv")
+
+write.csv(Total_B,
+          "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_B.csv")
 ```
 
-```{r}
-any(duplicated(Total_B))
-```
-Pas de duplicats.
+On modifie ensuite ces fichiers avec QGIS en selectionnant uniquement les données sur la bretagne continentale.

@@ -354,10 +354,93 @@ display: none;
 
 <div id="nettoyage-des-données" class="section level1">
 <h1>Nettoyage des données</h1>
-<div id="geonature" class="section level2">
-<h2>GeoNature</h2>
-<p>Données du 22 et 29</p>
-<p>Données du 35 et 36</p>
+<div id="importation-des-données-de-geonature" class="section level2">
+<h2>Importation des données de GeoNature</h2>
+<p>Données du 22 et 29:</p>
+<pre class="r"><code>setwd(&quot;~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes&quot;)
+data_original_22_29 &lt;- read_delim(&quot;GeoN_22-29_2025-06-05T09_18_37.225Z.csv&quot;, 
+                         delim = &quot;;&quot;, 
+                         escape_double = FALSE, 
+                         trim_ws = TRUE)</code></pre>
+<pre><code>## Warning: One or more parsing issues, call `problems()` on your data frame for details,
+## e.g.:
+##   dat &lt;- vroom(...)
+##   problems(dat)</code></pre>
+<pre><code>## Rows: 42939 Columns: 75
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;;&quot;
+## chr  (44): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group...
+## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, al...
+## lgl  (13): prof_min, prof_max, date_validation, comment_validation, preuve_n...
+## dttm  (2): date_creation, date_modification
+## date  (2): date_debut, date_fin
+## time  (2): heure_debut, heure_fin
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>GeoN_22_29 &lt;- data_original_22_29%&gt;%
+  select(&quot;id_synthese&quot;,
+         &quot;date_debut&quot;, 
+         &quot;cd_nom&quot;, 
+         &quot;nom_valide&quot;,  &quot;nom_vernaculaire&quot;,
+         &quot;ordre&quot;,
+         &quot;famille&quot;, &quot;rang_taxo&quot;,
+         &quot;nombre_min&quot;,
+         &quot;nombre_max&quot;,
+         &quot;observateurs&quot;,
+         &quot;communes&quot;,    
+         &quot;geometrie_wkt_4326&quot;,  
+         &quot;x_centroid_4326&quot;,
+         &quot;y_centroid_4326&quot;,
+         &quot;comment_occurrence&quot;,
+         &quot;niveau_validation&quot;,
+         &quot;jdd_nom&quot;,
+         &quot;jdd_uuid&quot;,
+         &quot;jdd_id&quot;,
+         &quot;ca_nom&quot;   ,
+         &quot;ca_uuid&quot;, 
+         &quot;ca_id&quot;,
+         &quot;technique_observation&quot;,
+         &quot;etat_biologique&quot;
+  )%&gt;%
+  mutate(date_debut = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         technique_observation,
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom)
+  )%&gt;%
+  filter(jdd_nom !=  &quot;Données faunebretagne.org&quot; )%&gt;%
+  mutate(
+      nom_vernaculaire = ifelse(
+      is.na(nom_vernaculaire),
+      nom_valide,
+      nom_vernaculaire
+    ),
+    nom_valide = as.factor(nom_valide),
+    nom_vernaculaire = as.factor(nom_vernaculaire),
+    nombre_min = ifelse(nombre_max != nombre_min, 
+                        median(c(nombre_max,nombre_min)),
+                        nombre_min)
+  )%&gt;%  
+  mutate(technique_observation = ifelse(
+    technique_observation %in% c(&quot;Fèces/Guano/Epreintes&quot;, 
+                                 &quot;Empreintes&quot;, &quot;Coulée&quot;,
+                                 &quot;Galerie/terrier&quot;, 
+                                 &quot;Hutte (Castor, Rat musqué)&quot;, &quot;Nid/Gîte&quot;,
+                                 &quot;Indices de présence divers&quot;,
+                                 &quot;Restes de repas&quot;,
+                                 &quot;Empreintes et fèces&quot;,
+                                 &quot;Restes dans pelote de réjection&quot;
+                                 ),
+    &quot;Indices&quot;,
+    ifelse(technique_observation %in% c(&quot;Entendu&quot;, &quot;Ultrasons&quot;), 
+           &quot;Entendu/Ultasons&quot;,
+           technique_observation)
+  ))%&gt;%
+  mutate(technique_observation = as.factor(technique_observation))</code></pre>
+<p>Données du 35 et 36:</p>
 <pre class="r"><code>setwd(&quot;~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes&quot;)
 
 data_original_35_56 &lt;- read_delim(&quot;GeoN_35-56_2025-06-05T09_21_08.380Z.csv&quot;, 
@@ -442,7 +525,7 @@ data_original_35_56 &lt;- read_delim(&quot;GeoN_35-56_2025-06-05T09_21_08.380Z.c
            technique_observation)
   ))%&gt;%
   mutate(technique_observation = as.factor(technique_observation))</code></pre>
-<p>Donnees du 44.</p>
+<p>Donnees du 44:</p>
 <pre class="r"><code>setwd(&quot;~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes&quot;)
 
 data_original_44 &lt;- read_delim(&quot;GeoN_44_2025-06-05T09_22_40.948Z.csv&quot;, 
@@ -523,76 +606,130 @@ data_original_44 &lt;- read_delim(&quot;GeoN_44_2025-06-05T09_22_40.948Z.csv&quo
            technique_observation)
   ))%&gt;%
   mutate(technique_observation = as.factor(technique_observation))</code></pre>
+<p>Rajout des Rodents:</p>
+<pre class="r"><code>setwd(&quot;~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes&quot;)
+
+data_original_GeoRodents &lt;- read_delim(&quot;GN_compl_Rodentia_2025-06-13T14_06_22.043Z.csv&quot;,
+                                  delim = &quot;;&quot;, 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)</code></pre>
+<pre><code>## Rows: 11267 Columns: 77
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;;&quot;
+## chr  (45): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group...
+## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, al...
+## lgl  (14): prof_min, prof_max, determinateur, comment_releve, validateur, da...
+## dttm  (2): date_creation, date_modification
+## date  (2): date_debut, date_fin
+## time  (2): heure_debut, heure_fin
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>GeoRodents &lt;- data_original_GeoRodents%&gt;%
+  select(&quot;id_synthese&quot;,
+         &quot;date_debut&quot;, 
+         &quot;cd_nom&quot;, 
+         &quot;nom_valide&quot;,  &quot;nom_vernaculaire&quot;,
+         &quot;ordre&quot;,
+         &quot;famille&quot;, &quot;rang_taxo&quot;,
+         &quot;nombre_min&quot;,
+         &quot;nombre_max&quot;,
+         &quot;observateurs&quot;,
+         &quot;communes&quot;,    
+         &quot;geometrie_wkt_4326&quot;,  
+         &quot;x_centroid_4326&quot;,
+         &quot;y_centroid_4326&quot;,
+         &quot;comment_occurrence&quot;,
+         &quot;niveau_validation&quot;,
+         &quot;jdd_nom&quot;,
+         &quot;jdd_uuid&quot;,
+         &quot;jdd_id&quot;,
+         &quot;ca_nom&quot;   ,
+         &quot;ca_uuid&quot;, 
+         &quot;ca_id&quot;,
+         &quot;technique_observation&quot;,
+         &quot;etat_biologique&quot;
+  )%&gt;%
+  mutate(date_debut = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         technique_observation,
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom)
+  )%&gt;%
+  filter(jdd_nom !=  &quot;Données faunebretagne.org&quot; )%&gt;%
+  mutate(
+    nom_vernaculaire = ifelse(
+      is.na(nom_vernaculaire),
+      nom_valide,
+      nom_vernaculaire
+    ),
+    nom_valide = as.factor(nom_valide),
+    nom_vernaculaire = as.factor(nom_vernaculaire),
+    nombre_min = ifelse(nombre_max != nombre_min, 
+                        median(c(nombre_max,nombre_min)),
+                        nombre_min)
+  )%&gt;%  
+  mutate(technique_observation = ifelse(
+    technique_observation %in% c(&quot;Fèces/Guano/Epreintes&quot;, 
+                                 &quot;Empreintes&quot;, &quot;Coulée&quot;,
+                                 &quot;Galerie/terrier&quot;, 
+                                 &quot;Hutte (Castor, Rat musqué)&quot;, &quot;Nid/Gîte&quot;,
+                                 &quot;Indices de présence divers&quot;,
+                                 &quot;Restes de repas&quot;,
+                                 &quot;Empreintes et fèces&quot;,
+                                 &quot;Restes dans pelote de réjection&quot;
+    ),
+    &quot;Indices&quot;,
+    ifelse(technique_observation %in% c(&quot;Entendu&quot;, &quot;Ultrasons&quot;), 
+           &quot;Entendu/Ultasons&quot;,
+           technique_observation)
+  ))%&gt;%
+  mutate(technique_observation = as.factor(technique_observation))</code></pre>
 <p>Création d’une base de données commune avec tous les départements
-(22, 29, 34, 56, 44) :</p>
-<pre class="r"><code>GeoN &lt;- rbind(GeoN_22_29, GeoN_34_56, GeoN_44)</code></pre>
+(22, 29, 34, 56, 44 et les rodents) :</p>
+<pre class="r"><code>GeoN &lt;- rbind(GeoN_22_29, GeoN_34_56, GeoN_44, GeoRodents)</code></pre>
+<p>On vérifie qu’il n’y a pas de doublons:</p>
+<pre class="r"><code>any(duplicated(GeoN))</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+<div id="importation-des-données-visionature-de-faune-bretagne" class="section level2">
+<h2>Importation des données VisioNature de Faune Bretagne</h2>
+<p>Il ne reste plus que 264 dont la technique d’observation est
+“Inconnus” et il y a un commentaire. Les commentaires sont assez
+aléatoire et beaucoup ne donnent pas d’infos supplémentaire. On se
+contente ici de rester là dessus.</p>
+</div>
+<div id="toutes-les-données-ensemble" class="section level2">
+<h2>Toutes les données ensemble</h2>
+<pre class="r"><code>Total_B &lt;- VisioN_FB %&gt;%
+  mutate(
+    bdd = &quot;VisioN_FB&quot;,
+    cd_nom = as.character(cd_nom)
+  ) %&gt;%
+  bind_rows(
+    GeoN %&gt;%
+      mutate(
+        bdd = &quot;GeoN&quot;,
+        cd_nom = as.character(cd_nom)
+      )
+  )
+
+any(duplicated(Total_B))</code></pre>
+<pre><code>## [1] FALSE</code></pre>
 </div>
 </div>
-<div id="importation-des-données-visionature-de-faune-bretagne" class="section level1">
-<h1>Importation des données VisioNature de Faune Bretagne</h1>
-<pre class="r"><code>summary(VisioN_FB)</code></pre>
-<pre><code>##   id_synthese         date_debut             cd_nom           cd_ref      
-##  Min.   : 6398392   Min.   :1972-05-14   Min.   : 60015   Min.   : 60015  
-##  1st Qu.: 6426271   1st Qu.:2018-05-16   1st Qu.: 60630   1st Qu.: 60630  
-##  Median : 6453178   Median :2021-03-21   Median : 61057   Median : 61057  
-##  Mean   : 8142794   Mean   :2020-06-14   Mean   : 60978   Mean   : 60978  
-##  3rd Qu.: 7804870   3rd Qu.:2023-04-27   3rd Qu.: 61153   3rd Qu.: 61153  
-##  Max.   :17610953   Max.   :2025-06-05   Max.   :199752   Max.   :199752  
-##                                                                           
-##                                   nom_valide   
-##  Capreolus capreolus (Linnaeus, 1758)  :20022  
-##  Sciurus vulgaris Linnaeus, 1758       : 9714  
-##  Lepus europaeus Pallas, 1778          : 9391  
-##  Vulpes vulpes (Linnaeus, 1758)        : 8015  
-##  Oryctolagus cuniculus (Linnaeus, 1758): 7887  
-##  Erinaceus europaeus Linnaeus, 1758    : 7401  
-##  (Other)                               :19914  
-##                                                            nom_vernaculaire
-##  Chevreuil européen, Chevreuil, Brocard (mâle), Chevrette (femelle):20022  
-##  Écureuil roux                                                     : 9714  
-##  Lièvre d&#39;Europe                                                   : 9391  
-##  Renard roux, Renard, Goupil                                       : 8015  
-##  Lapin de garenne                                                  : 7887  
-##  Hérisson d&#39;Europe                                                 : 7401  
-##  (Other)                                                           :19914  
-##              ordre              famille      rang_taxo    nombre_min     
-##  Carnivora      :20157   Cervidae   :20811   ES:82343   Min.   :  1.000  
-##  Cetartiodactyla:24391   Leporidae  :17278   GN:    1   1st Qu.:  1.000  
-##  Eulipotyphla   :10804   Mustelidae :12133              Median :  1.000  
-##  Lagomorpha     :17278   Sciuridae  : 9714              Mean   :  1.579  
-##  Rodentia       : 9714   Canidae    : 8015              3rd Qu.:  1.000  
-##                          Erinaceidae: 7401              Max.   :400.000  
-##                          (Other)    : 6992                               
-##  observateurs         communes         geometrie_wkt_4326 x_centroid_4326 
-##  Length:82344       Length:82344       Length:82344       Min.   :-5.140  
-##  Class :character   Class :character   Class :character   1st Qu.:-3.779  
-##  Mode  :character   Mode  :character   Mode  :character   Median :-3.038  
-##                                                           Mean   :-2.971  
-##                                                           3rd Qu.:-2.024  
-##                                                           Max.   :-1.035  
-##                                                                           
-##  y_centroid_4326 comment_occurrence technique_observation
-##  Min.   :47.28   Length:82344       Length:82344         
-##  1st Qu.:47.83   Class :character   Class :character     
-##  Median :48.10   Mode  :character   Mode  :character     
-##  Mean   :48.12                                           
-##  3rd Qu.:48.44                                           
-##  Max.   :48.90                                           
-##                                                          
-##        etat_biologique 
-##  Observé vivant:72489  
-##  Trouvé mort   : 9855  
-##                        
-##                        
-##                        
-##                        
-## </code></pre>
-<p>Exportation des données nettoyés:</p>
+<div id="exportation-des-données-nettoyés" class="section level1">
+<h1>Exportation des données nettoyés:</h1>
 <pre class="r"><code>write.csv(VisioN_FB,
           &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/VisioN_FB.csv&quot;)
 
 write.csv(GeoN,
-          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv&quot;)</code></pre>
+          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv&quot;)
+
+write.csv(Total_B,
+          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_B.csv&quot;)</code></pre>
 </div>
 
 
