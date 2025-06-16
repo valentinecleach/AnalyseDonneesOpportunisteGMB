@@ -228,14 +228,12 @@ GeoN_44 <- data_original_44%>%
   mutate(technique_observation = as.factor(technique_observation))
 ```
 
-Rajout des Rodents:
+Rajout des Rodents: (Attention GN et VisioNature sont inversés)
 ```{r}
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
 
-data_original_GeoRodents <- read_delim("GN_compl_Rodentia_2025-06-13T14_06_22.043Z.csv",
-                                  delim = ";", 
-                                  escape_double = FALSE, 
-                                  trim_ws = TRUE)
+data_original_GeoRodents <- read_delim("VN_compl_Rodentia_2025-06-13T14_05_03.107Z.csv", 
+                          delim = ";", escape_double = FALSE, trim_ws = TRUE)
 
 GeoRodents <- data_original_GeoRodents%>%
   select("id_synthese",
@@ -322,9 +320,10 @@ donnees_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
                                  escape_double = FALSE,
                                  trim_ws = TRUE)
 
-VN_Rodentia <- read_delim("VN_compl_Rodentia_2025-06-13T14_05_03.107Z.csv", 
-                          delim = ";", escape_double = FALSE, trim_ws = TRUE)
-
+VN_Rodentia <- read_delim("GN_compl_Rodentia_2025-06-13T14_06_22.043Z.csv",
+                                  delim = ";", 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)
 
 donnees_VisioNature_FB <- donnees_VisioNature_FB %>%
   mutate(bdd = "donnees_VisioNature_FB")%>%
@@ -404,7 +403,6 @@ On se contente ici de rester là dessus.
 
 ## Toutes les données ensemble
 ```{r}
-
 Total_B <- VisioN_FB %>%
   mutate(
     bdd = "VisioN_FB",
@@ -417,6 +415,8 @@ Total_B <- VisioN_FB %>%
         cd_nom = as.character(cd_nom)
       )
   )
+
+summary(as.factor(Total_B$bdd))
 
 any(duplicated(Total_B))
 ```
