@@ -311,7 +311,7 @@ any(duplicated(GeoN))
 
 ## Importation des données VisioNature de Faune Bretagne
 
-```{r, include = FALSE}
+```{r}
 
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
 
@@ -401,6 +401,11 @@ Il ne reste plus que 264 dont la technique d'observation est "Inconnus" et il y 
 Les commentaires sont assez aléatoire et beaucoup ne donnent pas d'infos supplémentaire.
 On se contente ici de rester là dessus.
 
+On vérifie qu'il n'y a pas de doublons:
+```{r}
+any(duplicated(VisioN_FB))
+```
+
 ## Toutes les données ensemble
 ```{r}
 Total_B <- VisioN_FB %>%
@@ -424,14 +429,14 @@ any(duplicated(Total_B))
 # Exportation des données nettoyés:
 
 ```{r}
-write.csv(VisioN_FB,
-          "~/work/AnalyseDonneesOpportunisteGMB/donnees/VisioN_FB.csv")
+#write.csv(VisioN_FB,
+#          "~/work/AnalyseDonneesOpportunisteGMB/donnees/VisioN_FB.csv")
 
-write.csv(GeoN,
-          "~/work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv")
+#write.csv(GeoN,
+#          "~/work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv")
 
-write.csv(Total_B,
-          "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_B.csv")
+#write.csv(Total_B,
+#          "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_B.csv")
 ```
 
 On modifie ensuite ces fichiers avec QGIS en selectionnant uniquement les données sur la bretagne continentale.

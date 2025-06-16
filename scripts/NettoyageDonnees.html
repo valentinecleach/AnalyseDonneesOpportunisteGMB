@@ -694,10 +694,118 @@ data_original_GeoRodents &lt;- read_delim(&quot;VN_compl_Rodentia_2025-06-13T14_
 </div>
 <div id="importation-des-données-visionature-de-faune-bretagne" class="section level2">
 <h2>Importation des données VisioNature de Faune Bretagne</h2>
+<pre class="r"><code>setwd(&quot;~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes&quot;)
+
+donnees_VisioNature_FB &lt;- read_delim(&quot;VisioN_FB_2025-06-05T09_19_40.789Z.csv&quot;,
+                                 delim = &quot;;&quot;, 
+                                 escape_double = FALSE,
+                                 trim_ws = TRUE)</code></pre>
+<pre><code>## Rows: 82470 Columns: 77
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;;&quot;
+## chr  (45): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group...
+## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, al...
+## lgl  (14): prof_min, prof_max, determinateur, comment_releve, validateur, da...
+## dttm  (2): date_creation, date_modification
+## date  (2): date_debut, date_fin
+## time  (2): heure_debut, heure_fin
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>VN_Rodentia &lt;- read_delim(&quot;GN_compl_Rodentia_2025-06-13T14_06_22.043Z.csv&quot;,
+                                  delim = &quot;;&quot;, 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)</code></pre>
+<pre><code>## Rows: 11267 Columns: 77
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;;&quot;
+## chr  (45): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group...
+## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, al...
+## lgl  (14): prof_min, prof_max, determinateur, comment_releve, validateur, da...
+## dttm  (2): date_creation, date_modification
+## date  (2): date_debut, date_fin
+## time  (2): heure_debut, heure_fin
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>donnees_VisioNature_FB &lt;- donnees_VisioNature_FB %&gt;%
+  mutate(bdd = &quot;donnees_VisioNature_FB&quot;)%&gt;%
+  bind_rows(VN_Rodentia %&gt;%
+              mutate(bdd = &quot;VN_Rodentia&quot;))
+
+
+any(duplicated(donnees_VisioNature_FB))</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>VisioN_FB &lt;- donnees_VisioNature_FB %&gt;%
+  dplyr::select(id_synthese,
+         date_debut,
+         cd_nom,
+         cd_ref,
+         nom_valide,
+         nom_vernaculaire,
+         ordre,
+         famille,
+         rang_taxo,
+         nombre_min, # nbre_min=nbre_max
+         observateurs,
+         communes,
+         geometrie_wkt_4326,
+         x_centroid_4326,
+         y_centroid_4326,
+         comment_occurrence,
+         technique_observation,
+         etat_biologique
+         )%&gt;%
+  dplyr::mutate(etat_biologique = as.factor(etat_biologique),
+         nom_valide=as.factor(nom_valide),
+         nom_vernaculaire=as.factor(nom_vernaculaire),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         rang_taxo=as.factor(rang_taxo)
+         )%&gt;%
+  dplyr::filter(technique_observation != &quot;Restes dans pelote de réjection&quot;)
+
+# Modification pour ajouter des indices
+VisioN_FB &lt;- VisioN_FB%&gt;%
+  dplyr::mutate(technique_observation = ifelse(
+    !is.na(comment_occurrence) &amp; technique_observation == &quot;Inconnu&quot;,
+    ifelse(any(grepl(&quot;TAUPINIERE&quot;, toupper(gsub(&quot;[[:punct:]]&quot;, 
+                                                &quot;&quot;, 
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  &quot;Latin-ASCII&quot;)
+                                                )
+                                           )
+                     ),
+               grepl(&quot;EMPREINTES&quot;, toupper(gsub(&quot;:punct:]]&quot;,
+                                                &quot;&quot;,
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  &quot;Latin-ASCII&quot;)
+                                                ))
+                     ),
+               grepl(&quot;TRACE&quot;, toupper(gsub(&quot;:punct:]]&quot;,
+                                                &quot;&quot;,
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  &quot;Latin-ASCII&quot;
+                                                  )
+                                           )
+                                      )
+               )
+               ),
+           &quot;Indices&quot;,
+           technique_observation),
+    technique_observation
+    )
+    )</code></pre>
 <p>Il ne reste plus que 264 dont la technique d’observation est
 “Inconnus” et il y a un commentaire. Les commentaires sont assez
 aléatoire et beaucoup ne donnent pas d’infos supplémentaire. On se
 contente ici de rester là dessus.</p>
+<p>On vérifie qu’il n’y a pas de doublons:</p>
+<pre class="r"><code>any(duplicated(VisioN_FB))</code></pre>
+<pre><code>## [1] FALSE</code></pre>
 </div>
 <div id="toutes-les-données-ensemble" class="section level2">
 <h2>Toutes les données ensemble</h2>
@@ -723,14 +831,14 @@ summary(as.factor(Total_B$bdd))</code></pre>
 </div>
 <div id="exportation-des-données-nettoyés" class="section level1">
 <h1>Exportation des données nettoyés:</h1>
-<pre class="r"><code>write.csv(VisioN_FB,
-          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/VisioN_FB.csv&quot;)
+<pre class="r"><code>#write.csv(VisioN_FB,
+#          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/VisioN_FB.csv&quot;)
 
-write.csv(GeoN,
-          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv&quot;)
+#write.csv(GeoN,
+#          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/GeoN.csv&quot;)
 
-write.csv(Total_B,
-          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_B.csv&quot;)</code></pre>
+#write.csv(Total_B,
+#          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_B.csv&quot;)</code></pre>
 <p>On modifie ensuite ces fichiers avec QGIS en selectionnant uniquement
 les données sur la bretagne continentale.</p>
 </div>
