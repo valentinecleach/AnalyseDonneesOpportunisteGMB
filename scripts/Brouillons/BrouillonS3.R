@@ -76,3 +76,153 @@ ggplot() +
   scale_fill_gradient(low="gray90", high="gray15") +
   theme_bw() +
   facet_grid(. ~ ordre)
+
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 5), 
+                     right = FALSE)
+  ) %>%
+  ggplot(aes(year_group, fill = ordre)) +
+  geom_bar(position = "fill") +  
+  scale_fill_grey(start = 0.2, end = 0.8)
+
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 5), 
+                     right = FALSE)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_valide)) +
+  geom_bar(position = "fill") +  
+  scale_fill_grey(start = 0.2, end = 0.8)
+
+library(dplyr)
+library(ggplot2)
+library(forcats)
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_valide_regroupe = fct_lump(nom_valide, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_valide_regroupe)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Période",
+    main = "Répartition des differentes espèces observés depuis 1980",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("2010-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 2), right = FALSE),
+    nom_valide_regroupe = fct_lump(nom_valide, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_valide_regroupe)) +
+  geom_bar(position = "fill") +
+#  scale_fill_grey(start = 0.1, end = 0.9) +
+  labs(
+    main = "Répartition des differentes espèces observés depuis 2010",
+    x = "Période",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()
+
+
+
+VisioN_FB <- VisioN_FB %>%
+  mutate(nom_vernaculaire = ifelse(cd_nom == 61585, "Rat brun", nom_vernaculaire))
+VisioN_FB %>%
+  filter(is.na(nom_vernaculaire))%>%
+  group_by(nom_valide)%>%
+  select(nom_valide, cd_nom)
+
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Période",
+    title = "Répartition des differentes espèces observés depuis 1980",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()
+
+
+GeoN %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Période",
+    title = "Répartition des differentes espèces observés depuis 1980",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("2010-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 2), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Répartition des differentes espèces observés depuis 2010",
+    x = "Période",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()
+
+GeoN %>%
+  filter(date_debut > as.Date("2010-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 2), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Répartition des differentes espèces observés depuis 2010",
+    x = "Période",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()

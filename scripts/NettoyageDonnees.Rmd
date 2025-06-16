@@ -439,4 +439,14 @@ any(duplicated(Total_B))
 #          "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_B.csv")
 ```
 
-On modifie ensuite ces fichiers avec QGIS en selectionnant uniquement les données sur la bretagne continentale.
+On à ensuite retiré les îles a l'aide d'une intersection avec notre BDD et une maps de la bretagne continentale sur QGIS.\ 
+
+VisioNature observations supprimés:
+```{r}
+82344-79064
+```
+
+GeoNature observations supprimés:
+```{r}
+82344-79064
+```

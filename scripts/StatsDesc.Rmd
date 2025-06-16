@@ -11,7 +11,12 @@ library(sf)
 library(rsample)
 library(patchwork)
 library(scales)
+library(viridis)
+library(ggplot2)
+library(purrr)
+library(forcats)
 
+# Graine aléatoire
 set.seed(12345)
 
 # Importations
@@ -20,13 +25,11 @@ Total_B <- read_csv("Total_B_Conti.csv")
 GeoN <- read_csv("GeoN_Conti.csv")
 VisioN_FB <- read_csv("VisioN_FB_Conti.csv")
 ```
-Tous nos données sont sur la bretagne continentale.
+Toutes nos données concernent uniquement la bretagne continentale.
 
-## 1. Répartition des techniques d'observations
+## 1. Differentes répartitions
 
-Quantité d'observations GeoNature Et VisioNature
-
-```{r ggplot2, warning = FALSE, echo=FALSE, out.width="50%"}
+```{r repartition-etat-bio-techniques, warning = FALSE, echo=FALSE, out.width="50%"}
 VisioN_FB%>%
   ggplot(aes(technique_observation, fill=etat_biologique))+
   geom_bar(position="dodge")+
@@ -50,7 +53,7 @@ GeoN%>%
 ```
 On remarque toujours beaucoup de données de VisioNature dont la techique d'observation est inconnu.
 
-```{r ggplot2, warning = FALSE, echo=FALSE, out.width="50%"}
+```{r repartition-etat-bio-ordes, warning = FALSE, echo=FALSE, out.width="50%"}
 VisioN_FB%>%
   ggplot(aes(technique_observation, fill=ordre))+
   geom_bar(position="dodge")+
@@ -72,38 +75,11 @@ GeoN%>%
   labs(title = "Répartition de l'état biologique selon les ordres",
        subtitle = "Données de GeoNature")
 ```
-Les lagomorphes sont peu remarqués avec les indices comparé aux autres dans VisioNature
+GeoNature observe des principalement des indices de rodents et de carnivores. Les lagomorphes sont peu remarqués avec les indices comparé aux autres dans VisioNature et GeoNature.
 
-```{r nmbre-données, warning = FALSE, echo=FALSE, out.width="50%"}
-VisioN_FB %>%
-  ggplot(aes(date_debut, nombre_min))+
-  geom_point()+
-  theme_bw()+
-  scale_fill_grey(start = 0.2,
-                  end = 0.8, 
-                  na.value = "red")+
-  labs(title="Le nombre d'individus enregistré par observation reparti dans le temps",
-       subtitle="Données de VisioNature",
-       ylab="Nombre d’individus")
-
-GeoN%>%
-  ggplot(aes(date_debut, nombre_min))+
-  geom_point()+
-  theme_bw()+
-  scale_fill_grey(start = 0.2,
-                  end = 0.8, 
-                  na.value = "red")+
-  +
-  labs(title="Le nombre d'individus enregistré par observation reparti dans le temps",
-       subtitle="Données de GeoNature",
-       ylab="Nombre d’individus")
-```
-La plupart des observations ne contiennent que un animal mais certains en contiennent plusieurs.
-
-Il faudrait peut être les prendre en compte, mais les données avec beaucoup d'animaux observés (ex: 50 obs d'un coup) risquent de causer des problèmes pour créer un model.
 
 ```{r, include = FALSE}
-# on remodifie c'etait parti 
+ 
 GeoN <- GeoN %>%
   mutate_at(c("communes", "nom_valide", "nom_vernaculaire",
               "ordre", "famille", "observateurs"), 
@@ -116,14 +92,6 @@ VisioN_FB <- VisioN_FB %>%
 ```
 
 ## 2. Description temporelle des bases de données
-
-On a des données a differentes périodes entre ces deux bases de données. 
-Essayer de les rassembler pour savoir si ca peut compenser entre eux.
-(en esperant que ce soit des differences de données non pas du a un réel 
-changement des population a ces moments là mais du a plus d'observateurs) 
-
-....
-
 
 ```{r}
 VisioN_FB%>%
@@ -141,7 +109,13 @@ GeoN%>%
   facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")
+```
 
+VisioNature a très peu de données avant 2010 et GeoNature a très peu de données avant 1990.\
+
+On coupe à 2005 pour mieux observer la répartition de nos données.
+
+```{r}
 VisioN_FB%>%
   filter(date_debut > as.Date("2005-01-01"))%>%
   ggplot(aes(date_debut))+
@@ -161,21 +135,158 @@ GeoN%>%
   geom_line(stat="density")
 ```
 
-J'aurais focalisé l'étude sur la période [2010 - maintenant], car avant il y a peu de données.
+J'aurais focalisé l'étude sur la période [2010 - maintenant] pour les séries temporelles, car avant il y a peu de données.\
 
-GéoNature a surtout des données entre 2010 et 2015, et VisioNature après 2015.
+GéoNature a surtout des données entre 2010 et 2015, et VisioNature après 2015.\
 
-Peut être regarder par rapport aux observateurs? 
-L'idée est que si il y a plus d'observateurs, alors il y aura plus d'observations.
+Peut être que ca pourrait être intéressant de regarder par rapport nombre au nombre  d'observateurs? 
+Si il y a plus d'observateurs, alors peut être qu'il y aura plus d'observations.
 Peut être, qu'on pourra pondérer là dessus? 
 
-*Insérer les proportion des espèces dans le temps*
+
+```{r nmbre-données, warning = FALSE, echo=FALSE, out.width="50%"}
+VisioN_FB %>%
+  ggplot(aes(date_debut, nombre_min))+
+  geom_point()+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red") + 
+  labs(title="Le nombre d'individus enregistré par observation reparti dans le temps",
+       subtitle="Données de VisioNature",
+       y="Nombre d’individus")
+
+GeoN%>%
+  ggplot(aes(date_debut, nombre_min))+
+  geom_point()+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red") + 
+  labs(title="Le nombre d'individus enregistré par observation reparti dans le temps",
+       subtitle="Données de GeoNature",
+       y="Nombre d’individus")
+```
+La plupart des observations ne contiennent que un animal mais certains en contiennent plusieurs.\
+
+Il faudrait peut être les prendre en compte, mais les données avec beaucoup d'animaux observés (ex: 400 obs d'un coup) risquent de causer des problèmes pour créer un model.\
+
+Ensuite, on a essayer d'observer les proportions d'espèces dans le temps. Dans "other" il y a toutes les espèces qui reprèsentent moins de 3% des observations de la période.\
+
+```{r, echo=FALSE, out.width="50%"}
+
+VisioN_FB <- VisioN_FB %>%
+  mutate(
+    nom_vernaculaire = as.character(nom_vernaculaire),
+    nom_vernaculaire = ifelse(cd_nom == 61585, "Rat brun", nom_vernaculaire)
+  )
+
+VisioN_FB %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Période",
+    title = "Répartition des differentes espèces observés depuis 1980",
+    y = "Proportion",
+    subtitle = "VisioNature",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+  
+
+
+GeoN %>%
+  filter(date_debut > as.Date("1980-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Période",
+    title = "Répartition des differentes espèces observés depuis 1980",
+    y = "Proportion",
+    subtitle = "GeoNature",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+  
+
+# Depuis 2010
+VisioN_FB %>%
+  filter(date_debut > as.Date("2010-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 2), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Répartition des differentes espèces observés depuis 2010",
+    x = "Période",
+    subtitle = "VisioNature",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()+
+  scale_fill_discrete(labels = label_wrap(40))+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+  
+
+
+GeoN %>%
+  filter(date_debut > as.Date("2010-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date_debut, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 2), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Répartition des differentes espèces observés depuis 2010",
+    subtitle = "GeoNature",
+    x = "Période",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d()+  
+  scale_x_discrete(labels = label_wrap(40))+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+  
+```
+
+\
+
+On remarque que depuis les années 1980, il semble avoir de moins en moins de "other" donc d'espèces peu présentes. Les principales espèces sont peut être de plus en plus dominantes. 
 
 ## 3. Répresentation cartographique des données
 
 ```{r cartes-densite}
-# GeoNature
 
+# Carte bretagne
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
+carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
+carte_bretagne <- st_set_crs(carte_bretagne, 2154)
+carte_bretagne <- st_transform(carte_bretagne, 4326)
+
+
+# GeoNature
 GeoN_sf <- st_as_sf(GeoN, 
                   coords = c("x_centroid_4326", "y_centroid_4326"), 
                   crs = 4326)
@@ -187,11 +298,10 @@ grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densité des observations en bretagne",
-       subtitle = "GeoNature avec îles") +
+       subtitle = "GeoNature") +
   geom_sf(data = grid_sf, aes(fill = density)) +
   scale_fill_gradient(low="gray97", high="gray15") +
   theme_bw()
-# C'est pas sizun le gros point noir?
 
 # VisioNature
 VisioN_FB_sf <- st_as_sf(VisioN_FB, 
@@ -204,13 +314,15 @@ grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densité des observations en bretagne",
-       subtitle = "VisioNature avec îles") +
+       subtitle = "VisioNature") +
   geom_sf(data = grid_sf, aes(fill = density)) +
   scale_fill_gradient(low="grey97", high="gray15") +
   theme_bw()
 ```
 
-Les deux points avec une très forte densité sont probablement dues a nos deux principaux contributeurs (voir la partie), donc on décide de les supprimer pour voir.
+On croit remarquer un lieu avec une forte densité proche de Sizun dans la BDD GeoNature. On remarque aussi que les observations ont lieu surtout au nord-ouest de la bretatgne et au sud entre le morbihan et l'ille et vilaine.\
+
+Dans VisioNature, on a deux points avec une très forte densité sont probablement dues a nos deux principaux contributeurs (voir la partie 4), donc on décide de les supprimer pour voir.
 
 ```{r}
 VisioN_FB_modif <- VisioN_FB%>%
@@ -228,15 +340,14 @@ grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densité des observations en bretagne",
-       subtitle = "VisioNature avec îles, sans Daniel et Martine") +
+       subtitle = "VisioNature, sans les deux principaux observateurs") +
   geom_sf(data = grid_sf, aes(fill = density)) +
   scale_fill_gradient(low="grey97", high="gray15") +
   theme_bw()
 
 ```
 
-
-```{r carte-bzh-geonat-visionat}
+```{r, fig.width=10, fig.height=7}
 # Carte bretagne
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
 carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
@@ -253,7 +364,80 @@ VisioN_sf <- VisioN_FB %>%
                crs = sf::st_crs(4326))
 
 GeoN_sf <- GeoN %>%
-  filter(date_debut > as.Date("2010-01-01")) %>%
+  dplyr::select(x_centroid_4326,
+                y_centroid_4326,
+                ordre,
+                date_debut) %>% 
+  sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+               crs = sf::st_crs(4326))
+
+ordres <- unique(VisioN_sf$ordre)
+
+grid <- st_make_grid(carte_bretagne, cellsize = c(0.12, 0.09)) %>%
+  st_sf() %>%
+  st_set_crs(4326)
+
+# VisioNature
+grid_list <- map(ordres, function(o) {
+  vis_ord <- VisioN_sf %>% filter(ordre == o)
+  grid_tmp <- grid
+  grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
+  grid_tmp$ordre <- o
+  grid_tmp
+})
+grid_sf <- bind_rows(grid_list)
+grid_sf <- st_intersection(grid_sf, carte_bretagne)
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Densité des observations en bretagne selon les ordres",
+       subtitle = "VisioN_sf") +
+  geom_sf(data = grid_sf, aes(fill = density), color = NA) +
+  scale_fill_gradient(low="gray90", high="gray15") +
+  theme_bw() +
+  facet_grid(. ~ ordre)
+
+# GeoNature
+grid_list <- map(ordres, function(o) {
+  vis_ord <- GeoN_sf %>% filter(ordre == o)
+  grid_tmp <- grid
+  grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
+  grid_tmp$ordre <- o
+  grid_tmp
+})
+grid_sf <- bind_rows(grid_list)
+grid_sf <- st_intersection(grid_sf, carte_bretagne)
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Densité des observations en bretagne selon les ordres",
+       subtitle = "GeoNature") +
+  geom_sf(data = grid_sf, aes(fill = density), color = NA) +
+  scale_fill_gradient(low="gray90", high="gray15") +
+  theme_bw() +
+  facet_grid(. ~ ordre)
+
+
+```
+
+
+
+```{r carte-bzh-geonat-visionat, fig.width=10, fig.height=7}
+
+# Carte bretagne
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
+carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
+carte_bretagne <- st_set_crs(carte_bretagne, 2154)
+carte_bretagne <- st_transform(carte_bretagne, 4326)
+
+# Données geographique
+VisioN_sf <- VisioN_FB %>% 
+  dplyr::select(x_centroid_4326,
+                y_centroid_4326,
+                ordre,
+                date_debut) %>% 
+  sf::st_as_sf(coords = c("x_centroid_4326", "y_centroid_4326"),
+               crs = sf::st_crs(4326))
+
+GeoN_sf <- GeoN %>%
   dplyr::select(x_centroid_4326,
                 y_centroid_4326,
                 ordre,
@@ -276,61 +460,11 @@ ggplot() +
   theme_bw() + facet_grid(. ~ ordre)
 
 ```
+\
 
-```{r}
-ordres <- unique(VisioN_sf$ordre)
+On dirait que plus on avance dans les années, plus on retrouve des indivius aux sud de la bretagne. Ceci est car nous avons plus de données de VisioNature au fil du temps qui provient d'ornithologues. Les ornithologues sont souvent plus au sud de la bretagne.\
 
-# VisioNature
-grid_list <- map(ordres, function(o) {
-  vis_ord <- VisioN_sf %>% filter(ordre == o)
-  grid_tmp <- grid
-  grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
-  grid_tmp$ordre <- o
-  grid_tmp
-})
-grid_sf <- bind_rows(grid_list)
-grid_sf <- st_intersection(grid_all, carte_bretagne)
-ggplot() +
-  geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne",
-       subtitle = "VisioN_sf") +
-  geom_sf(data = grid_sf, aes(fill = density), color = NA) +
-  scale_fill_gradient(low="gray90", high="gray15") +
-  theme_bw() +
-  facet_grid(. ~ ordre)
-
-# GeoNature
-grid_list <- map(ordres, function(o) {
-  vis_ord <- GeoN_sf %>% filter(ordre == o)
-  grid_tmp <- grid
-  grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
-  grid_tmp$ordre <- o
-  grid_tmp
-})
-grid_sf <- bind_rows(grid_list)
-grid_sf <- st_intersection(grid_all, carte_bretagne)
-ggplot() +
-  geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne",
-       subtitle = "GeoNature") +
-  geom_sf(data = grid_sf, aes(fill = density), color = NA) +
-  scale_fill_gradient(low="gray90", high="gray15") +
-  theme_bw() +
-  facet_grid(. ~ ordre)
-
-
-```
-
-https://www.data.gouv.fr/fr/datasets/departements-de-louest/  <- ref de ma carte
-Peut etre regarder les espèces a travers les années?
-Comme on commence 2010, -> 2010-2015, 2015-2020, 2020-2025
-
-
-En vrai ca veut pas dire  trop grand chose, on savait qu'on voyait en tout moins d'animaux avec les années donc logique ca se réflète ici aussi (Sutout bcp + en T1)
-On voit quand même un peu de déplacements.
-
-je prends la BDD avec toutes les données et je selectionne "aléatoirement" 40 000 ou 50 000 données avec les proportions.
-
+Je prends la BDD avec toutes les données et je selectionne 40 000 ou 50 000 données avec les proportions.\
 
 Pour info, la graine aléatoire est figée a 12345.
 
@@ -388,11 +522,12 @@ graph_ordre_tranche_annee("Lagomorpha")
 graph_ordre_tranche_annee("Rodentia")
 ```
 
+On remarque que on ne retrouve pas la même répartition 
 
+## Répartition des ordres
+Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformement les 4 autres ordres. On se dit que c'est peut être du au fort intéret de GMB pour la loutre, mais pas tant que ca le cas (voir figure de la répartition des ordres sans le loutres)
 
-## REPARTITION DES ORDRES
-Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformement les 4 autres ordres. On se dit que c'est peut être du au fort intéret de GMB pour la loutre, mais pas tant que ca le cas (voir figure de la répartition des ordres sans le loutres.s)
-```{r repartition-des-ordes}
+```{r repartition-des-ordes, echo=FALSE, out.width="50%"}
 GeoN %>%
   ggplot(aes(ordre))+
   geom_bar()+
@@ -411,7 +546,7 @@ Total_B %>%
   ggplot(aes(ordre))+
   geom_bar()+
   labs(title="Répartition des differents ordres",
-       subtitle="Total_B")+
+       subtitle="Total Bretagne")+
   theme_bw()
 
 GeoN %>%
@@ -422,9 +557,9 @@ GeoN %>%
        subtitle="GeoNature sans les loutres")+
   theme_bw()
 ```
-On s'est demandé a quoi ressemblerait la répartition des ordres sans la loutre car elle est une espèce dont se préoccupent beaucoup le GMB.
+On s'est demandé a quoi ressemblerait la répartition des ordres sans la loutre car elle est une espèce dont se préoccupe beaucoup le GMB. Ca ne change pas drastiquement la distribution.
 
-```{r repartition-especes}
+```{r repartition-especes, fig.width=10, fig.height=7}
 
 VisioN_FB %>%
   count(nom_vernaculaire, ordre, sort = TRUE) %>%
@@ -469,7 +604,14 @@ GeoN %>%
 ```
 
 
-## 4. Etude ds principaux observateurs
+## 4. Etude des principaux observateurs
+
+Etudier les principaux observateurs peut être important parce qu'ils participent grandement au receuil des données donc un changement de leur comportement implique également un changement du comportement de la base de donnée.
+
+Ils pourraient introduire des biais:\
+- pour un endroit du territoire, s'ils log toujours au même endroit\
+- pour une espece, s'ils sont intéressé par une espèce\
+- en enregistrant pendant une durée précise dans le temps\
 
 
 ```{r nombre-total-observateurs}
@@ -479,11 +621,11 @@ GeoN %>%
 VisioN_FB %>% 
   summarize(nb_observateurs = n_distinct(observateurs))
 ```
-Pour GeoNature, il y a en tout 2778 observateurs qui peuvent être une ou 2 personnes
+Pour GeoNature, il y a en tout 2778 observateurs qui peuvent être une ou 2 personnes. Certains observateurs sont anonymes et sont attribués un code.\
 
-Pour VisioNature, il y a 3662 observateurs. 1813 des observations n'ont pas d'observateurs attribué.
+Pour VisioNature, il y a 3662 observateurs. 1813 des observations n'ont pas d'observateurs attribué.\
 
-On transforme tous les noms en majuscule pour éviter des pb si on regroupe les BDD par la suite.
+On transforme tous les noms en majuscule pour éviter des problèmes.\
 
 ```{r modif-données, include = FALSE}
 VisioN_FB <- VisioN_FB %>%
@@ -496,6 +638,8 @@ VisioN_FB <- VisioN_FB %>%
 GeoN <- GeoN %>% 
   mutate(observateurs = toupper(observateurs))
 ```
+
+On cherche les observateurs qui ont le plus contribué aux deux bases de données.\
 
 ```{r lollipop-plot-observateurs}
 GeoN_summary <- GeoN %>%
@@ -533,22 +677,14 @@ ggplot(VisioN_summary, aes(x=observateurs, y=nbr_obs_obr)) +
   labs(title="Lollipop plot des principaux observateurs",
        subtitle="VisioNature")+
   theme_bw()
-
 ```
 
+On remarque qu'on a bien des observateurs avec un très grand nombre d'observations.
+On ne sait pas si deleted deleted est un observateur. On peut imaginer que c'est les observations de tous les membres qui ont supprimés leurs comptes.
 
-Il faudra faire gaffe a pas biaser les résultats car certains participe très grandement au receuil des données donc un changement de leur comportement implique également un changement du comportement de la base de donnée
+Pour étudier facilement leur données, on créer une fonction qui donne rapidement quelques graphiques.
 
- Regarder les dates des principaux observateurs ainsi que leurs espèces, et les lieux?
-- des biais pour un endroit du territoire?
-- des biais pour une espece?
-- déplacement donc refletement dans les observations?
-- Arrêt des déclarations pendant un moment?
-
-On se dit peut etre que les gros observateurs sont ceux avec plus de 1500 observations?
-Faire des fonctions qui permettent d'étudier simplement ces cas.
-
-```{r stats-observateur}
+```{r stats-observateur, fig.width=10, fig.height=7}
 stats_observateur <- function(nom_obs, bdd, carte){
   
   # Date
@@ -574,7 +710,8 @@ stats_observateur <- function(nom_obs, bdd, carte){
     geom_bar() + 
     labs(title = "Répartition des differents ordres", 
          subtitle = paste("Données de ", toupper(nom_obs))) +
-    theme_bw()
+    theme_bw()+
+    theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
   
   # Carte
   geo_obsteur <- bdd %>% 
@@ -619,8 +756,6 @@ stats_observateur(nom_obs="deleted deleted",
                   bdd=VisioN_FB, 
                   carte=carte_bretagne)
 
-# Probablement tous les comptes qui ont été supprimés donc si important. -> plusieurs personnes
-
 stats_observateur(nom_obs="simonnet franck", 
                   bdd=GeoN, 
                   carte=carte_bretagne)
@@ -631,19 +766,7 @@ stats_observateur(nom_obs="le campion thomas",
 
 ```
 
-
-Les données de VisioNature sont - aléatoires que c'elle de GeoNature..
-Biaisé a cause de eux ou alors simplement + de données a ces endroits là?
-....
-
-On retire les îles a l'aide d'une intersection avec notre BDD et une maps de la bretagne continentale sur QGIS. On se retrouve avec: 
-
-VisioNature obs supprimés:
-```{r}
-82344-79064
-```
-
-GeoNature obs supprimés:
-```{r}
-82344-79064
-```
+On remarque:
+- BELLIER DANIEL observe beaucoup de rongeurs autour de Rennes.
+- CHAPUIS MARTINE observe uniquement a un endroit précis.
+- DELETED DELETED, semble être surtout dans le finistère ce qui est étonnant si on se dit que c'est plusieurs personnes.
