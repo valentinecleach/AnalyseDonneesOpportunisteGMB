@@ -2,18 +2,6 @@ To do:
 
 Priorité
 
-- ajouter les nvles bdd avec rodents
-
-- Corriger/Améliorer les geom_bar(position = "fill") 
- des differentes proportion des espèces par an. 
- Cmt faire pour rentrer toutes les espèces proprement?
- Cmt définir les périodes?
--> Mettre les principaux puis "autres"
-
-- Tout rentre propre
-
-- Envoyer résultats Lundi a Pascal et demander réu dans la semaine..  
-
 - travail sur les especes
 - cartographie non pas avec les points mais la densité par secteurs
 
@@ -22,5 +10,3 @@ Priorité
 - corrélations entre les variables? 
 
 Tester rpubs / apprendre a utiliser 
-
-Contacter Marie-Pierre Etienne. 
