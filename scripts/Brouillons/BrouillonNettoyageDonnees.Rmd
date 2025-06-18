@@ -1,0 +1,102 @@
+# Nettoyage des données
+
+```{r, include = FALSE}
+# Packages
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringi)
+library(sf)
+```
+
+```{r}
+GeoN <- GeoN %>%
+  filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
+  mutate(
+    # Vison
+    nom_vernaculaire = ifelse(cd_nom==194944, 
+                              "Vison d'Europe, Vison, Petite loutre, Putois d'eau",
+                              nom_vernaculaire),
+    cd_nom = ifelse(cd_nom==194944, 60704, cd_nom),
+    # Ecureuil
+    nom_vernaculaire = ifelse(cd_nom==197486, 
+                              "Écureuil roux", 
+                              nom_vernaculaire),
+    cd_nom = ifelse(cd_nom==197486, 61153, cd_nom),
+    # Martre
+    nom_vernaculaire = ifelse(cd_nom==194481, 
+                              "Martre des pins, Martre", 
+                              nom_vernaculaire),
+    cd_nom = ifelse(cd_nom==194481, 60658, cd_nom),
+    # Rat
+    nom_vernaculaire = ifelse(cd_nom==61585, 
+                              "Rat brun", 
+                              nom_vernaculaire),
+    nom_vernaculaire = ifelse(cd_nom==197057, 
+                              "Rat Fischer", 
+                              nom_vernaculaire)
+  )%>%
+  filter(cd_nom != 194928)%>%
+  mutate(nombre = ifelse(nombre_max != nombre_min, 
+                         median(c(nombre_max,nombre_min)),
+                         nombre_min)
+  )%>%
+  mutate(technique_observation = ifelse(
+    technique_observation %in% c("Fèces/Guano/Epreintes", 
+                                 "Empreintes", "Coulée",
+                                 "Galerie/terrier", 
+                                 "Hutte (Castor, Rat musqué)", "Nid/Gîte",
+                                 "Indices de présence divers",
+                                 "Restes de repas",
+                                 "Empreintes et fèces",
+                                 "Restes dans pelote de réjection"
+    ),
+    "Indices",
+    ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
+           "Entendu/Ultasons",
+           technique_observation)
+  ))%>%
+  mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
+                                  "Non renseigné", etat_biologique))%>%
+  #  filter(!jdd_nom %in% c(490,53))%>% 
+  # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
+  # 53:  Données faunebretagne.org 
+  mutate(date = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         technique_observation,
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom),
+         nom_valide = as.factor(nom_valide),
+         nom_vernaculaire = as.factor(nom_vernaculaire),
+         technique_observation = as.factor(technique_observation))%>%
+  select("id_synthese",
+         "date",
+         "cd_nom",
+         "nom_valide",	"nom_vernaculaire",
+         "ordre",
+         "famille",	"rang_taxo",
+         "nombre",
+         "observateurs",
+         "communes",	
+         "geometrie_wkt_4326",	
+         "x_centroid_4326",
+         "y_centroid_4326",
+         "comment_occurrence",
+         "technique_observation",
+         "etat_biologique")
+
+donnees_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
+                                 delim = ";", 
+                                 escape_double = FALSE,
+                                 trim_ws = TRUE)
+VN_Rodentia <- read_delim("GN_compl_Rodentia_2025-06-13T14_06_22.043Z.csv",
+                                  delim = ";", 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)
+
+VisioN_FB <- rbind(donnees_VisioNature_FB, VN_Rodentia)
+
+```
+

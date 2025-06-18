@@ -268,7 +268,9 @@ GeoRodents <- data_original_GeoRodents%>%
          etat_biologique=as.factor(etat_biologique),
          jdd_nom = as.factor(jdd_nom)
   )%>%
-  filter(jdd_nom !=  "Données faunebretagne.org" )%>%
+#  filter(!jdd_nom %in% c(490,53))%>% 
+           # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
+           # 53:  Données faunebretagne.org   
   mutate(
     nom_vernaculaire = ifelse(
       is.na(nom_vernaculaire),
@@ -299,7 +301,7 @@ GeoRodents <- data_original_GeoRodents%>%
   mutate(technique_observation = as.factor(technique_observation))
 ```
 
-Création d'une base de données commune avec tous les départements (22, 29, 34, 56, 44 et les rodents) :
+Création d'une base de données commune avec tous les départements (22, 29, 34, 56, et les rodents) :
 ```{r}
 GeoN <- rbind(GeoN_22_29, GeoN_34_56, GeoN_44, GeoRodents)
 ```

@@ -4,7 +4,8 @@ date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   bookdown::html_document2:
     toc: true
-    toc_float: true
+    toc_float: true*
+    ann
 ---
 
 # Statistiques descriptives
@@ -33,6 +34,11 @@ setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/bretagne_conti")
 Total_B <- read_csv("Total_B_Conti.csv")
 GeoN <- read_csv("GeoN_Conti.csv")
 VisioN_FB <- read_csv("VisioN_FB_Conti.csv")
+
+# Couleurs
+couleur <- c("red", "green", "orange", "pink", "blue")
+ordres <- c("Carnivora", "Cetartiodactyla", "Eulipotyphla", "Lagomorpha", "Rodentia")
+
 ```
 Toutes nos données concernent uniquement la Bretagne continentale.
 
@@ -46,7 +52,7 @@ VisioN_FB%>%
   scale_fill_grey(start = 0.2,
                   end = 0.8, 
                   na.value = "red")+
-  labs(title = "Répartition de l'état biologique selon les techniques d'observations",
+  labs(title = "1a. Répartition de l'état biologique selon les techniques d'observations",
        subtitle = "Données de VisioNature")
 
 GeoN%>%
@@ -57,7 +63,7 @@ GeoN%>%
   scale_fill_grey(start = 0.2,
                   end = 0.8, 
                   na.value = "red")+
-  labs(title = "Répartition de l'état biologique selon les techniques d'observations",
+  labs(title = "1b. Répartition de l'état biologique selon les techniques d'observations",
        subtitle = "Données de GeoNature")
 ```
 Nous remarquons toujours beaucoup de données de VisioNature dont la technique d'observation est inconnue.
@@ -67,22 +73,18 @@ VisioN_FB%>%
   ggplot(aes(technique_observation, fill=ordre))+
   geom_bar(position="dodge")+
   theme_bw()+
-  scale_fill_grey(start = 0.2,
-                  end = 0.8, 
-                  na.value = "red")+
-  labs(title = "Répartition de l'état biologique selon les ordres",
-       subtitle = "Données de VisioNature")
+  labs(title = "2a. Répartition de l'état biologique selon les ordres",
+       subtitle = "Données de VisioNature")+
+  scale_fill_manual(values = couleur, limits = ordres, name = "Ordre")
 
 GeoN%>%
   ggplot(aes(technique_observation, 
              fill=ordre))+
   geom_bar(position="dodge")+
   theme_bw()+
-  scale_fill_grey(start = 0.2,
-                  end = 0.8, 
-                  na.value = "red")+
-  labs(title = "Répartition de l'état biologique selon les ordres",
-       subtitle = "Données de GeoNature")
+  labs(title = "2b. Répartition de l'état biologique selon les ordres",
+       subtitle = "Données de GeoNature")+
+  scale_fill_manual(values = couleur, limits = ordres, name = "Ordre")
 ```
 GeoNature observe principalement des indices de rodents et de carnivores. Les lagomorphes sont peu remarqués avec les indices, comparés aux autres dans VisioNature et GeoNature.
 
@@ -104,34 +106,39 @@ VisioN_FB <- VisioN_FB %>%
 Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformément les 4 autres ordres. C’est peut-être dû au fort intérêt de GMB pour la loutre, mais ce n’est pas tant le cas que ça (voir figure de la répartition des ordres sans le loutres)
 
 ```{r repartition-des-ordes, echo=FALSE, out.width="50%"}
-GeoN %>%
-  ggplot(aes(ordre))+
-  geom_bar()+
-  labs(title="Répartition des differents ordres",
-       subtitle="GeoN")+
-  theme_bw()
 
 VisioN_FB %>%
   ggplot(aes(ordre))+
   geom_bar()+
-  labs(title="Répartition des differents ordres",
+  labs(title="3a. Répartition des differents ordres",
        subtitle="VisioN_FB")+
-  theme_bw()
+  theme_bw()+
+  scale_fill_manual(values = couleur, limits = ordres, name = "Ordre")
+
+GeoN %>%
+  ggplot(aes(ordre))+
+  geom_bar()+
+  labs(title="3b. Répartition des differents ordres",
+       subtitle="GeoN")+
+  theme_bw()+
+  scale_fill_manual(values = couleur, limits = ordres, name = "Ordre")
 
 Total_B %>%
   ggplot(aes(ordre))+
   geom_bar()+
-  labs(title="Répartition des differents ordres",
+  labs(title="3c. Répartition des differents ordres",
        subtitle="Total Bretagne")+
-  theme_bw()
+  theme_bw()+
+  scale_fill_manual(values = couleur, limits = ordres, name = "Ordre")
 
 GeoN %>%
   filter(cd_nom != 60630)%>%
   ggplot(aes(ordre))+
   geom_bar()+
-  labs(title="Répartition des differents ordres",
+  labs(title="3d. Répartition des differents ordres",
        subtitle="GeoNature sans les loutres")+
-  theme_bw()
+  theme_bw()+
+  scale_fill_manual(values = couleur, limits = ordres, name = "Ordre")
 ```
 Nous nous sommes demandés à quoi ressemblerait la répartition des ordres sans la loutre car elle est une espèce dont le GMB se préoccupe beaucoup. Ca ne change pas drastiquement la distribution.
 
@@ -463,7 +470,8 @@ GeoN_sf <- GeoN %>%
 
 ordres <- unique(VisioN_sf$ordre)
 
-grid <- st_make_grid(carte_bretagne, cellsize = c(0.12, 0.09)) %>%
+grid <- st_make_grid(carte_bretagne, 
+                     cellsize = c(0.12, 0.09)) %>%
   st_sf() %>%
   st_set_crs(4326)
 
