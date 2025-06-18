@@ -226,3 +226,259 @@ GeoN %>%
   ) +
   theme_minimal()+
   scale_fill_viridis_d()
+
+
+summary(as.factor(VisioN_FB$ordre))
+
+
+summary(GeoN)
+
+id_synthèse
+date_debut
+nom_valide
+nom_vernaculaire
+ordre
+famille
+rang_taxo
+nombre_min
+observateurs
+communes
+geometrie_wkt_4326 
+x_centroid_4326
+y_centroid_4326
+comment_occurrence 
+niveau_validation    
+technique_observation
+etat_biologique
+
+summary(as.factor(GeoN$niveau_validation))
+
+summary(VisioN_FB)summacomment_occurrencery(VisioN_FB)
+
+GeoN %>%
+  filter(niveau_validation == "Douteux")%>%
+  select(nom_vernaculaire, date_debut, observateurs, nombre_min)
+# Supression : 6 niveau validation == Invalide, 2 Douteux
+
+GeoN %>%
+  filter(cd_nom == 194481)%>%
+  select(nom_valide)
+
+Martre des pins
+
+t <- GeoN %>%
+  filter(ordre=="Carnivora")%>%
+  select(nom_vernaculaire)
+
+summary(as.factor(t$nom_vernaculaire))
+
+GeoN%>%
+  filter(nom_vernaculaire == "Martre des pins, Martre")%>%
+  select(ordre, cd_nom)
+
+GeoN%>%
+  select
+GeoN%>%
+  filter(nom_vernaculaire == "Écureuil roux")
+
+GeoN%>%
+  mutate(nom_vernaculaire = ifelse(cd_nom==194944, 
+                                   "Vison d'Europe, Vison, Petite loutre, Putois d'eau",
+                                   nom_vernaculaire),
+         cd_nom = ifelse(cd_nom==194944, 
+                         60704, 
+                         cd_nom),
+         nom_vernaculaire = ifelse(cd_nom==197486, 
+                                   "Écureuil roux", 
+                                   nom_vernaculaire),
+         cd_nom = ifelse(cd_nom==197486, 
+                         61153, 
+                         cd_nom)
+         nom_vernaculaire = ifelse(cd_nom==194481, 
+                                   "Martre des pins, Martre", 
+                                   nom_vernaculaire),
+         cd_nom = ifelse(cd_nom==194481, 
+                         60658, 
+                         cd_nom)
+         
+           )
+
+GeoN%>%
+  filter(nom_valide == nom_vernaculaire,
+         cd_nom != 194481)%>%
+  select(nom_valide, cd_nom)
+GeoN%>%
+  filter(nom_vernaculaire == "Vison d'Europe, Vison, Petite loutre, Putois d'eau")%>%
+  select(cd_nom, nom_valide)
+GeoN%>%
+  filter(cd_nom == 194928)%>%
+  select(observateurs, communes, niveau_validation)
+  
+
+Martes
+194481
+194928 
+194944 
+197486 
+
+
+# Packages
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringi)
+library(sf)
+
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
+data_original_22_29 <- read_delim("GeoN_22-29_2025-06-05T09_18_37.225Z.csv", 
+                                  delim = ";", 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)
+problems()
+
+data_original_35_56 <- read_delim("GeoN_35-56_2025-06-05T09_21_08.380Z.csv", 
+                                  delim = ";", 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)
+
+data_original_GeoRodents <- read_delim("VN_compl_Rodentia_2025-06-13T14_05_03.107Z.csv", 
+                                       delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+GeoN <- rbind(data_original_22_29, 
+              data_original_35_56, 
+              data_original_GeoRodents)
+
+GeoN <- GeoN %>%
+  filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
+  mutate(
+    # Vison
+    nom_vernaculaire = ifelse(cd_nom==194944, 
+                              "Vison d'Europe, Vison, Petite loutre, Putois d'eau",
+                              nom_vernaculaire),
+    cd_nom = ifelse(cd_nom==194944, 60704, cd_nom),
+    # Ecureuil
+    nom_vernaculaire = ifelse(cd_nom==197486, 
+                              "Écureuil roux", 
+                              nom_vernaculaire),
+    cd_nom = ifelse(cd_nom==197486, 61153, cd_nom),
+    # Martre
+    nom_vernaculaire = ifelse(cd_nom==194481, 
+                              "Martre des pins, Martre", 
+                              nom_vernaculaire),
+    cd_nom = ifelse(cd_nom==194481, 60658, cd_nom),
+    # Rat
+    nom_vernaculaire = ifelse(cd_nom==61585, 
+                              "Rat brun", 
+                              nom_vernaculaire),
+    nom_vernaculaire = ifelse(cd_nom==197057, 
+                              "Rat Fischer", 
+                              nom_vernaculaire)
+  )%>%
+  filter(cd_nom != 194928)%>%
+  mutate(nombre = ifelse(nombre_max != nombre_min, 
+                         median(c(nombre_max,nombre_min)),
+                         nombre_min)
+  )%>%
+  mutate(technique_observation = ifelse(
+    technique_observation %in% c("Fèces/Guano/Epreintes", 
+                                 "Empreintes", "Coulée",
+                                 "Galerie/terrier", 
+                                 "Hutte (Castor, Rat musqué)", "Nid/Gîte",
+                                 "Indices de présence divers",
+                                 "Restes de repas",
+                                 "Empreintes et fèces",
+                                 "Restes dans pelote de réjection"
+    ),
+    "Indices",
+    ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
+           "Entendu/Ultasons",
+           technique_observation)
+  ))%>%
+  mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
+                                  "Non renseigné", etat_biologique))%>%
+  #  filter(!jdd_nom %in% c(490,53))%>% 
+  # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
+  # 53:  Données faunebretagne.org 
+  mutate(date = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         technique_observation,
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom),
+         nom_valide = as.factor(nom_valide),
+         nom_vernaculaire = as.factor(nom_vernaculaire),
+         technique_observation = as.factor(technique_observation))%>%
+  select("id_synthese",
+         "date",
+         "cd_nom",
+         "nom_valide",	"nom_vernaculaire",
+         "ordre",
+         "famille",	"rang_taxo",
+         "nombre",
+         "observateurs",
+         "communes",	
+         "geometrie_wkt_4326",	
+         "x_centroid_4326",
+         "y_centroid_4326",
+         "comment_occurrence",
+         "technique_observation",
+         "etat_biologique")
+
+
+
+donnees_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
+                                     delim = ";", 
+                                     escape_double = FALSE,
+                                     trim_ws = TRUE)
+VN_Rodentia <- read_delim("GN_compl_Rodentia_2025-06-13T14_06_22.043Z.csv",
+                          delim = ";", 
+                          escape_double = FALSE, 
+                          trim_ws = TRUE)
+
+VisioN_FB <- rbind(donnees_VisioNature_FB, VN_Rodentia)
+summary(VisioN_FB)
+
+VisioN_FB <- VisioN_FB %>%
+  filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
+  filter(technique_observation != "Restes dans pelote de réjection")%>%
+  mutate(technique_observation = ifelse(
+    !is.na(comment_occurrence) & technique_observation == "Inconnu",
+    ifelse(any(grepl("TAUPINIERE", toupper(gsub("[[:punct:]]", 
+                                                "", 
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  "Latin-ASCII")))),
+               grepl("EMPREINTES", toupper(gsub(":punct:]]",
+                                                "",
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  "Latin-ASCII")))),
+               grepl("TRACE", toupper(gsub(":punct:]]",
+                                           "",
+                                           stri_trans_general(
+                                             comment_occurrence, 
+                                             "Latin-ASCII"))))),
+           "Indices",
+           technique_observation),
+    technique_observation))
+
+summary(as.factor(VisioN_FB$niveau_validation))
+summary(VisioN_FB)
+
+    select("id_synthese",
+         "date",
+         "cd_nom",
+         "nom_valide",	"nom_vernaculaire",
+         "ordre",
+         "famille",	"rang_taxo",
+         "nombre",
+         "observateurs",
+         "communes",	
+         "geometrie_wkt_4326",	
+         "x_centroid_4326",
+         "y_centroid_4326",
+         "comment_occurrence",
+         "technique_observation",
+         "etat_biologique")
+
