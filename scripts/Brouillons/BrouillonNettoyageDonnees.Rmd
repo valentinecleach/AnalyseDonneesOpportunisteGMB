@@ -1,6 +1,14 @@
-# Nettoyage des données
+---
+title: "Nettoyage des données opportunistes du GMB"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+---
 
-```{r, include = FALSE}
+
+```{r importations}
 # Packages
 library(readr)
 library(ggplot2)
@@ -9,13 +17,12 @@ library(stringi)
 library(sf)
 ```
 
-```{r}
+```{r nettoyage-contenue}
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
 data_original_22_29 <- read_delim("GeoN_22-29_2025-06-05T09_18_37.225Z.csv", 
                                   delim = ";", 
                                   escape_double = FALSE, 
                                   trim_ws = TRUE)
-problems()
 
 data_original_35_56 <- read_delim("GeoN_35-56_2025-06-05T09_21_08.380Z.csv", 
                                   delim = ";", 
@@ -174,10 +181,51 @@ VisioN_FB <- VisioN_FB %>%
 
 Total <- rbind(VisioN_FB, GeoN)
 
-summary(Total)
 any(duplicated(Total))
+```
 
-write.csv(Total,
-          "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
+Maintenant on nettoie selon les coordonnées géographiques:
+- suppréssion des rongeurs en Loire Atlantique
+- suppréssion des îles 
+
+```{r nettoyage-cartographique}
+Total_sf <- st_as_sf(Total,
+                     coords = c("x_centroid_4326", "y_centroid_4326"), 
+                     crs = 4326)
+CRS = st_crs(Total_sf)
+
+#importation des cartes
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale")
+carte_bretagne_44 <- st_read("Masque_Bretagne_Continentale.shp")
+carte_bretagne_44 <- st_transform(carte_bretagne_44, 2154)
+carte_bretagne_44 <- st_buffer(carte_bretagne_44, dist = 200)
+carte_bretagne_44  <- st_transform(carte_bretagne_44, st_crs(CRS))
+
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44")
+carte_44 <- st_read("Masque44.shp")
+carte_44 <- st_transform(carte_44, 2154)
+carte_44 <- st_buffer(carte_44, dist = 200) 
+# Il nous manquera peut être qqes données entre le 44 et le 35 mais j'espère pas trop grave?
+carte_44 <- st_transform(carte_44, st_crs(CRS))
+
+
+#filtre
+total_bretagne_44 <- st_filter(Total_sf, carte_bretagne_44, .predicate = st_within)
+total_44 <- st_filter(Total_sf, carte_44, .predicate = st_within)
+total_44_id_synthese <- total_44 %>%
+  st_drop_geometry() %>%
+  select(id_synthese)
+only_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
+
+# Verifications
+ggplot() +
+  geom_sf(data = carte_bretagne_44) +
+  geom_sf(data = only_bretagne) +
+  labs(title = "Points in Bretagne (sauf 44)")
+
+Total_Conti <- only_bretagne %>%
+  st_drop_geometry()
+
+write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
 ```
 
