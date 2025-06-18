@@ -503,7 +503,6 @@ any(duplicated(Total))
 library(sf)
 library(ggplot2)
 
-
 Total_sf <- st_as_sf(Total,
                      coords = c("x_centroid_4326", "y_centroid_4326"), 
                      crs = 4326)
@@ -512,21 +511,27 @@ CRS = st_crs(Total_sf)
 #importation des cartes
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale")
 carte_bretagne_44 <- st_read("Masque_Bretagne_Continentale.shp")
-carte_bretagne_44 <- st_transform(carte_bretagne_44, st_crs(CRS))
+carte_bretagne_44 <- st_transform(carte_bretagne_44, 2154)
+carte_bretagne_44 <- st_buffer(carte_bretagne_44, dist = 200)
+carte_bretagne_44  <- st_transform(carte_bretagne_44, st_crs(CRS))
+
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44")
 carte_44 <- st_read("Masque44.shp")
+carte_44 <- st_transform(carte_44, 2154)
+carte_44 <- st_buffer(carte_44, dist = 200) 
+# Il nous manquera peut être qqes données entre le 44 et le 35 mais j'espère pas trop grave?
 carte_44 <- st_transform(carte_44, st_crs(CRS))
+
 
 #filtre
 total_bretagne_44 <- st_filter(Total_sf, carte_bretagne_44, .predicate = st_within)
-# ajouter au dessus une marge.
 total_44 <- st_filter(Total_sf, carte_44, .predicate = st_within)
 total_44_id_synthese <- total_44 %>%
   st_drop_geometry() %>%
   select(id_synthese)
 only_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
 
-# Plot -> verifs?
+# Plot
 ggplot() +
   geom_sf(data = carte_bretagne_44) +
   geom_sf(data = only_bretagne) +
@@ -534,4 +539,71 @@ ggplot() +
 
 Total_Conti <- only_bretagne %>%
   st_drop_geometry()
-summary(Total_Conti)
+
+
+Total <- read_csv("~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
+Total <- Total[-1]
+str(Total)
+
+Total%>%
+  ggplot(aes(technique_observation, fill=etat_biologique))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "1a. Répartition de l'état biologique selon les techniques d'observations")
+
+Total%>%
+  ggplot(aes(technique_observation, fill=etat_biologique))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  coord_flip()+
+  labs(title = "1a. Répartition de l'état biologique selon les techniques d'observations")
+
+Total%>%
+  ggplot(aes(technique_observation, fill=ordre))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  coord_flip()+
+  labs(title = "1a. Répartition de l'état biologique selon les techniques d'observations")
+
+Total %>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
+  geom_col(fill = "grey30") +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw() +
+  theme(
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
+  )
+
+Total%>%
+  filter(date> as.Date("2010-01-01"))%>%
+  ggplot(aes(date))+
+  labs(title="Fréquence des observations dans le temps")+ 
+  theme_bw()+
+  geom_line(stat="density")
+
+Total%>%
+  filter(date> as.Date("2010-01-01"))%>%
+  ggplot(aes(date))+
+  labs(title="Fréquence des observations dans le temps")+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")

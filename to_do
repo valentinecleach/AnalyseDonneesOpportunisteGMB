@@ -2,20 +2,18 @@ To do:
 
 Priorité
 
-- repondre mail
+regarder sur 
+https://stackoverflow.com/questions/48407745/density-plot-based-on-time-of-the-day
+essayer d'adapter par jours par ans.
+
+- corrélation coordonnées et individus
 
 - code couleur
-
 - numéroter figures
-
 - tourner diagrammes en bâton
-
 - sous répertoire R pour fonctions
-
 - communauté des observateurs? Infos dessus?
-
 - cartes interactives avec mapview -> Transformer tous les points en points par couleur selon ordres?
-
 - travail sur les especes
 
 - cartographie non pas avec les points mais la densité par secteurs
@@ -25,3 +23,5 @@ Priorité
 - corrélations entre les variables? 
 
 Tester rpubs / apprendre a utiliser 
+
+
