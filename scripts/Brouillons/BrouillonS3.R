@@ -8,7 +8,7 @@ library(rsample)
 library(patchwork)
 library(scales)
 
-
+######################
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/bretagne_conti")
 Total_B <- read_csv("TotalN_FB_Conti.csv")
 GeoN <- read_csv("GeoN_Conti.csv")
@@ -321,7 +321,7 @@ Martes
 194944 
 197486 
 
-
+######################
 # Packages
 library(readr)
 library(ggplot2)
@@ -396,7 +396,7 @@ GeoN <- GeoN %>%
   ))%>%
   mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
                                   "Non renseigné", etat_biologique))%>%
-  #  filter(!jdd_nom %in% c(490,53))%>% 
+  filter(!jdd_nom %in% c(490,53))%>% 
   # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
   # 53:  Données faunebretagne.org 
   mutate(date = as.Date(date_debut),
@@ -408,7 +408,8 @@ GeoN <- GeoN %>%
          jdd_nom = as.factor(jdd_nom),
          nom_valide = as.factor(nom_valide),
          nom_vernaculaire = as.factor(nom_vernaculaire),
-         technique_observation = as.factor(technique_observation))%>%
+         technique_observation = as.factor(technique_observation),
+         bdd_originale = as.factor("GeoNature"))%>%
   select("id_synthese",
          "date",
          "cd_nom",
@@ -423,9 +424,7 @@ GeoN <- GeoN %>%
          "y_centroid_4326",
          "comment_occurrence",
          "technique_observation",
-         "etat_biologique")
-
-
+         "etat_biologique", "bdd_originale")
 
 donnees_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
                                      delim = ";", 
@@ -437,7 +436,6 @@ VN_Rodentia <- read_delim("GN_compl_Rodentia_2025-06-13T14_06_22.043Z.csv",
                           trim_ws = TRUE)
 
 VisioN_FB <- rbind(donnees_VisioNature_FB, VN_Rodentia)
-summary(VisioN_FB)
 
 VisioN_FB <- VisioN_FB %>%
   filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
@@ -461,15 +459,26 @@ VisioN_FB <- VisioN_FB %>%
                                              "Latin-ASCII"))))),
            "Indices",
            technique_observation),
-    technique_observation))
-
-summary(as.factor(VisioN_FB$niveau_validation))
-summary(VisioN_FB)
-
-    select("id_synthese",
+    technique_observation))%>%
+  mutate(technique_observation = ifelse(technique_observation=="Entendu",
+                                        "Entendu/Ultrasons",
+                                        technique_observation))%>%
+  mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
+         date = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         technique_observation,
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom),
+         nom_valide = as.factor(nom_valide),
+         nom_vernaculaire = as.factor(nom_vernaculaire),
+         technique_observation = as.factor(technique_observation),
+         bdd_originale = as.factor("VisioNature"))%>%
+  select("id_synthese",
          "date",
          "cd_nom",
-         "nom_valide",	"nom_vernaculaire",
+         "nom_valide", "nom_vernaculaire",
          "ordre",
          "famille",	"rang_taxo",
          "nombre",
@@ -480,5 +489,49 @@ summary(VisioN_FB)
          "y_centroid_4326",
          "comment_occurrence",
          "technique_observation",
-         "etat_biologique")
+         "etat_biologique", "bdd_originale")
 
+Total <- rbind(VisioN_FB, GeoN)
+
+summary(Total)
+any(duplicated(Total))
+
+######################
+
+# Carte bretagne
+
+library(sf)
+library(ggplot2)
+
+
+Total_sf <- st_as_sf(Total,
+                     coords = c("x_centroid_4326", "y_centroid_4326"), 
+                     crs = 4326)
+CRS = st_crs(Total_sf)
+
+#importation des cartes
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale")
+carte_bretagne_44 <- st_read("Masque_Bretagne_Continentale.shp")
+carte_bretagne_44 <- st_transform(carte_bretagne_44, st_crs(CRS))
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44")
+carte_44 <- st_read("Masque44.shp")
+carte_44 <- st_transform(carte_44, st_crs(CRS))
+
+#filtre
+total_bretagne_44 <- st_filter(Total_sf, carte_bretagne_44, .predicate = st_within)
+# ajouter au dessus une marge.
+total_44 <- st_filter(Total_sf, carte_44, .predicate = st_within)
+total_44_id_synthese <- total_44 %>%
+  st_drop_geometry() %>%
+  select(id_synthese)
+only_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
+
+# Plot -> verifs?
+ggplot() +
+  geom_sf(data = carte_bretagne_44) +
+  geom_sf(data = only_bretagne) +
+  labs(title = "Points in Bretagne (sauf 44)")
+
+Total_Conti <- only_bretagne %>%
+  st_drop_geometry()
+summary(Total_Conti)
