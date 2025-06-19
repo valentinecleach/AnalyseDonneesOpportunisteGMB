@@ -91,13 +91,14 @@ GeoN <- GeoN %>%
          cd_nom = as.factor(cd_nom),
          ordre = as.factor(ordre),
          famille = as.factor(famille),
-         technique_observation,
          etat_biologique=as.factor(etat_biologique),
          jdd_nom = as.factor(jdd_nom),
          nom_valide = as.factor(nom_valide),
          nom_vernaculaire = as.factor(nom_vernaculaire),
          technique_observation = as.factor(technique_observation),
-         bdd_originale = as.factor("GeoNature"))%>%
+         bdd_originale = as.factor("GeoNature"),
+         observateurs = toupper(observateurs)
+         )%>%
   select("id_synthese",
          "date",
          "cd_nom",
@@ -156,13 +157,13 @@ VisioN_FB <- VisioN_FB %>%
          cd_nom = as.factor(cd_nom),
          ordre = as.factor(ordre),
          famille = as.factor(famille),
-         technique_observation,
          etat_biologique=as.factor(etat_biologique),
          jdd_nom = as.factor(jdd_nom),
          nom_valide = as.factor(nom_valide),
          nom_vernaculaire = as.factor(nom_vernaculaire),
          technique_observation = as.factor(technique_observation),
-         bdd_originale = as.factor("VisioNature"))%>%
+         bdd_originale = as.factor("VisioNature"),
+         observateurs = toupper(observateurs))%>%
   select("id_synthese",
          "date",
          "cd_nom",
