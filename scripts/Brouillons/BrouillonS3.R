@@ -607,3 +607,80 @@ Total%>%
   facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")
+
+
+### density selon les jours de l'année
+
+library(ggplot2)
+library(lubridate)
+library(dplyr)
+library(scales)
+library(grid)
+library(gridExtra)
+
+Total%>%
+  mutate(month = month(date))
+
+date_min <- as.Date("2010-01-01")
+
+Total%>%
+    filter(date > date_min)%>%
+    ggplot(aes(factor(month(date))))+
+    labs(title="Barplot des observation selon le mois",
+         y="Nombre d'observations",
+         x="Mois")+ 
+    theme_bw()+
+    geom_bar()+
+    scale_x_discrete(labels=c("1" = "Janvier", 
+                              "2" = "Février",
+                              "3" = "Mars",
+                              "4" = "Avril",
+                              "5" = "Mai",
+                              "6" = "Juin",
+                              "7" = "Juillet",
+                              "8" = "Aout",
+                              "9" = "Septembre",
+                              "10" = "Octobre",
+                              "11" = "Novembre",
+                              "12" = "Decembre"))
+
+Total %>%
+  filter(date > date_min)%>%
+  mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)%>%
+  ggplot(aes(jour_annee)) +
+  labs(title="Frequence des observations selon le jour de l'année",
+       y="Proportion",
+       x="Jour de l'année")+
+  geom_density()
+
+t <- Total %>%
+  mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)
+summary(t$jour_annee)
+
+str(qday(Total$date))
+
+str(
+  quarter(
+    Total$date,
+    with_year = FALSE))
+
+summary(as.factor(quarter(Total$date, with_year = FALSE)))
+
+Total%>%
+  ggplot(aes(as.factor(wday(date, 
+                            week_start = getOption("lubridate.week.start", 1)))))+
+  labs(title="Barplot des observation selon le jour de la semaine",
+       y="Nombre d'observations",
+       x="Jour de la semaine")+ 
+  theme_bw()+
+  geom_bar()+
+  scale_x_discrete(labels=c("1" = "Lundi", 
+                            "2" = "Mardi",
+                            "3" = "Mercredi",
+                            "4" = "Jeudi",
+                            "5" = "Vendredi",
+                            "6" = "Samedi",
+                            "7" = "Dimanche"
+                            ))
+
+
