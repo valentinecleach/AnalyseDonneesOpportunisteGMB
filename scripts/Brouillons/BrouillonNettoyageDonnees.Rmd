@@ -164,6 +164,8 @@ VisioN_FB <- VisioN_FB %>%
          technique_observation = as.factor(technique_observation),
          bdd_originale = as.factor("VisioNature"),
          observateurs = toupper(observateurs))%>%
+  mutate(observateurs = ifelse(!is.na(observateurs), 
+                               toupper(observateurs), NA))%>%
   select("id_synthese",
          "date",
          "cd_nom",
@@ -216,17 +218,19 @@ total_44 <- st_filter(Total_sf, carte_44, .predicate = st_within)
 total_44_id_synthese <- total_44 %>%
   st_drop_geometry() %>%
   select(id_synthese)
-only_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
+que_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
 
 # Verifications
 ggplot() +
   geom_sf(data = carte_bretagne_44) +
-  geom_sf(data = only_bretagne) +
+  geom_sf(data = que_bretagne) +
   labs(title = "Points in Bretagne (sauf 44)")
 
-Total_Conti <- only_bretagne %>%
+Total_Conti <- que_bretagne %>%
   st_drop_geometry()
 
+
+st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
 write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
 ```
 

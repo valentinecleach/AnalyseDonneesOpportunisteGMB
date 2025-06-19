@@ -745,9 +745,114 @@ Observateurs <- Observateurs %>%
          )
 
 
-install.packages("FactoMineR")
 library(FactoMineR)
 acp = PCA(Observateurs)
 
 library(Factoshiny)
 PCAshiny(Observateurs)
+
+
+Total %>%
+  filter(date > as.Date("1980-01-01"),
+         ordre == "Carnivora",
+         nom_vernaculaire != "Loutre d'Europe, Loutre commune, Loutre") %>%
+  mutate(
+    year = as.numeric(format(date, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.015)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Période",
+    title = "Répartition des differentes carnivores observés depuis 1980",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d(labels = label_wrap(40))+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))+
+  coord_flip()
+
+
+summary(as.factor(Total$ordre))
+
+Total %>%
+  filter(date > as.Date("1980-01-01"),
+         ordre == "Lagomorpha",
+         nom_vernaculaire != "Loutre d'Europe, Loutre commune, Loutre") %>%
+  mutate(
+    year = as.numeric(format(date, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.015)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Période",
+    title = "Répartition des differentes carnivores observés depuis 1980",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d(labels = label_wrap(40))+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))+
+  coord_flip()
+
+lapins <- Total%>%
+  filter(ordre == "Lagomorpha")%>%
+  mutate(
+    year = as.numeric(format(date, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.015)
+  ) 
+lapins$nom_vernaculaire_grp
+
+prop.table(lapins$nom_vernaculaire)
+
+str(Total)
+paste(Total$bdd_originale)
+
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == "VisioNature")%>%
+  ggplot(aes(ordre))+
+  geom_bar()+
+  labs(title="3a. Répartition des differents ordres",
+       subtitle = paste(Total$bdd_originale))+
+  theme_bw()+
+  scale_fill_manual(
+  values = c("skyblue", "royalblue", "blue", "navy","black"))
+
+
+Total <- Total%>%
+  mutate(observateurs = ifelse(!is.na(observateurs), 
+                               toupper(observateurs), NA))%>%
+  mutate_at(c("bdd_originale", 
+              "etat_biologique", "technique_observation", 
+              "communes", "observateurs", 
+              "famille", "ordre", 
+              "nom_vernaculaire", "nom_valide"), 
+            .funs = as.factor)
+summary(Total)
+
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+
+Total_sf <- st_read("Total_sf.shp")
+Total_sf%>%
+ordre_data <- Total %>% filter(ordre == "Lagomorpha")
+bdd_props <- prop.table(table(ordre_data$bdd_originale))
+n_bdd1 <- round(5000 * bdd_props[1])
+n_bdd2 <- 5000 - n_bdd1
+bdd1 <- ordre_data %>% 
+  filter(bdd_originale == "GeoNature") %>% 
+  sample_n(min(n_bdd1, n()))
+bdd2 <- ordre_data %>% 
+  filter(bdd_originale == "VisioNature") %>% 
+  sample_n(min(n_bdd2, n()))
+
+# Transformation pour des données de la carte
+carte_ordre <- ordre_graph %>%
+  select(grp_date, ordre, date) %>%
+  filter(ordre == ordre_voulu)
