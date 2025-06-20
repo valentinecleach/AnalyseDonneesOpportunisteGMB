@@ -79,7 +79,7 @@ GeoN <- GeoN %>%
     ),
     "Indices",
     ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
-           "Entendu/Ultasons",
+           "Entendu/Ultrasons",
            technique_observation)
   ))%>%
   mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
