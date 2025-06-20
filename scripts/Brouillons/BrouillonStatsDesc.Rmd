@@ -51,6 +51,8 @@ couleur  <- c("Carnivora" = "orangered3",
               "Eulipotyphla" = "bisque4", 
               "Lagomorpha" = "#CC8C3C", 
               "Rodentia" = "darkorange")
+VN <- "VisioNature"
+GN <- "GeoNature"
 ```
 Toutes nos données concernent uniquement la Bretagne continentale, hors Loire-Atlantique.
 
@@ -59,7 +61,7 @@ Toutes nos données concernent uniquement la Bretagne continentale, hors Loire-A
 ```{r repartition-etat-bio-techniques, warning = FALSE, echo=FALSE, out.width="50%"}
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "VisioNature")%>%
+         bdd_originale == VN)%>%
   ggplot(aes(technique_observation, fill=etat_biologique))+
   geom_bar(position="dodge")+
   theme_bw()+
@@ -67,10 +69,10 @@ Total%>%
                   end = 0.8, 
                   na.value = "red")+
   labs(title = "1a. Répartition de l'état biologique selon les techniques d'observations",
-       subtitle = paste(Total$bdd_originale))
+       subtitle = paste(VN))
 
 Total%>%
-  filter(bdd_originale == "GeoNature",
+  filter(bdd_originale == GN,
          date > params$date_min)%>%
   ggplot(aes(technique_observation, 
              fill=etat_biologique))+
@@ -80,33 +82,61 @@ Total%>%
                   end = 0.8, 
                   na.value = "red")+
   labs(title = "1b. Répartition de l'état biologique selon les techniques d'observations",
-       subtitle = paste(Total$bdd_originale))
+       subtitle = paste(GN))
 ```
 Nous remarquons toujours beaucoup de données de VisioNature dont la technique d'observation est inconnue.
 
 ```{r repartition-etat-bio-ordes, warning = FALSE, echo=FALSE, out.width="50%"}
 Total%>%
-  filter(bdd_originale == "VisioNature",
+  filter(bdd_originale == VN,
          date > params$date_min)%>%
   ggplot(aes(technique_observation, fill=ordre))+
   geom_bar(position="dodge")+
   theme_bw()+
   labs(title = "2a. Répartition de l'état biologique selon les ordres",
-       subtitle = paste(Total$bdd_originale))+
+       subtitle = paste(VN))+
   scale_fill_manual(values = couleur, name = "Ordre")
 
 Total%>%
-  filter(bdd_originale == "GeoNature",
+  filter(bdd_originale == GN,
          date > params$date_min)%>%
   ggplot(aes(technique_observation, 
              fill=ordre))+
   geom_bar(position="dodge")+
   theme_bw()+
   labs(title = "2b. Répartition de l'état biologique selon les ordres",    
-       subtitle = paste(Total$bdd_originale))+
+       subtitle = paste(GN))+
   scale_fill_manual(values = couleur, name = "Ordre")
 ```
 GeoNature observe principalement des indices de rodents et de carnivores. Les lagomorphes sont peu remarqués avec les indices, comparés aux autres dans VisioNature et GeoNature.
+```{r}
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == VN)%>%
+  ggplot(aes(technique_observation, fill=nom_vernaculaire))+
+  geom_bar(position="dodge")+
+  facet_grid(. ~ ordre)
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "1a. Répartition de l'état biologique selon l'espèce",
+       subtitle = paste(VN))
+
+Total%>%
+  filter(bdd_originale == GN,
+         date > params$date_min)%>%
+  ggplot(aes(technique_observation, 
+             fill=etat_biologique))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "1b. Répartition de l'état biologique selon les techniques d'observations",
+       subtitle = paste(GN))
+
+```
 
 ### Répartition des ordres
 Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformément les 4 autres ordres. C’est peut-être dû au fort intérêt de GMB pour la loutre, mais ce n’est pas tant le cas que ça (voir figure de la répartition des ordres sans le loutres)
@@ -115,22 +145,22 @@ Dans la BDD GeoNature, principalement des carnivores, puis relativement uniform�
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "VisioNature")%>%
+         bdd_originale == VN)%>%
   ggplot(aes(ordre, fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3a. Répartition des differents ordres",
-       subtitle = paste(Total$bdd_originale))+
+       subtitle = paste(VN))+
   theme_bw()+
   scale_fill_manual(values = couleur)+
   scale_color_manual(values = couleur)
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "GeoNature")%>%
+         bdd_originale == GN)%>%
   ggplot(aes(ordre,fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3b. Répartition des differents ordres",
-       subtitle = paste(Total$bdd_originale))+
+       subtitle = paste(GN))+
   theme_bw()+
   scale_fill_manual(values = couleur)+
   scale_color_manual(values = couleur)
@@ -148,12 +178,12 @@ Total%>%
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "GeoNature",
+         bdd_originale == GN,
          cd_nom != 60630)%>%
   ggplot(aes(ordre, fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3d. Répartition des differents ordres",
-       subtitle = paste(Total$bdd_originale, "sans la loutre"))+
+       subtitle = paste(GN, "sans la loutre"))+
   theme_bw()+
   scale_fill_manual(values = couleur)+
   scale_color_manual(values = couleur)
@@ -164,7 +194,7 @@ Nous nous sommes demandés à quoi ressemblerait la répartition des ordres sans
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "GeoNature")%>%
+         bdd_originale == GN)%>%
   count(nom_vernaculaire, ordre, sort = TRUE) %>%
   ggplot(aes(x = reorder(nom_vernaculaire, n), 
              y = n, fill = ordre, color = ordre)) +
@@ -173,7 +203,7 @@ Total%>%
   facet_wrap(~ ordre, scales = "free_y") +
   labs(
     title = "Répartition des espèces",
-        subtitle = paste(Total$bdd_originale),
+        subtitle = paste(GN),
     y = "Nombre d'observations", x = "Nom vernaculaire"
   ) +
   scale_x_discrete(labels = label_wrap(40)) +
@@ -185,7 +215,7 @@ Total%>%
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "GeoNature")%>%
+         bdd_originale == GN)%>%
   count(nom_vernaculaire, ordre, sort = TRUE) %>%
   ggplot(aes(x = reorder(nom_vernaculaire, n), 
              y = n, fill = ordre, color = ordre)) +
@@ -194,7 +224,7 @@ Total%>%
   facet_wrap(~ ordre, scales = "free_y") +
   labs(
     title = "Répartition des espèces",
-        subtitle = paste(Total$bdd_originale),
+        subtitle = paste(GN),
     y = "Nombre d'observations", x = "Nom vernaculaire"
   ) +
   scale_x_discrete(labels = label_wrap(40)) +
@@ -211,10 +241,10 @@ Nous remarquons une inversion entre les lapins et les lièvres entre les deux ba
 ```{r}
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "VisioNature")%>%
+         bdd_originale == VN)%>%
   ggplot(aes(date, color = ordre))+
   labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
-       subtitle = paste(Total$bdd_originale))+ 
+       subtitle = paste(VN))+ 
   facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")+
@@ -223,10 +253,10 @@ Total%>%
   
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "GeoNature")%>%
+         bdd_originale == GN)%>%
   ggplot(aes(date, color = ordre))+
   labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
-       subtitle = paste(Total$bdd_originale))+ 
+       subtitle = paste(GN))+ 
   facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")+
@@ -257,26 +287,26 @@ Peut-être qu'on pourra pondérer là dessus?
 ```{r nmbre-données, warning = FALSE, echo=FALSE, out.width="50%"}
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "VisioNature")%>%
+         bdd_originale == VN)%>%
   ggplot(aes(date, nombre))+
   geom_point()+
   theme_bw()+
   scale_fill_grey(start = 0.2,
                   end = 0.8) + 
   labs(title="Le nombre d'individus enregistré par observation reparti dans le temps",
-       subtitle = paste(Total$bdd_originale),
+       subtitle = paste(VN),
        y="Nombre d’individus")
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "GeoNature")%>%
+         bdd_originale == GN)%>%
   ggplot(aes(date, nombre))+
   geom_point()+
   theme_bw()+
   scale_fill_grey(start = 0.2,
                   end = 0.8) + 
   labs(title="Le nombre d'individus enregistré par observation reparti dans le temps",
-      subtitle = paste(Total$bdd_originale),
+      subtitle = paste(GN),
        y="Nombre d’individus")
 ```
 La plupart des observations ne contiennent qu'un animal mais certains en contiennent plusieurs.\
@@ -289,7 +319,7 @@ Ensuite, on a essayer d'observer les proportions d'espèces dans le temps. Dans 
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "VisioNature")%>%
+         bdd_originale == VN)%>%
   mutate(
     year = as.numeric(format(date, "%Y")),
     year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
@@ -301,7 +331,7 @@ Total%>%
     x = "Période",
     title = "Répartition des differentes espèces observés depuis 1980",
     y = "Proportion",
-    subtitle = paste(Total$bdd_originale),
+    subtitle = paste(VN),
     fill = "Espèce"
   ) +
   theme_minimal()+
@@ -310,7 +340,7 @@ Total%>%
 
   Total%>%
   filter(date > params$date_min,
-         bdd_originale == "GeoNature")%>%
+         bdd_originale == GN)%>%
   mutate(
     year = as.numeric(format(date, "%Y")),
     year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
@@ -322,7 +352,7 @@ Total%>%
     x = "Période",
     title = "Répartition des differentes espèces observés depuis 1980",
     y = "Proportion",
-    subtitle = paste(Total$bdd_originale),
+    subtitle = paste(GN),
     fill = "Espèce"
   ) +
   theme_minimal()+
@@ -334,7 +364,7 @@ Total%>%
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == "VisioNature")%>%
+         bdd_originale == VN)%>%
   mutate(
     year = as.numeric(format(date, "%Y")),
     year_group = cut(year, breaks = seq(1980, max(year), by = 2), right = FALSE),
@@ -345,7 +375,7 @@ Total%>%
   labs(
     title = "Répartition des differentes espèces observés depuis 2010",
     x = "Période",
-    subtitle = paste(Total$bdd_originale),
+    subtitle = paste(VN),
     y = "Proportion",
     fill = "Espèce"
   ) +
@@ -356,7 +386,7 @@ Total%>%
 
 Total%>%
   filter(date > params$date_min)%>%
-  filter(bdd_originale == "GeoNature",
+  filter(bdd_originale == GN,
          date > as.Date("2010-01-01")) %>%
   mutate(
     year = as.numeric(format(date, "%Y")),
@@ -369,7 +399,7 @@ Total%>%
   geom_bar(position = "fill") +
   labs(
     title = "Répartition des differentes espèces observés depuis 2010",
-    subtitle = paste(Total$bdd_originale),
+    subtitle = paste(GN),
     x = "Période",
     y = "Proportion",
     fill = "Espèce"
@@ -400,7 +430,7 @@ carte_bretagne <- st_transform(carte_bretagne, 4326)
 # GeoNature
 
 GN_sf <- Total_sf %>%
-  filter(bdd_rgn == "GeoNature")
+  filter(bdd_rgn == GN)
 
 grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
                                          cellsize = c(0.12, 0.09))
@@ -410,7 +440,7 @@ grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densité des observations en bretagne",
-       subtitle = "GeoNature") +
+       subtitle = GN) +
   geom_sf(data = grid_sf, aes(fill = density)) +
   scale_fill_gradient(low="gray97", high="gray15") +
   theme_bw()
@@ -418,7 +448,7 @@ ggplot() +
 # VisioNature
 
 VN_sf <- Total_sf %>%
-  filter(bdd_rgn == "VisioNature")
+  filter(bdd_rgn == VN)
 
 grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
                                          cellsize = c(0.12, 0.09)))
@@ -427,7 +457,7 @@ grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densité des observations en bretagne",
-       subtitle = "VisioNature") +
+       subtitle = VN) +
   geom_sf(data = grid_sf, aes(fill = density)) +
   scale_fill_gradient(low="grey97", high="gray15") +
   theme_bw()
@@ -466,11 +496,11 @@ carte_bretagne <- st_transform(carte_bretagne, 4326)
 # Données geographique
 
 GN_sf <- Total_sf%>% 
-  dplyr::filter(bdd_rgn == "GeoNature")%>%
+  dplyr::filter(bdd_rgn == GN)%>%
   dplyr::select(ordre, date)
 
 VN_sf <- Total_sf%>% 
-  dplyr::filter(bdd_rgn == "VisioNature")%>%
+  dplyr::filter(bdd_rgn == VN)%>%
   dplyr::select(ordre, date)
 
 ordres <- unique(VN_sf$ordre)
@@ -493,7 +523,7 @@ grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densité des observations en bretagne selon les ordres",
-       subtitle = "VisioNature") +
+       subtitle = VN) +
   geom_sf(data = grid_sf, aes(fill = density), color = NA) +
   scale_fill_gradient(low="gray90", high="gray15") +
   theme_bw() +
