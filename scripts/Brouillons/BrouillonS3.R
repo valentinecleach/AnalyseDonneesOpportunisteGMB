@@ -856,3 +856,144 @@ bdd2 <- ordre_data %>%
 carte_ordre <- ordre_graph %>%
   select(grp_date, ordre, date) %>%
   filter(ordre == ordre_voulu)
+
+VN <- "VisioNature"
+GN <- "GeoNature"
+
+date_min <- as.Date("2010-01-01")
+etat_bio_espece <- function(nom_ordre, bdd){
+  Total%>%
+    filter(ordre == nom_ordre) %>%
+    count(ordre, sort = TRUE) %>% 
+    {
+             ggplot(., aes(technique_observation, 
+                           fill=nom_vernaculaire)) + 
+               geom_bar(position="dodge")+
+               theme_bw()
+             }
+}
+
+etat_bio_espece <- function(nom_ordre, bdd){
+  data <- Total %>%
+    filter(ordre == nom_ordre) 
+  
+  # Get order of techniques by count
+  technique_order <- data %>%
+    count(technique_observation, sort = TRUE) %>%
+    pull(technique_observation)
+  
+  data %>%
+    mutate(technique_observation = factor(technique_observation, levels = technique_order)) %>%
+    ggplot(aes(technique_observation, fill = nom_vernaculaire)) + 
+    geom_bar(position = "dodge") +
+    theme_bw()
+}
+
+data <- Total %>%
+  filter(ordre == "Cetartiodactyla") 
+
+# Get order of techniques by count
+technique_order <- data %>%
+  count(technique_observation, sort = TRUE) %>%
+  pull(technique_observation)
+
+(technique_order)
+
+data %>%
+  mutate(technique_observation = factor(technique_observation, levels = technique_order)) %>%
+  ggplot(aes(technique_observation, fill = nom_vernaculaire)) + 
+  geom_bar(position = "dodge") +
+  theme_bw()
+rm(t)
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+Total <- read_delim("Total.csv", delim = ",", 
+                    escape_double = FALSE, trim_ws = TRUE)
+Total <- Total%>%
+  mutate_at(c("bdd_originale", 
+              "etat_biologique", "technique_observation", 
+              "communes", "observateurs", 
+              "famille", "ordre", 
+              "nom_vernaculaire", "nom_valide"), 
+            .funs = as.factor)
+
+
+t <- Total%>%
+  filter(ordre == "Cetartiodactyla")
+
+t$nom_vernaculaire <- factor(t$nom_vernaculaire, 
+              levels=c("Daim européen, Daim", "Cerf élaphe","Sanglier",
+                       "Chevreuil européen, Chevreuil, Brocard (mâle), Chevrette (femelle)"
+              ))
+
+ggplot(t, aes(technique_observation, fill=nom_vernaculaire)) + 
+  geom_bar(position="dodge")+coord_flip()
+
+etat_bio_espece("Cetartiodactyla", VN)
+
+
+t <- Total%>%
+  filter(ordre == "Carnivora")%>%
+  mutate(
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  )
+  
+summary(t$nom_vernaculaire_grp)
+
+t$nom_vernaculaire_grp <- factor(t$nom_vernaculaire_grp, 
+                             levels=c("Other", "Fouine", "Belette d'Europe, Belette",
+                                      "Martre des pins, Martre",
+                                      "Loutre d'Europe, Loutre commune, Loutre",
+                                      "Blaireau européen, Blaireau",
+                                      "Renard roux, Renard, Goupil"
+                             ))
+
+ggplot(t, aes(technique_observation, fill=nom_vernaculaire_grp)) + 
+  geom_bar(position="dodge")+coord_flip()
+
+t %>%
+  mutate(
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(technique_observation, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "dodge") + coord_flip()
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == VN)%>%
+  arrange(nom_vernaculaire)%>%
+  ggplot(aes(technique_observation, fill=nom_vernaculaire))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  labs(title = "1a. Répartition de l'état biologique selon l'espèce",
+       subtitle = paste(VN))
+
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == "VisioNature")%>%
+  {
+    ggplot(., aes(technique_observation, fill=etat_biologique))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8)+
+  labs(title = "1a. Répartition de l'état biologique selon les techniques d'observations",
+       subtitle = paste(.$bdd_originale))
+  }
+
+
+t <- Total%>%
+  filter(date > params$date_min,
+         bdd_originale == "GeoNature")
+
+{ 
+  ggplot(., aes(technique_observation)) +
+    labs(subtitle = paste(.$bdd_originale[1]))
+  }
+
+Total%>%
+  filter(bdd_originale == "VisioNature")%>%
+  {
+    ggplot(., aes(technique_observation))+
+  labs(subtitle = paste(Total$bdd_originale[1]))
+    }
