@@ -25,6 +25,7 @@ library(patchwork)
 library(scales)
 library(viridis)
 library(ggplot2)
+library(lubridate)
 library(purrr)
 library(forcats)
 
@@ -115,76 +116,59 @@ Dans la BDD GeoNature, principalement des carnivores, puis relativement uniform�
 Total%>%
   filter(date > params$date_min,
          bdd_originale == "VisioNature")%>%
-  ggplot(aes(ordre))+
+  ggplot(aes(ordre, fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3a. Répartition des differents ordres",
        subtitle = paste(Total$bdd_originale))+
   theme_bw()+
-  scale_fill_manual(values = couleur, name = "Ordre")
+  scale_fill_manual(values = couleur)+
+  scale_color_manual(values = couleur)
 
 Total%>%
   filter(date > params$date_min,
          bdd_originale == "GeoNature")%>%
-  ggplot(aes(ordre))+
+  ggplot(aes(ordre,fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3b. Répartition des differents ordres",
        subtitle = paste(Total$bdd_originale))+
   theme_bw()+
-  scale_fill_manual(values = couleur, name = "Ordre")
+  scale_fill_manual(values = couleur)+
+  scale_color_manual(values = couleur)
 
 
 Total%>%
   filter(date > params$date_min)%>%
-  ggplot(aes(ordre))+
+  ggplot(aes(ordre, fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3c. Répartition des differents ordres",
        subtitle="Bretagne Entière")+
   theme_bw()+
-  scale_fill_manual(values = couleur, name = "Ordre")
+  scale_fill_manual(values = couleur)+
+  scale_color_manual(values = couleur)
 
 Total%>%
   filter(date > params$date_min,
          bdd_originale == "GeoNature",
          cd_nom != 60630)%>%
-  ggplot(aes(ordre))+
+  ggplot(aes(ordre, fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3d. Répartition des differents ordres",
        subtitle = paste(Total$bdd_originale, "sans la loutre"))+
   theme_bw()+
-  scale_fill_manual(values = couleur, name = "Ordre")
+  scale_fill_manual(values = couleur)+
+  scale_color_manual(values = couleur)
 ```
 Nous nous sommes demandés à quoi ressemblerait la répartition des ordres sans la loutre car elle est une espèce dont le GMB se préoccupe beaucoup. Ca ne change pas drastiquement la distribution.
 
 ```{r repartition-especes, fig.width=10, fig.height=7}
 
-Total %>%
-  filter(date > params$date_min,
-         bdd_originale == "VisioNature")%>%
-  count(nom_vernaculaire, ordre, sort = TRUE) %>%
-  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
-  geom_col(fill = "grey30") +
-  coord_flip() +
-  facet_wrap(~ ordre, scales = "free_y") +
-  labs(
-    title = "Répartition des espèces",
-    subtitle = paste(Total$bdd_originale),
-    y = "Nombre d'observations", x = "Nom vernaculaire"
-  ) +
-  scale_x_discrete(labels = label_wrap(40)) +
-  theme_bw() +
-  theme(
-    axis.text.y = element_text(size = 8),
-    strip.text = element_text(face = "bold"),
-    plot.title = element_text(size = 16),
-    plot.subtitle = element_text(size = 12)
-  )
-
 Total%>%
   filter(date > params$date_min,
          bdd_originale == "GeoNature")%>%
   count(nom_vernaculaire, ordre, sort = TRUE) %>%
-  ggplot(aes(x = reorder(nom_vernaculaire, n), y = n, fill = ordre)) +
-  geom_col(fill = "grey30") +
+  ggplot(aes(x = reorder(nom_vernaculaire, n), 
+             y = n, fill = ordre, color = ordre)) +
+  geom_col() +
   coord_flip() +
   facet_wrap(~ ordre, scales = "free_y") +
   labs(
@@ -193,14 +177,31 @@ Total%>%
     y = "Nombre d'observations", x = "Nom vernaculaire"
   ) +
   scale_x_discrete(labels = label_wrap(40)) +
-  theme_bw() +
-  theme(
-    axis.text.y = element_text(size = 8),
-    strip.text = element_text(face = "bold"),
-    plot.title = element_text(size = 16),
-    plot.subtitle = element_text(size = 12)
-  )
+  theme_bw()+
+  theme(axis.text=element_text(size=8))+
+  scale_colour_manual(values=couleur)+
+  scale_fill_manual(values = couleur)
 
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == "GeoNature")%>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), 
+             y = n, fill = ordre, color = ordre)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "Répartition des espèces",
+        subtitle = paste(Total$bdd_originale),
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw()+
+  theme(axis.text=element_text(size=8))+
+  scale_colour_manual(values=couleur)+
+  scale_fill_manual(values = couleur)
 ```
 
 Nous remarquons une inversion entre les lapins et les lièvres entre les deux bases de données. Peut-être lié a la période pendant laquelle les BDD sont remplies.
@@ -226,6 +227,16 @@ Total%>%
   ggplot(aes(date, color = ordre))+
   labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
        subtitle = paste(Total$bdd_originale))+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")+
+  scale_colour_manual(values=couleur)
+
+Total%>%
+  filter(date > params$date_min)%>%
+  ggplot(aes(date, color = ordre))+
+  labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
+       subtitle = "Base de donnée complète")+ 
   facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")+
@@ -602,7 +613,7 @@ Total_summary_GN <- Total %>%
   filter(bdd_originale == "GeoNature")%>%
   group_by(observateurs) %>%
   summarize(nbr_obs_obr = n()) %>%
-  filter(nbr_obs_obr > 200) %>%
+  filter(nbr_obs_obr > 500) %>%
   arrange(nbr_obs_obr)
 
 Total_summary_GN$observateurs<- factor(Total_summary_GN$observateurs,
@@ -612,13 +623,14 @@ Total_summary_VN <- Total %>%
   filter(bdd_originale == "VisioNature")%>%
   group_by(observateurs) %>%
   summarize(nbr_obs_obr = n()) %>%
-  filter(nbr_obs_obr > 200) %>%
+  filter(nbr_obs_obr > 500) %>%
   arrange(nbr_obs_obr)
 
 Total_summary_VN$observateurs <- factor(Total_summary_VN$observateurs,
                                       levels = Total_summary_VN$observateurs)
 
 Total_summary_GN%>%
+  filter(!is.na(observateurs))%>%
   ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
   geom_point() + 
   geom_segment( aes(x=observateurs, xend=observateurs, 
@@ -626,16 +638,20 @@ Total_summary_GN%>%
   coord_flip()+
   labs(title="Lollipop plot des principaux observateurs",
        subtitle="GeoNature")+
-  theme_bw()
+  theme_bw()+
+  theme(axis.text=element_text(size=6))
 
-ggplot(Total_summary_VN, aes(x=observateurs, y=nbr_obs_obr)) +
+Total_summary_VN%>%
+  filter(!is.na(observateurs))%>%
+  ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
   geom_point() + 
   geom_segment( aes(x=observateurs, xend=observateurs, 
                     y=0, yend=nbr_obs_obr))+
   coord_flip()+
   labs(title="Lollipop plot des principaux observateurs",
        subtitle="VisioNature")+
-  theme_bw()
+  theme_bw()+
+  theme(axis.text=element_text(size=6))
 ```
 
 Nous remarquons que nous avons des observateurs avec un très grand nombre d'observations comme attendu.
@@ -720,3 +736,80 @@ Nous remarquons que:\
 - BELLIER DANIEL observe beaucoup de rongeurs autour de Rennes.\
 - CHAPUIS MARTINE observe uniquement a un endroit précis.\
 - DELETED DELETED, semble être surtout dans le finistère ce qui est étonnant si ce sont plusieurs personnes.
+
+```{r}
+Total %>%
+  filter(date > params$date_min,
+         ordre == "Lagomorpha",
+         nom_vernaculaire != "Loutre d'Europe, Loutre commune, Loutre") %>%
+  mutate(
+    year = as.numeric(format(date, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.015)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Période",
+    title = "Répartition des differentes carnivores observés depuis 1980",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d(labels = label_wrap(40))+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))+
+  coord_flip()
+```
+
+```{r}
+
+Total%>%
+  ggplot(aes(as.factor(wday(date, 
+                            week_start = getOption("lubridate.week.start", 1)))))+
+  labs(title="Barplot des observation selon le jour de la semaine",
+       y="Nombre d'observations",
+       x="Jour de la semaine")+ 
+  theme_bw()+
+  geom_bar()+
+  scale_x_discrete(labels=c("1" = "Lundi", 
+                            "2" = "Mardi",
+                            "3" = "Mercredi",
+                            "4" = "Jeudi",
+                            "5" = "Vendredi",
+                            "6" = "Samedi",
+                            "7" = "Dimanche"))
+
+
+Total %>%
+  filter(date > params$date_min)%>%
+  mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)%>%
+  ggplot(aes(jour_annee)) +
+  labs(title="Frequence des observations selon le jour de l'année",
+       y="Proportion",
+       x="Jour de l'année")+
+  geom_density()
+
+
+Total%>%
+    filter(date > params$date_min)%>%
+    ggplot(aes(factor(month(date))))+
+    labs(title="Barplot des observation selon le mois",
+         y="Nombre d'observations",
+         x="Mois")+ 
+    theme_bw()+
+    geom_bar()+
+    scale_x_discrete(labels=c("1" = "Janvier", 
+                              "2" = "Février",
+                              "3" = "Mars",
+                              "4" = "Avril",
+                              "5" = "Mai",
+                              "6" = "Juin",
+                              "7" = "Juillet",
+                              "8" = "Aout",
+                              "9" = "Septembre",
+                              "10" = "Octobre",
+                              "11" = "Novembre",
+                              "12" = "Decembre"))
+
+```
+
