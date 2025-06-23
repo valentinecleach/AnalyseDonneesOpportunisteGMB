@@ -19,17 +19,18 @@ Total <- Total%>%
 
 
 Total <- Total %>%
-  mutate(observateurs = toupper(observateurs))%>%
-  mutate(observateurs = ifelse("BALLOT JEAN NOËL", 
+  mutate(observateurs = toupper(observateurs),
+         observateurs = ifelse( observateurs == "BALLOT JEAN NOËL", 
                                "BALLOT JEAN-NOËL",
-                               observateurs))
+                               observateurs),
+         observateurs = as.factor(replace(
+           as.character(observateurs),
+           which(is.na(observateurs)),
+           paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))
+  )
+
 
 nb_observations <- Total %>%
-  mutate( observateurs = as.factor(replace(
-    as.character(observateurs),
-    which(is.na(observateurs)),
-    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))
-  ) %>%
   group_by(observateurs) %>%
   summarise(total_obs = n(), .groups = "drop")
 
@@ -78,10 +79,13 @@ Observateurs <- Observateurs %>%
          nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
   )
 
+Observateurs$shannon <- vegan::diversity(Observateurs[,3:7])
+
+Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,3:7]))
 Observateurs <- Observateurs %>%
-  mutate(shannon = vegan::diversity(Observateurs[,3:7]),
-         Pielou = shannon / log(vegan::specnumber(Observateurs[,3:7])),
-         Pielou = ifelse(shannon==0, 0, Pielou))
+  mutate(Pielou = ifelse(shannon==0, 0, Pielou))
+
+summary(Observateurs$shannon)
 
 summary(Observateurs$Pielou)
 
@@ -92,15 +96,12 @@ boxplot(Observateurs$Pielou, main="Boxplot des Indice de Pielou")
 summary(Observateurs$Pielou)
 
 haut_pielou <- Observateurs%>%
-  filter(Pielou >= 0.9136)
+  filter(Pielou >= 0.9)
+
 
 summary(haut_pielou)
 PCAshiny(haut_pielou)
 
-haut_pielou %>%
-  filter(observateurs %in% c("BALLOT JEAN-NOËL", "BALLOT JEAN NOËL"))
-
-878/(1329+878)
 res.PCA<-PCA(haut_pielou,quali.sup=c(1),graph=FALSE)
 plot.PCA(res.PCA,choix='var')
 plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali')) 
