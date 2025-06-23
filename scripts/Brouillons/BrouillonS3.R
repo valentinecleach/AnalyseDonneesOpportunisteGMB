@@ -745,11 +745,16 @@ Observateurs <- Observateurs %>%
          )
 
 
+<<<<<<< HEAD
+=======
+install.packages("FactoMineR")
+>>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
 library(FactoMineR)
 acp = PCA(Observateurs)
 
 library(Factoshiny)
 PCAshiny(Observateurs)
+<<<<<<< HEAD
 
 
 Total %>%
@@ -997,3 +1002,5 @@ Total%>%
     ggplot(., aes(technique_observation))+
   labs(subtitle = paste(Total$bdd_originale[1]))
     }
+=======
+>>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67

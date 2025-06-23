@@ -35,9 +35,15 @@ GeoN <- read_csv("GeoN_Conti.csv")
 VisioN_FB <- read_csv("VisioN_FB_Conti.csv")
 
 # Couleurs
+<<<<<<< HEAD
 couleur <- c("orangered3", "#225d00", "bisque4", "#CC8C3C", "darkorange")
 ordres <- c("Carnivora", "Cetartiodactyla", "Eulipotyphla", "Lagomorpha", "Rodentia")
 demo("colors")
+=======
+couleur <- c("red", "green", "orange", "pink", "blue")
+ordres <- c("Carnivora", "Cetartiodactyla", "Eulipotyphla", "Lagomorpha", "Rodentia")
+
+>>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
 ```
 Toutes nos données concernent uniquement la Bretagne continentale.
 
@@ -347,9 +353,13 @@ GeoN %>%
   filter(date_debut > as.Date("2010-01-01")) %>%
   mutate(
     year = as.numeric(format(date_debut, "%Y")),
+<<<<<<< HEAD
     year_group = cut(year, 
                      breaks = seq(1980, max(year), by = 2), 
                      right = FALSE),
+=======
+    year_group = cut(year, breaks = seq(1980, max(year), by = 2), right = FALSE),
+>>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
     nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
   ) %>%
   ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +

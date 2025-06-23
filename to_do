@@ -2,6 +2,7 @@ To do:
 
 Priorité
 
+<<<<<<< HEAD
 - changer le 194928 en Cerf muntjac (le remettre? ne participe pas au dynamiques) 
 - code couleur partout
 - plutot les + gros contribueurs les 2 bases confondus
@@ -15,5 +16,24 @@ Priorité
 - continuer le truc de moyennes mobiles
 - corrélations entre les variables? 
 
+=======
+- corrélation coordonnées et individus
+
+- code couleur
+- numéroter figures
+- tourner diagrammes en bâton
+- sous répertoire R pour fonctions
+- communauté des observateurs? Infos dessus?
+- cartes interactives avec mapview -> Transformer tous les points en points par couleur selon ordres?
+- travail sur les especes
+
+- cartographie non pas avec les points mais la densité par secteurs
+
+- continuer le truc de moyennes mobiles
+
+- corrélations entre les variables? 
+
+Tester rpubs / apprendre a utiliser 
+>>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
 
 
