@@ -9,10 +9,11 @@ library(patchwork)
 library(scales)
 
 ######################
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/bretagne_conti")
-Total_B <- read_csv("TotalN_FB_Conti.csv")
-GeoN <- read_csv("GeoN_Conti.csv")
-VisioN_FB <- read_csv("VisioN_FB_Conti.csv")
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+Total <- read_csv("Total.csv")
+VN <- "VisioNature"
+GN <- "GeoNature"
+
 
 summary(as.factor(VisioN_FB$technique_observation))
 
@@ -745,16 +746,6 @@ Observateurs <- Observateurs %>%
          )
 
 
-<<<<<<< HEAD
-=======
-install.packages("FactoMineR")
->>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
-library(FactoMineR)
-acp = PCA(Observateurs)
-
-library(Factoshiny)
-PCAshiny(Observateurs)
-<<<<<<< HEAD
 
 
 Total %>%
@@ -910,6 +901,8 @@ data %>%
   geom_bar(position = "dodge") +
   theme_bw()
 rm(t)
+
+
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
 Total <- read_delim("Total.csv", delim = ",", 
                     escape_double = FALSE, trim_ws = TRUE)
@@ -921,86 +914,85 @@ Total <- Total%>%
               "nom_vernaculaire", "nom_valide"), 
             .funs = as.factor)
 
+library(dplyr)
+library(forcats)
+library(ggplot2)
 
-t <- Total%>%
-  filter(ordre == "Cetartiodactyla")
-
-t$nom_vernaculaire <- factor(t$nom_vernaculaire, 
-              levels=c("Daim européen, Daim", "Cerf élaphe","Sanglier",
-                       "Chevreuil européen, Chevreuil, Brocard (mâle), Chevrette (femelle)"
-              ))
-
-ggplot(t, aes(technique_observation, fill=nom_vernaculaire)) + 
-  geom_bar(position="dodge")+coord_flip()
-
-etat_bio_espece("Cetartiodactyla", VN)
-
-
-t <- Total%>%
-  filter(ordre == "Carnivora")%>%
+repartition_espece <- function(nom_ordre, repartition){
+  Total %>%
+  filter(ordre == nom_ordre) %>%
   mutate(
-    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
-  )
+    nom_vernaculaire_grp = ifelse(
+      length(unique(fct_lump(Total$nom_vernaculaire))) > 5 , 
+           fct_lump(nom_vernaculaire, prop = 0.03),
+           nom_vernaculaire),
+    nom_vernaculaire_grp = fct_infreq(nom_vernaculaire_grp)  # reorder by frequency
+  )%>%
+    ggplot(aes({{repartition}}, fill = nom_vernaculaire_grp)) + 
+    geom_bar(position = "dodge") +
+    coord_flip()
+}
+
+
+
+library(dplyr)
+library(forcats)
+library(ggplot2)
+
+repartition_espece <- function(bdd = Total, nom_ordre, repartition, date_min = params$date_min) {
   
-summary(t$nom_vernaculaire_grp)
-
-t$nom_vernaculaire_grp <- factor(t$nom_vernaculaire_grp, 
-                             levels=c("Other", "Fouine", "Belette d'Europe, Belette",
-                                      "Martre des pins, Martre",
-                                      "Loutre d'Europe, Loutre commune, Loutre",
-                                      "Blaireau européen, Blaireau",
-                                      "Renard roux, Renard, Goupil"
-                             ))
-
-ggplot(t, aes(technique_observation, fill=nom_vernaculaire_grp)) + 
-  geom_bar(position="dodge")+coord_flip()
-
-t %>%
-  mutate(
-    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
-  ) %>%
-  ggplot(aes(technique_observation, fill = nom_vernaculaire_grp)) +
-  geom_bar(position = "dodge") + coord_flip()
-
-Total%>%
-  filter(date > params$date_min,
-         bdd_originale == VN)%>%
-  arrange(nom_vernaculaire)%>%
-  ggplot(aes(technique_observation, fill=nom_vernaculaire))+
-  geom_bar(position="dodge")+
-  theme_bw()+
-  labs(title = "1a. Répartition de l'état biologique selon l'espèce",
-       subtitle = paste(VN))
-
-
-Total%>%
-  filter(date > params$date_min,
-         bdd_originale == "VisioNature")%>%
-  {
-    ggplot(., aes(technique_observation, fill=etat_biologique))+
-  geom_bar(position="dodge")+
-  theme_bw()+
-  scale_fill_grey(start = 0.2,
-                  end = 0.8)+
-  labs(title = "1a. Répartition de l'état biologique selon les techniques d'observations",
-       subtitle = paste(.$bdd_originale))
+  bdd_filtre <- bdd %>%
+    filter(ordre == nom_ordre,
+           date > params$date_min)
+  
+  grps <- fct_lump(bdd_filtre$nom_vernaculaire, prop = 0.03)
+  
+  if (length(unique(grps)) > 5) {
+    bdd_filtre <- bdd_filtre %>%
+      mutate(nom_vernaculaire_grp = grps)
+  } else {
+    bdd_filtre <- bdd_filtre %>%
+      mutate(nom_vernaculaire_grp = nom_vernaculaire)
   }
+  
+  bdd_filtre %>%
+    mutate(nom_vernaculaire_grp = fct_infreq(nom_vernaculaire_grp)) %>% 
+    ggplot(aes(x = {{ repartition }}, fill = nom_vernaculaire_grp)) +
+    geom_bar(position = "dodge") +
+    coord_flip()+
+    scale_fill_discrete(labels = label_wrap(40)) +
+    theme_bw()
+}
 
+## Technique D'observation
+repartition_espece(nom_ordre = "Carnivora", 
+                   repartition = technique_observation)
 
-t <- Total%>%
-  filter(date > params$date_min,
-         bdd_originale == "GeoNature")
+repartition_espece(nom_ordre = "Cetartiodactyla", 
+                   repartition = technique_observation)
 
-{ 
-  ggplot(., aes(technique_observation)) +
-    labs(subtitle = paste(.$bdd_originale[1]))
-  }
+repartition_espece(nom_ordre = "Eulipotyphla", 
+                   repartition = technique_observation)
 
-Total%>%
-  filter(bdd_originale == "VisioNature")%>%
-  {
-    ggplot(., aes(technique_observation))+
-  labs(subtitle = paste(Total$bdd_originale[1]))
-    }
-=======
->>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
+repartition_espece(nom_ordre = "Lagomorpha", 
+                   repartition = technique_observation)
+
+repartition_espece(nom_ordre = "Rodentia", 
+                   repartition = technique_observation)
+
+## Etat Bio
+repartition_espece(nom_ordre = "Carnivora", 
+                   repartition = etat_biologique)
+
+repartition_espece(nom_ordre = "Cetartiodactyla", 
+                   repartition = etat_biologique)
+
+repartition_espece(nom_ordre = "Eulipotyphla", 
+                   repartition = etat_biologique)
+
+repartition_espece(nom_ordre = "Lagomorpha", 
+                   repartition = etat_biologique)
+
+repartition_espece(nom_ordre = "Rodentia", 
+                   repartition = etat_biologique)
+
