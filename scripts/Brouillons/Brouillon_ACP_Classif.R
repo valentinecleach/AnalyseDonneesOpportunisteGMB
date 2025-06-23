@@ -144,11 +144,3 @@ plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali'))
 # Pas vrmt de clusters visible 
 # -> vaut pas le coup d'essayer de forcer des groupes.
 
-
-haut_pielou <- Observateurs%>%
-  filter(Pielou >= 0.9)
-
-summary(haut_pielou)
-PCAshiny(haut_pielou)
-
-
