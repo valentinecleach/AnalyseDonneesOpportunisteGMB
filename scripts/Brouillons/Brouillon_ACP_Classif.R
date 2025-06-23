@@ -102,6 +102,11 @@ haut_pielou <- Observateurs%>%
 summary(haut_pielou)
 PCAshiny(haut_pielou)
 
+
+haut_pielou%>%
+  filter(observateurs == "BALLOT JEAN-NOËL")
+
+
 res.PCA<-PCA(haut_pielou,quali.sup=c(1),graph=FALSE)
 plot.PCA(res.PCA,choix='var')
 plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali')) 
@@ -120,8 +125,6 @@ plot.PCA(res.PCA,invisible=c('ind','ind.sup'),habillage='cos2',label ='none')
 summary(res.PCA)
 
 Factoshiny(Observateurs)
-
-summary(Observateurs)
 
 Observateurs %>%
   filter(is.na(observateurs))
