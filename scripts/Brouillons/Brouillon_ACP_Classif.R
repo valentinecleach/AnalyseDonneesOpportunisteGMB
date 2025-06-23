@@ -83,6 +83,7 @@ Observateurs <- Observateurs %>%
          Pielou = shannon / log(vegan::specnumber(Observateurs[,3:7])),
          Pielou = ifelse(shannon==0, 0, Pielou))
 
+summary(Observateurs$Pielou)
 
 library(Factoshiny)
 PCAshiny(Observateurs)
