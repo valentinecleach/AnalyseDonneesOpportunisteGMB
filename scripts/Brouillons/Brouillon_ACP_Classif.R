@@ -4,7 +4,10 @@
 #######################################
 
 library(dplyr)
-library(tibble)
+library(Factoshiny)
+library(collapse)
+library(vegan)
+library(permute)
 
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
 Total <- read_delim("Total.csv", delim = ",", 
@@ -28,7 +31,7 @@ Total <- Total %>%
            which(is.na(observateurs)),
            paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))
   )
-
+#####################
 
 nb_observations <- Total %>%
   group_by(observateurs) %>%
@@ -59,17 +62,25 @@ nb_rodentia <- Total %>%
   group_by(observateurs) %>%
   summarise(nb_rodentia  = n(), .groups = "drop")
 
+max_technique <- Total%>%
+  group_by(observateurs) %>%
+  summarise(tech_obs_max = collapse::fmode(technique_observation))
+
+max_etat_bio <- Total%>%
+  group_by(observateurs) %>%
+  summarise(etat_bio_max = collapse::fmode(etat_biologique))
 
 Observateurs <- nb_observations %>%
   left_join(nb_carnivora, by = "observateurs") %>%
   left_join(nb_cetartiodactyla, by = "observateurs") %>%
   left_join(nb_eulipotyphla, by = "observateurs") %>%
   left_join(nb_lagomorpha, by = "observateurs") %>%
-  left_join(nb_rodentia, by = "observateurs")
+  left_join(nb_rodentia, by = "observateurs")%>%
+  left_join(max_technique, by = "observateurs")%>%
+  left_join(max_etat_bio, by = "observateurs")
 
-#Indice de Shannon
-library(vegan)
-library(permute)
+# Indice de Shannon
+
 
 Observateurs <- Observateurs %>%
   mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
@@ -85,46 +96,59 @@ Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs
 Observateurs <- Observateurs %>%
   mutate(Pielou = ifelse(shannon==0, 0, Pielou))
 
-summary(Observateurs$shannon)
-
-summary(Observateurs$Pielou)
-
-library(Factoshiny)
-PCAshiny(Observateurs)
-
 boxplot(Observateurs$Pielou, main="Boxplot des Indice de Pielou")
 summary(Observateurs$Pielou)
 
+Observateurs <- Observateurs%>%
+  mutate(prop_carnivora = nb_carnivora / total_obs,
+         prop_cetartiodactyla = nb_cetartiodactyla / total_obs,
+         prop_eulipotyphla = nb_eulipotyphla / total_obs,
+         prop_lagomorpha = nb_lagomorpha / total_obs,
+         prop_rodentia = nb_rodentia / total_obs)
+
+PCAshiny(Observateurs)
+
+res.PCA<-PCA(Observateurs,quali.sup=c(1),quanti.sup=c(2,8),graph=FALSE)
+plot.PCA(res.PCA,choix='var')
+plot.PCA(res.PCA,invisible=c('ind','ind.sup'),habillage='cos2',label =c('quali'))
+summary(res.PCA)
+
+Factoshiny(Observateurs)
+
+####################
+
+# Intéressant, ceux qui ont le + sur les routes, ont peu de diversité
+res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(7,8),graph=FALSE)
+plot.PCA(res.PCA,choix='var')
+plot.PCA(res.PCA,invisible=c('ind','ind.sup'),select='cos2  0.3',cex=0.5,cex.main=0.5,cex.axis=0.5,label =c('quali'))
+
+
+# globalement, ceux qui observent beaucoup les carnivores ou rongeurs ont un
+# indice faible d'equivalence
+
+# graph: supp : nb de chaque, tech_obs et etat_bio
+# -> ceux avec un une haute proportion de carnivores, sont 
+# ceux qui trouvent morts : colision routière  mais aussi juste mort
+
+# Ici, 80% sans les proportions -> très bon
+res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(7,8),quanti.sup=c(11,12,13,14,15),graph=FALSE)
+plot.PCA(res.PCA,choix='var')
+plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali'))
+# On remarque
+# bcp d'obs -> bcp de "autre" (quel catégorie? etat bio ou technique obs?)
+# peu obs -> entendu/ultrasons (logique)
+# bcp de diversité -> non renseigné?
+# peu diversité -> autre, entendu/ultrason, mort / mort routier...
+
+
+# Pas vrmt de clusters visible 
+# -> vaut pas le coup d'essayer de forcer des groupes.
+
+
 haut_pielou <- Observateurs%>%
   filter(Pielou >= 0.9)
-
 
 summary(haut_pielou)
 PCAshiny(haut_pielou)
 
 
-haut_pielou%>%
-  filter(observateurs == "BALLOT JEAN-NOËL")
-
-
-res.PCA<-PCA(haut_pielou,quali.sup=c(1),graph=FALSE)
-plot.PCA(res.PCA,choix='var')
-plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali')) 
-
-
-res.PCA<-PCA(Observateurs,quali.sup=c(1),graph=FALSE)
-plot.PCA(res.PCA,choix='var')
-plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali')) 
-
-res.PCA<-PCA(Observateurs,quali.sup=c(1),quanti.sup=c(2,8),graph=FALSE)
-plot.PCA(res.PCA,choix='var')
-plot.PCA(res.PCA,invisible=c('ind','ind.sup'),habillage='cos2',label =c('quali'))
-res.PCA<-PCA(Observateurs,quali.sup=c(1),quanti.sup=c(2,8),graph=FALSE)
-plot.PCA(res.PCA,choix='var')
-plot.PCA(res.PCA,invisible=c('ind','ind.sup'),habillage='cos2',label ='none')
-summary(res.PCA)
-
-Factoshiny(Observateurs)
-
-Observateurs %>%
-  filter(is.na(observateurs))
