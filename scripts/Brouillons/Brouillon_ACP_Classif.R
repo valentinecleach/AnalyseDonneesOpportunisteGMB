@@ -3,19 +3,40 @@
 ##### Classification Observateurs #####
 #######################################
 
-On peut aussi effectuer une classification des observateurs selon les espèces observées, le nombre d’observations par taxon, etc., afin de créer une typologie des
-observateurs.
+library(dplyr)
+library(tibble)
 
-summary(as.factor(Total$ordre))
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
+Total <- read_delim("Total.csv", delim = ",", 
+                    escape_double = FALSE, trim_ws = TRUE)
+Total <- Total%>%
+  mutate_at(c("bdd_originale", 
+              "etat_biologique", "technique_observation", 
+              "communes", "observateurs", 
+              "famille", "ordre", 
+              "nom_vernaculaire", "nom_valide"), 
+            .funs = as.factor)
+
 
 Total <- Total %>%
-  mutate(observateurs = toupper(observateurs))
+  mutate(observateurs = toupper(observateurs))%>%
+  mutate(observateurs = ifelse("BALLOT JEAN NOËL", 
+                               "BALLOT JEAN-NOËL",
+                               observateurs))
+
+nb_observations <- Total %>%
+  mutate( observateurs = as.factor(replace(
+    as.character(observateurs),
+    which(is.na(observateurs)),
+    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))
+  ) %>%
+  group_by(observateurs) %>%
+  summarise(total_obs = n(), .groups = "drop")
 
 nb_carnivora <- Total %>%
   filter(ordre=="Carnivora")%>%
   group_by(observateurs) %>%
   summarise(nb_carnivora = n(), .groups = "drop")
-summary(nb_carnivora)
 
 nb_cetartiodactyla <- Total %>%
   filter(ordre=="Cetartiodactyla")%>%
@@ -37,21 +58,13 @@ nb_rodentia <- Total %>%
   group_by(observateurs) %>%
   summarise(nb_rodentia  = n(), .groups = "drop")
 
-nb_observations <- Total %>%
-  group_by(observateurs) %>%
-  summarise(total_obs = n(), .groups = "drop")
-
-# idées dans mon tableau: Ordre préféré.
-
 
 Observateurs <- nb_observations %>%
   left_join(nb_carnivora, by = "observateurs") %>%
   left_join(nb_cetartiodactyla, by = "observateurs") %>%
   left_join(nb_eulipotyphla, by = "observateurs") %>%
   left_join(nb_lagomorpha, by = "observateurs") %>%
-  left_join(nb_rodentia, by = "observateurs") %>%
-  mutate_at( c("observateurs"), 
-             .funs = as.factor)
+  left_join(nb_rodentia, by = "observateurs")
 
 #Indice de Shannon
 library(vegan)
@@ -65,20 +78,10 @@ Observateurs <- Observateurs %>%
          nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
   )
 
-
-
-Observateurs$shannon <- vegan::diversity(Observateurs[,3:7])
-Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,3:7]))
-Observateurs <- Observateurs%>%
-  mutate(Pielou = ifelse(shannon==0, 0, Pielou))
-
-
-
 Observateurs <- Observateurs %>%
   mutate(shannon = vegan::diversity(Observateurs[,3:7]),
          Pielou = shannon / log(vegan::specnumber(Observateurs[,3:7])),
          Pielou = ifelse(shannon==0, 0, Pielou))
-
 
 
 library(Factoshiny)
@@ -87,9 +90,36 @@ PCAshiny(Observateurs)
 boxplot(Observateurs$Pielou, main="Boxplot des Indice de Pielou")
 summary(Observateurs$Pielou)
 
-Observateurs <- Observateurs%>%
-  mutate(Pielou = ifelse(shannon==0, 0, Pielou))
+haut_pielou <- Observateurs%>%
+  filter(Pielou >= 0.9136)
+
+summary(haut_pielou)
+PCAshiny(haut_pielou)
+
+haut_pielou %>%
+  filter(observateurs %in% c("BALLOT JEAN-NOËL", "BALLOT JEAN NOËL"))
+
+878/(1329+878)
+res.PCA<-PCA(haut_pielou,quali.sup=c(1),graph=FALSE)
+plot.PCA(res.PCA,choix='var')
+plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali')) 
+
 
 res.PCA<-PCA(Observateurs,quali.sup=c(1),graph=FALSE)
 plot.PCA(res.PCA,choix='var')
 plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali')) 
+
+res.PCA<-PCA(Observateurs,quali.sup=c(1),quanti.sup=c(2,8),graph=FALSE)
+plot.PCA(res.PCA,choix='var')
+plot.PCA(res.PCA,invisible=c('ind','ind.sup'),habillage='cos2',label =c('quali'))
+res.PCA<-PCA(Observateurs,quali.sup=c(1),quanti.sup=c(2,8),graph=FALSE)
+plot.PCA(res.PCA,choix='var')
+plot.PCA(res.PCA,invisible=c('ind','ind.sup'),habillage='cos2',label ='none')
+summary(res.PCA)
+
+Factoshiny(Observateurs)
+
+summary(Observateurs)
+
+Observateurs %>%
+  filter(is.na(observateurs))
