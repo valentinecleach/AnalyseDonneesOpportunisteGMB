@@ -106,6 +106,10 @@ Observateurs <- Observateurs%>%
          prop_lagomorpha = nb_lagomorpha / total_obs,
          prop_rodentia = nb_rodentia / total_obs)
 
+rm(max_etat_bio, max_technique,
+   nb_carnivora, nb_cetartiodactyla, nb_eulipotyphla,
+   nb_lagomorpha, nb_observations, nb_rodentia)
+
 PCAshiny(Observateurs)
 
 res.PCA<-PCA(Observateurs,quali.sup=c(1),quanti.sup=c(2,8),graph=FALSE)
@@ -143,4 +147,5 @@ plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali'))
 
 # Pas vrmt de clusters visible 
 # -> vaut pas le coup d'essayer de forcer des groupes.
+
 
