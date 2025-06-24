@@ -77,10 +77,32 @@ application_tous_ordres <- function(fonction, repartition_cherche=NA){
 #' 
 nb_ordre <- function(nom_ordre){
   nb_o <- Total %>%
-    filter(ordre=="Carnivora")%>%
+    filter(ordre==nom_ordre)%>%
     group_by(observateurs) %>%
-    summarise(nb_carnivora = n(), .groups = "drop")
+    summarise(nbr = n(), .groups = "drop")
+  
+  nom = paste("nb_",tolower(nom_ordre), sep="")
+  nb_o <- nb_o %>% 
+    rename_at("nbr",~nom)%>%head()
   
   return(nb_o)
 }
 
+#' Rassemble les individus qui ont un nom d'individu similaire
+#'
+#' @param nom_ordre Le nom de l'ordre qu'on veut compter
+#'
+#' @return Un tibble observateurs et nombre
+#' @export
+#'
+#' @examples
+#' 
+noms_simiaires <- function(nom){
+  
+  # Att pas juste prendre quand ca contient car plusieurs ensemble
+  # les tirets entre les noms
+  # Les accents (enlever je penses)
+  # ceux qui ecrivent "OFB", ou observation ponctuelle dans le nom
+  
+  
+}
