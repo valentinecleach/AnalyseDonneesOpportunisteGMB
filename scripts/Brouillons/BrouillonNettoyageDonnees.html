@@ -1486,6 +1486,22 @@ library(dplyr)</code></pre>
 <pre class="r"><code>library(stringi)
 library(sf)</code></pre>
 <pre><code>## Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE</code></pre>
+<pre class="r"><code>library(collapse)</code></pre>
+<pre><code>## collapse 2.1.2, see ?`collapse-package` or ?`collapse-documentation`</code></pre>
+<pre><code>## 
+## Attaching package: &#39;collapse&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:stats&#39;:
+## 
+##     D</code></pre>
+<pre class="r"><code>library(vegan)</code></pre>
+<pre><code>## Loading required package: permute</code></pre>
+<pre class="r"><code>library(janitor)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;janitor&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     chisq.test, fisher.test</code></pre>
+<pre class="r"><code>library(permute)</code></pre>
 <pre class="r"><code>setwd(&quot;~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes&quot;)
 data_original_22_29 &lt;- read_delim(&quot;GeoN_22-29_2025-06-05T09_18_37.225Z.csv&quot;, 
                                   delim = &quot;;&quot;, 
@@ -1715,6 +1731,17 @@ VisioN_FB &lt;- VisioN_FB %&gt;%
          &quot;etat_biologique&quot;, &quot;bdd_originale&quot;)
 
 Total &lt;- rbind(VisioN_FB, GeoN)
+
+Total &lt;- Total %&gt;%
+  mutate(observateurs = gsub(&quot;-&quot;, &quot; &quot;, observateurs), # enlever tirets
+         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
+         observateurs = toupper(observateurs),
+         observateurs = ifelse(observateurs == &quot;NA&quot;, NA, observateurs)#majuscule
+  )%&gt;%
+  mutate(observateurs = as.factor(replace(
+    as.character(observateurs),
+    which(is.na(observateurs)),
+    paste(&quot;NA_&quot;, seq_len(sum(is.na(observateurs))), sep=&quot;&quot;)))) # donner le nom : NA_1, NA_2, ...
 
 any(duplicated(Total))</code></pre>
 <pre><code>## [1] FALSE</code></pre>
