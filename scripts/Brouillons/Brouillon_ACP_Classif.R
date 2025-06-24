@@ -1,4 +1,3 @@
-
 #######################################
 ##### Classification Observateurs #####
 #######################################
@@ -19,13 +18,25 @@ Total <- Total%>%
               "famille", "ordre", 
               "nom_vernaculaire", "nom_valide"), 
             .funs = as.factor)
-
+PIQUET STÉPHANE
 
 Total <- Total %>%
   mutate(observateurs = toupper(observateurs),
          observateurs = ifelse( observateurs == "BALLOT JEAN NOËL", 
                                "BALLOT JEAN-NOËL",
                                observateurs),
+         observateurs = ifelse( observateurs %in% c("PIQUET STÉPHANE",
+                                                    "PIQUET STEPHANE",
+                                                    "PIQUET OFB STÉPHANE"),
+                                "PIQUET STEPHANE",
+                                observateurs),
+         observateurs = ifelse( observateurs %in% c("PIQUET STÉPHANE",
+                                                    "PIQUET STEPHANE",
+                                                    "PIQUET OFB STÉPHANE"),
+                                "PIQUET STEPHANE",
+                                observateurs),
+         
+         
          observateurs = as.factor(replace(
            as.character(observateurs),
            which(is.na(observateurs)),
@@ -33,18 +44,12 @@ Total <- Total %>%
   )
 #####################
 
+
+source("~/work/AnalyseDonneesOpportunisteGMB/fonctions/fonctions.R")
+
 nb_observations <- Total %>%
   group_by(observateurs) %>%
   summarise(total_obs = n(), .groups = "drop")
-
-nb_ordre <- function(nom_ordre){
-  nb_o <- Total %>%
-    filter(ordre=="Carnivora")%>%
-    group_by(observateurs) %>%
-    summarise(nb_carnivora = n(), .groups = "drop")
-  
-  return(nb_o)
-}
 
 
 max_technique <- Total%>%
@@ -64,8 +69,9 @@ Observateurs <- nb_observations %>%
   left_join(max_technique, by = "observateurs")%>%
   left_join(max_etat_bio, by = "observateurs")
 
-# Indice de Shannon
+str(Observateurs)
 
+# Indice de Shannon
 
 Observateurs <- Observateurs %>%
   mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
@@ -91,18 +97,16 @@ Observateurs <- Observateurs%>%
          prop_lagomorpha = nb_lagomorpha / total_obs,
          prop_rodentia = nb_rodentia / total_obs)
 
-rm(max_etat_bio, max_technique,
-   nb_carnivora, nb_cetartiodactyla, nb_eulipotyphla,
-   nb_lagomorpha, nb_observations, nb_rodentia)
+rm(max_etat_bio, max_technique)
 
 PCAshiny(Observateurs)
 
-res.PCA<-PCA(Observateurs,quali.sup=c(1),quanti.sup=c(2,8),graph=FALSE)
-plot.PCA(res.PCA,choix='var')
-plot.PCA(res.PCA,invisible=c('ind','ind.sup'),habillage='cos2',label =c('quali'))
-summary(res.PCA)
+#res.PCA<-PCA(Observateurs,quali.sup=c(1),quanti.sup=c(2,8),graph=FALSE)
+#plot.PCA(res.PCA,choix='var')
+#plot.PCA(res.PCA,invisible=c('ind','ind.sup'),habillage='cos2',label =c('quali'))
+#summary(res.PCA)
 
-Factoshiny(Observateurs)
+#Factoshiny(Observateurs)
 
 ####################
 
