@@ -33,6 +33,12 @@ library(tarchetypes)
 library(ggplot2)
 library(ggpubr)
 
+library(Factoshiny)
+library(collapse)
+library(vegan)
+library(permute)
+
+
 # Graine aléatoire
 set.seed(12345)
 
@@ -754,30 +760,6 @@ Nous remarquons que:\
 - DELETED DELETED, semble être surtout dans le finistère ce qui est étonnant si ce sont plusieurs personnes.
 
 ```{r}
-Total %>%
-  filter(date > params$date_min,
-         ordre == "Lagomorpha",
-         nom_vernaculaire != "Loutre d'Europe, Loutre commune, Loutre") %>%
-  mutate(
-    year = as.numeric(format(date, "%Y")),
-    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
-    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.015)
-  ) %>%
-  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
-  geom_bar(position = "fill") +
-  labs(
-    x = "Période",
-    title = "Répartition des differentes carnivores observés depuis 1980",
-    y = "Proportion",
-    fill = "Espèce"
-  ) +
-  theme_minimal()+
-  scale_fill_viridis_d(labels = label_wrap(40))+
-  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))+
-  coord_flip()
-```
-
-```{r}
 
 Total%>%
   ggplot(aes(as.factor(wday(date, 
@@ -826,6 +808,11 @@ Total%>%
                               "10" = "Octobre",
                               "11" = "Novembre",
                               "12" = "Decembre"))
+
+```
+
+```{r}
+
 
 ```
 

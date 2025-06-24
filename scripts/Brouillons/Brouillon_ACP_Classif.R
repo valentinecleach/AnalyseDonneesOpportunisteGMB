@@ -37,30 +37,15 @@ nb_observations <- Total %>%
   group_by(observateurs) %>%
   summarise(total_obs = n(), .groups = "drop")
 
-nb_carnivora <- Total %>%
-  filter(ordre=="Carnivora")%>%
-  group_by(observateurs) %>%
-  summarise(nb_carnivora = n(), .groups = "drop")
+nb_ordre <- function(nom_ordre){
+  nb_o <- Total %>%
+    filter(ordre=="Carnivora")%>%
+    group_by(observateurs) %>%
+    summarise(nb_carnivora = n(), .groups = "drop")
+  
+  return(nb_o)
+}
 
-nb_cetartiodactyla <- Total %>%
-  filter(ordre=="Cetartiodactyla")%>%
-  group_by(observateurs) %>%
-  summarise(nb_cetartiodactyla = n(), .groups = "drop")
-
-nb_eulipotyphla <- Total %>%
-  filter(ordre=="Eulipotyphla")%>%
-  group_by(observateurs) %>%
-  summarise(nb_eulipotyphla = n(), .groups = "drop")
-
-nb_lagomorpha <- Total %>%
-  filter(ordre=="Lagomorpha")%>%
-  group_by(observateurs) %>%
-  summarise(nb_lagomorpha  = n(), .groups = "drop")
-
-nb_rodentia <- Total %>%
-  filter(ordre=="Rodentia")%>%
-  group_by(observateurs) %>%
-  summarise(nb_rodentia  = n(), .groups = "drop")
 
 max_technique <- Total%>%
   group_by(observateurs) %>%
@@ -71,11 +56,11 @@ max_etat_bio <- Total%>%
   summarise(etat_bio_max = collapse::fmode(etat_biologique))
 
 Observateurs <- nb_observations %>%
-  left_join(nb_carnivora, by = "observateurs") %>%
-  left_join(nb_cetartiodactyla, by = "observateurs") %>%
-  left_join(nb_eulipotyphla, by = "observateurs") %>%
-  left_join(nb_lagomorpha, by = "observateurs") %>%
-  left_join(nb_rodentia, by = "observateurs")%>%
+  left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
+  left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
+  left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
+  left_join(nb_ordre(nom_ordre = "Lagomorpha"), by = "observateurs") %>%
+  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")%>%
   left_join(max_technique, by = "observateurs")%>%
   left_join(max_etat_bio, by = "observateurs")
 
