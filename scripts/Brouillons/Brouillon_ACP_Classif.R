@@ -6,6 +6,7 @@ library(dplyr)
 library(Factoshiny)
 library(collapse)
 library(vegan)
+library(janitor)
 library(permute)
 
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
@@ -18,32 +19,21 @@ Total <- Total%>%
               "famille", "ordre", 
               "nom_vernaculaire", "nom_valide"), 
             .funs = as.factor)
-PIQUET STÉPHANE
+
+
 
 Total <- Total %>%
-  mutate(observateurs = toupper(observateurs),
-         observateurs = ifelse( observateurs == "BALLOT JEAN NOËL", 
-                               "BALLOT JEAN-NOËL",
-                               observateurs),
-         observateurs = ifelse( observateurs %in% c("PIQUET STÉPHANE",
-                                                    "PIQUET STEPHANE",
-                                                    "PIQUET OFB STÉPHANE"),
-                                "PIQUET STEPHANE",
-                                observateurs),
-         observateurs = ifelse( observateurs %in% c("PIQUET STÉPHANE",
-                                                    "PIQUET STEPHANE",
-                                                    "PIQUET OFB STÉPHANE"),
-                                "PIQUET STEPHANE",
-                                observateurs),
-         
-         
-         observateurs = as.factor(replace(
-           as.character(observateurs),
-           which(is.na(observateurs)),
-           paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))
-  )
-#####################
+  mutate(observateurs = gsub("-", " ", observateurs), # enlever tirets
+         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
+         observateurs = toupper(observateurs),
+         observateurs = ifelse(observateurs == "NA", NA, observateurs)#majuscule
+  )%>%
+  mutate(observateurs = as.factor(replace(
+    as.character(observateurs),
+    which(is.na(observateurs)),
+    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))) # donner le nom : NA_1, NA_2, ...
 
+####
 
 source("~/work/AnalyseDonneesOpportunisteGMB/fonctions/fonctions.R")
 
@@ -127,6 +117,7 @@ plot.PCA(res.PCA,invisible=c('ind','ind.sup'),select='cos2  0.3',cex=0.5,cex.mai
 res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(7,8),quanti.sup=c(11,12,13,14,15),graph=FALSE)
 plot.PCA(res.PCA,choix='var')
 plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali'))
+summary(res.PCA)
 # On remarque
 # bcp d'obs -> bcp de "autre" (quel catégorie? etat bio ou technique obs?)
 # peu obs -> entendu/ultrasons (logique)
