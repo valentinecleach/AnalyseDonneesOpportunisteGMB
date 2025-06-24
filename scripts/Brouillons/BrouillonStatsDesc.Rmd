@@ -815,7 +815,7 @@ Total%>%
 \
 
 ### Differences parmi les observateurs
-```{r}
+```{r Creation-BDD-Observateurs}
 nb_observations <- Total %>%
   group_by(observateurs) %>%
   summarise(total_obs = n(), .groups = "drop")
@@ -856,13 +856,17 @@ Observateurs <- Observateurs%>%
          prop_cetartiodactyla = nb_cetartiodactyla / total_obs,
          prop_eulipotyphla = nb_eulipotyphla / total_obs,
          prop_lagomorpha = nb_lagomorpha / total_obs,
-         prop_rodentia = nb_rodentia / total_obs)
+         prop_rodentia = nb_rodentia / total_obs,
+         tech_obs_max = paste("Tech d'obs: ", tech_obs_max, sep=""),
+         etat_bio_max = paste("Etat bio: ", etat_bio_max, sep="")
+         )
+
 
 rm(max_etat_bio, max_technique)
 ```
 
 On se demande a quoi ressemble la répartition des Indice de Pielou 
-```{r}
+```{r Indices-Equitabilite}
 boxplot(Observateurs$Pielou, 
         main="Répartition des Indice de Pielou",
         ylab="Indice de Pielou")
@@ -881,7 +885,7 @@ assez bonne diversité dans leurs observations.
 (1/4 d'entre eux sont entre 0.86 et 1 d'Indice.) 
 
 On fait une ACP sur cette base de donnée, et on obtiens ceci:
-```{r}
+```{r ACP}
 res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(7,8),
              quanti.sup=c(11,12,13,14,15),graph=FALSE)
 plot.PCA(res.PCA,choix='var')
@@ -897,5 +901,20 @@ le deuxieme axe la diversité.
 Les Individus ayant principalement des "technique biologique: autre" sont ceux qui ont beaucoup d'observation. Ceux ayant surtout remarqué des animaux morts, ont peu d'observations. De même pour une technique d'ob Inconnu et Entendu/Ultrasons.
 
 Les individus qui ont principalement observé des animaux mort due a un impact routier ont peu de diversité dans les espèces qu'ils remarquent. Pareil pour Entendu/Ultrasons, Inconnu et Indices, et Trouvé Mort.
-Les animaux avec une tech d'obs Non Renseigné (ou Vu mais moins) le sont par des gens avec une grande diversité d'obsrvations.
+Les animaux avec une tech d'obs Non Renseigné (ou Vu mais moins) le sont par des gens avec une grande diversité d'observations.
+
+Clustering : On voit pas grand chose
+```{r}
+res.HCPC<-HCPC(res.PCA,nb.clust=2,consol=FALSE,graph=FALSE)
+plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
+plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
+plot.HCPC(res.HCPC,choice='3D.map',ind.names=FALSE,centers.plot=FALSE,angle=90,title='Hierarchical tree on the factor map')
+
+
+
+res.HCPC<-HCPC(res.PCA,nb.clust=4,consol=FALSE,graph=FALSE)
+plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
+plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
+plot.HCPC(res.HCPC,choice='3D.map',ind.names=FALSE,centers.plot=FALSE,angle=90,title='Hierarchical tree on the factor map')
+```
 

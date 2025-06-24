@@ -123,3 +123,14 @@ summary(res.PCA)
 # Pas vrmt de clusters visible 
 # -> vaut pas le coup d'essayer de forcer des groupes.
 
+Observateurs %>%
+  mutate(tech_obs_max = paste("Tech d'obs: ", tech_obs_max, sep=""),
+         etat_bio_max = paste("Etat bio: ", etat_bio_max, sep=""))
+
+Factoshiny(Observateurs[,-1])
+
+
+res.HCPC<-HCPC(res.PCA,nb.clust=4,consol=FALSE,graph=FALSE)
+plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
+plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
+plot.HCPC(res.HCPC,choice='3D.map',ind.names=FALSE,centers.plot=FALSE,angle=90,title='Hierarchical tree on the factor map')
