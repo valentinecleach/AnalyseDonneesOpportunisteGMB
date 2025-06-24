@@ -1,3 +1,15 @@
+#' Fait un barplot selon les espèces. Les espèces sont rangés sur le plot
+#'
+#' @param bdd La base de donnée
+#' @param nom_ordre Le nom de l'ordre parmis lesquels ont veut...
+#' @param repartition ce quon veut etudier
+#' @param date_min  la date minimum
+#'
+#' @return Une liste de plots
+#' @export
+#'
+#' @examples
+#' 
 repartition_espece <- function(bdd = Total, nom_ordre, repartition, date_min = params$date_min) {
   
   pour_titre1 = deparse(substitute(repartition))
@@ -30,7 +42,16 @@ repartition_espece <- function(bdd = Total, nom_ordre, repartition, date_min = p
                        pour_titre2))
 }
 
-
+#' Applique une fonction qui plot qqe chose a tous les ordres
+#'
+#' @param fonction La fonction qu'on veux
+#' @param repartition_cherche un parametre de la fonction d'avant
+#'
+#' @return Une liste de plots
+#' @export
+#'
+#' @examples
+#' 
 application_tous_ordres <- function(fonction, repartition_cherche=NA){
   p1 <- fonction(nom_ordre = "Carnivora", 
                  repartition = {{repartition_cherche}})
@@ -44,3 +65,22 @@ application_tous_ordres <- function(fonction, repartition_cherche=NA){
                  repartition = {{repartition_cherche}})
   return(list(p1,p2,p3,p4,p5))
 }
+
+#' Donne le nombre d'observation de chaque ordre pour chaque individu
+#'
+#' @param nom_ordre Le nom de l'ordre qu'on veut compter
+#'
+#' @return Un tibble observateurs et nombre
+#' @export
+#'
+#' @examples
+#' 
+nb_ordre <- function(nom_ordre){
+  nb_o <- Total %>%
+    filter(ordre=="Carnivora")%>%
+    group_by(observateurs) %>%
+    summarise(nb_carnivora = n(), .groups = "drop")
+  
+  return(nb_o)
+}
+
