@@ -3,5 +3,6 @@
 .RData
 .Ruserdata
 .csv
+.dbf
 
 *.csv
