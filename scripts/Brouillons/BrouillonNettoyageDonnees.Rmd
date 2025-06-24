@@ -15,6 +15,10 @@ library(ggplot2)
 library(dplyr)
 library(stringi)
 library(sf)
+library(collapse)
+library(vegan)
+library(janitor)
+library(permute)
 ```
 
 ```{r nettoyage-contenue}
@@ -183,6 +187,17 @@ VisioN_FB <- VisioN_FB %>%
          "etat_biologique", "bdd_originale")
 
 Total <- rbind(VisioN_FB, GeoN)
+
+Total <- Total %>%
+  mutate(observateurs = gsub("-", " ", observateurs), # enlever tirets
+         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
+         observateurs = toupper(observateurs),
+         observateurs = ifelse(observateurs == "NA", NA, observateurs)#majuscule
+  )%>%
+  mutate(observateurs = as.factor(replace(
+    as.character(observateurs),
+    which(is.na(observateurs)),
+    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))) # donner le nom : NA_1, NA_2, ...
 
 any(duplicated(Total))
 ```
