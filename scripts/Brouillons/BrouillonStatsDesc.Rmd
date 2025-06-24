@@ -28,9 +28,16 @@ library(ggplot2)
 library(lubridate)
 library(purrr)
 library(forcats)
+library(targets)
+library(tarchetypes)
+library(ggplot2)
+library(ggpubr)
 
 # Graine aléatoire
 set.seed(12345)
+
+# Fonctions
+source("~/work/AnalyseDonneesOpportunisteGMB/fonctions/fonctions.R")
 
 # Importations
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
@@ -110,32 +117,11 @@ Total%>%
 ```
 GeoNature observe principalement des indices de rodents et de carnivores. Les lagomorphes sont peu remarqués avec les indices, comparés aux autres dans VisioNature et GeoNature.
 ```{r}
-Total%>%
-  filter(date > params$date_min,
-         bdd_originale == VN)%>%
-  ggplot(aes(technique_observation, fill=nom_vernaculaire))+
-  geom_bar(position="dodge")+
-  facet_grid(. ~ ordre)
-  theme_bw()+
-  scale_fill_grey(start = 0.2,
-                  end = 0.8, 
-                  na.value = "red")+
-  labs(title = "1a. Répartition de l'état biologique selon l'espèce",
-       subtitle = paste(VN))
+application_tous_ordres(repartition_espece, 
+                        repartition = etat_biologique)
 
-Total%>%
-  filter(bdd_originale == GN,
-         date > params$date_min)%>%
-  ggplot(aes(technique_observation, 
-             fill=etat_biologique))+
-  geom_bar(position="dodge")+
-  theme_bw()+
-  scale_fill_grey(start = 0.2,
-                  end = 0.8, 
-                  na.value = "red")+
-  labs(title = "1b. Répartition de l'état biologique selon les techniques d'observations",
-       subtitle = paste(GN))
-
+application_tous_ordres(repartition_espece, 
+                        repartition = technique_observation)
 ```
 
 ### Répartition des ordres

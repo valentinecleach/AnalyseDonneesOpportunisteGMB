@@ -79,11 +79,7 @@ GeoN <- GeoN %>%
     ),
     "Indices",
     ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
-<<<<<<< HEAD
            "Entendu/Ultrasons",
-=======
-           "Entendu/Ultasons",
->>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
            technique_observation)
   ))%>%
   mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
@@ -168,11 +164,8 @@ VisioN_FB <- VisioN_FB %>%
          technique_observation = as.factor(technique_observation),
          bdd_originale = as.factor("VisioNature"),
          observateurs = toupper(observateurs))%>%
-<<<<<<< HEAD
   mutate(observateurs = ifelse(!is.na(observateurs), 
                                toupper(observateurs), NA))%>%
-=======
->>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
   select("id_synthese",
          "date",
          "cd_nom",
@@ -225,16 +218,11 @@ total_44 <- st_filter(Total_sf, carte_44, .predicate = st_within)
 total_44_id_synthese <- total_44 %>%
   st_drop_geometry() %>%
   select(id_synthese)
-<<<<<<< HEAD
+
 que_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
-=======
-only_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
->>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
 
 # Verifications
 ggplot() +
-  geom_sf(data = carte_bretagne_44) +
-<<<<<<< HEAD
   geom_sf(data = que_bretagne) +
   labs(title = "Points in Bretagne (sauf 44)")
 
@@ -243,14 +231,13 @@ Total_Conti <- que_bretagne %>%
 
 
 st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
-=======
-  geom_sf(data = only_bretagne) +
+
+geom_sf(data = only_bretagne) +
   labs(title = "Points in Bretagne (sauf 44)")
 
 Total_Conti <- only_bretagne %>%
   st_drop_geometry()
 
->>>>>>> cde2984bb2468f5d88afdab04530c6265e5c8f67
 write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
 ```
 

@@ -996,3 +996,15 @@ repartition_espece(nom_ordre = "Lagomorpha",
 repartition_espece(nom_ordre = "Rodentia", 
                    repartition = etat_biologique)
 
+source("~/work/AnalyseDonneesOpportunisteGMB/fonctions/fonctions.R")
+
+repartition_espece(nom_ordre = "Rodentia", 
+                   repartition = technique_observation)
+
+source("~/work/AnalyseDonneesOpportunisteGMB/fonctions/fonctions.R")
+
+application_tous_ordres(repartition_espece, 
+                        repartition = etat_biologique)
+
+application_tous_ordres(repartition_espece, 
+                        repartition = technique_observation)
