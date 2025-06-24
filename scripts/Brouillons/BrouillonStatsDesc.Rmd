@@ -603,8 +603,9 @@ graph_ordre_tranche_annee("Rodentia")
 On dirait que plus on avance dans les années, plus on retrouve d'individus aux sud de la Bretagne. Ceci peut être car nous avons plus de données de VisioNature au fil du temps qui provient d'ornithologues et les ornithologues sont souvent proches des littoraux.\
 
 
-## 4. Étude des principaux observateurs
+## 4. Étude des observateurs
 
+###  Étude des principaux observateurs
 Étudier les principaux observateurs peut être important parce qu'ils participent grandement au recueil des données donc un changement de leur comportement implique également un changement du comportement de la base de données.
 
 Ils pourraient introduire des biais:\
@@ -759,6 +760,7 @@ Nous remarquons que:\
 - CHAPUIS MARTINE observe uniquement a un endroit précis.\
 - DELETED DELETED, semble être surtout dans le finistère ce qui est étonnant si ce sont plusieurs personnes.
 
+### Habitudes des observateurs?
 ```{r}
 
 Total%>%
@@ -810,9 +812,90 @@ Total%>%
                               "12" = "Decembre"))
 
 ```
+\
 
+### Differences parmi les observateurs
 ```{r}
+nb_observations <- Total %>%
+  group_by(observateurs) %>%
+  summarise(total_obs = n(), .groups = "drop")
 
+max_technique <- Total%>%
+  group_by(observateurs) %>%
+  summarise(tech_obs_max = collapse::fmode(technique_observation))
 
+max_etat_bio <- Total%>%
+  group_by(observateurs) %>%
+  summarise(etat_bio_max = collapse::fmode(etat_biologique))
+
+Observateurs <- nb_observations %>%
+  left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
+  left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
+  left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
+  left_join(nb_ordre(nom_ordre = "Lagomorpha"), by = "observateurs") %>%
+  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")%>%
+  left_join(max_technique, by = "observateurs")%>%
+  left_join(max_etat_bio, by = "observateurs")
+
+Observateurs <- Observateurs %>%
+  mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
+         nb_cetartiodactyla = ifelse(is.na(nb_cetartiodactyla), 0, nb_cetartiodactyla),
+         nb_eulipotyphla = ifelse(is.na(nb_eulipotyphla), 0, nb_eulipotyphla),
+         nb_lagomorpha = ifelse(is.na(nb_lagomorpha), 0, nb_lagomorpha),
+         nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
+  )
+
+Observateurs$shannon <- vegan::diversity(Observateurs[,3:7])
+
+Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,3:7]))
+Observateurs <- Observateurs %>%
+  mutate(Pielou = ifelse(shannon==0, 0, Pielou))
+
+Observateurs <- Observateurs%>%
+  mutate(prop_carnivora = nb_carnivora / total_obs,
+         prop_cetartiodactyla = nb_cetartiodactyla / total_obs,
+         prop_eulipotyphla = nb_eulipotyphla / total_obs,
+         prop_lagomorpha = nb_lagomorpha / total_obs,
+         prop_rodentia = nb_rodentia / total_obs)
+
+rm(max_etat_bio, max_technique)
 ```
+
+On se demande a quoi ressemble la répartition des Indice de Pielou 
+```{r}
+boxplot(Observateurs$Pielou, 
+        main="Répartition des Indice de Pielou",
+        ylab="Indice de Pielou")
+
+summary(Observateurs$Pielou)
+```
+On remarque qu'il y a enormément d'observateurs qui on un Indice nul, ou presque.
+Ceci est normal car beaucoup ont observé uniquement une observation. 
+(Par exemple, tous les NA ont été considéré comme des observateurs uniques, 
+et d'autres ont observé a plusieurs.) 
+On a 4032 observateurs qui ont uniquement une observation tandis qu'il y a 7869
+observateurs dans la base de donnée.
+
+Le 4e quartile est aussi assez sérré. Il y a donc beaucoup d'individus avec une 
+assez bonne diversité dans leurs observations. 
+(1/4 d'entre eux sont entre 0.86 et 1 d'Indice.) 
+
+On fait une ACP sur cette base de donnée, et on obtiens ceci:
+```{r}
+res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(7,8),
+             quanti.sup=c(11,12,13,14,15),graph=FALSE)
+plot.PCA(res.PCA,choix='var')
+plot.PCA(res.PCA,invisible=c('ind','ind.sup'), label =c('quali'))
+summary(res.PCA)
+```
+On a environ 83% d'explication des axes avec uniquement les 2 premières 
+dimension ce qui est très bien. 
+
+Le premier axe semble représenter un grand nombre d'observations, et 
+le deuxieme axe la diversité.
+
+Les Individus ayant principalement des "technique biologique: autre" sont ceux qui ont beaucoup d'observation. Ceux ayant surtout remarqué des animaux morts, ont peu d'observations. De même pour une technique d'ob Inconnu et Entendu/Ultrasons.
+
+Les individus qui ont principalement observé des animaux mort due a un impact routier ont peu de diversité dans les espèces qu'ils remarquent. Pareil pour Entendu/Ultrasons, Inconnu et Indices, et Trouvé Mort.
+Les animaux avec une tech d'obs Non Renseigné (ou Vu mais moins) le sont par des gens avec une grande diversité d'obsrvations.
 

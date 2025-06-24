@@ -6,7 +6,6 @@ library(dplyr)
 library(Factoshiny)
 library(collapse)
 library(vegan)
-library(janitor)
 library(permute)
 
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
@@ -21,26 +20,11 @@ Total <- Total%>%
             .funs = as.factor)
 
 
-
-Total <- Total %>%
-  mutate(observateurs = gsub("-", " ", observateurs), # enlever tirets
-         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
-         observateurs = toupper(observateurs),
-         observateurs = ifelse(observateurs == "NA", NA, observateurs)#majuscule
-  )%>%
-  mutate(observateurs = as.factor(replace(
-    as.character(observateurs),
-    which(is.na(observateurs)),
-    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))) # donner le nom : NA_1, NA_2, ...
-
-####
-
 source("~/work/AnalyseDonneesOpportunisteGMB/fonctions/fonctions.R")
 
 nb_observations <- Total %>%
   group_by(observateurs) %>%
   summarise(total_obs = n(), .groups = "drop")
-
 
 max_technique <- Total%>%
   group_by(observateurs) %>%
@@ -77,7 +61,18 @@ Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs
 Observateurs <- Observateurs %>%
   mutate(Pielou = ifelse(shannon==0, 0, Pielou))
 
-boxplot(Observateurs$Pielou, main="Boxplot des Indice de Pielou")
+Observateurs%>%
+  ggplot(aes(x="Observateurs",y=Pielou))+
+  geom_boxplot(fill="lightgray")+
+  theme_bw()+
+  labs(title="Répartition des Indice de Pielou",
+       x="", y="Indice de Pielou")+
+  geom_jitter(width = 0.2, alpha=0.05, color="blue4")
+
+boxplot(Observateurs$Pielou, 
+        main="Répartition des Indice de Pielou",
+        ylab="Indice de Pielou")
+
 summary(Observateurs$Pielou)
 
 Observateurs <- Observateurs%>%
@@ -127,5 +122,4 @@ summary(res.PCA)
 
 # Pas vrmt de clusters visible 
 # -> vaut pas le coup d'essayer de forcer des groupes.
-
 
