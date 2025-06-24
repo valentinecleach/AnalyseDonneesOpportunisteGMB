@@ -656,7 +656,9 @@ data_original_GeoRodents &lt;- read_delim(&quot;VN_compl_Rodentia_2025-06-13T14_
          etat_biologique=as.factor(etat_biologique),
          jdd_nom = as.factor(jdd_nom)
   )%&gt;%
-  filter(jdd_nom !=  &quot;Données faunebretagne.org&quot; )%&gt;%
+#  filter(!jdd_nom %in% c(490,53))%&gt;% 
+           # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
+           # 53:  Données faunebretagne.org   
   mutate(
     nom_vernaculaire = ifelse(
       is.na(nom_vernaculaire),
@@ -686,7 +688,7 @@ data_original_GeoRodents &lt;- read_delim(&quot;VN_compl_Rodentia_2025-06-13T14_
   ))%&gt;%
   mutate(technique_observation = as.factor(technique_observation))</code></pre>
 <p>Création d’une base de données commune avec tous les départements
-(22, 29, 34, 56, 44 et les rodents) :</p>
+(22, 29, 34, 56, et les rodents) :</p>
 <pre class="r"><code>GeoN &lt;- rbind(GeoN_22_29, GeoN_34_56, GeoN_44, GeoRodents)</code></pre>
 <p>On vérifie qu’il n’y a pas de doublons:</p>
 <pre class="r"><code>any(duplicated(GeoN))</code></pre>
@@ -824,7 +826,7 @@ contente ici de rester là dessus.</p>
 
 summary(as.factor(Total_B$bdd))</code></pre>
 <pre><code>##      GeoN VisioN_FB 
-##     57517     93416</code></pre>
+##     58226     93416</code></pre>
 <pre class="r"><code>any(duplicated(Total_B))</code></pre>
 <pre><code>## [1] FALSE</code></pre>
 </div>
@@ -839,8 +841,14 @@ summary(as.factor(Total_B$bdd))</code></pre>
 
 #write.csv(Total_B,
 #          &quot;~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_B.csv&quot;)</code></pre>
-<p>On modifie ensuite ces fichiers avec QGIS en selectionnant uniquement
-les données sur la bretagne continentale.</p>
+<p>On à ensuite retiré les îles a l’aide d’une intersection avec notre
+BDD et une maps de la bretagne continentale sur QGIS. </p>
+<p>VisioNature observations supprimés:</p>
+<pre class="r"><code>82344-79064</code></pre>
+<pre><code>## [1] 3280</code></pre>
+<p>GeoNature observations supprimés:</p>
+<pre class="r"><code>82344-79064</code></pre>
+<pre><code>## [1] 3280</code></pre>
 </div>
 
 
