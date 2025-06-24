@@ -1,8 +1,0 @@
-Package: AnalyseDonneesOpportunisteGMB
-Title: Analyse de Donnees Opportunistes pour Le GMB
-Authors@R: 
-    person("Valentine", "Cleach")
-Description: Travail dans le cadre de mon stage au GMB 
-    pour faire une analyse de donnees opportunistes sur
-    les 20 dernieres annees.
-RoxygenNote: 7.3.2
