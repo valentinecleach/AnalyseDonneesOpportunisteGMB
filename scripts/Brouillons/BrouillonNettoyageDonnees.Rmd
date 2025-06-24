@@ -232,12 +232,6 @@ Total_Conti <- que_bretagne %>%
 
 st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
 
-geom_sf(data = only_bretagne) +
-  labs(title = "Points in Bretagne (sauf 44)")
-
-Total_Conti <- only_bretagne %>%
-  st_drop_geometry()
-
 write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
 ```
 
