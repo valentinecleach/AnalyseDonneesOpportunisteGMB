@@ -56,13 +56,13 @@ max_etat_bio <- Total%>%
   summarise(etat_bio_max = collapse::fmode(etat_biologique))
 
 Observateurs <- nb_observations %>%
+  left_join(max_technique, by = "observateurs")%>%
+  left_join(max_etat_bio, by = "observateurs")%>%
   left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Lagomorpha"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")%>%
-  left_join(max_technique, by = "observateurs")%>%
-  left_join(max_etat_bio, by = "observateurs")
+  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")
 
 Observateurs <- Observateurs %>%
   mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
@@ -72,9 +72,9 @@ Observateurs <- Observateurs %>%
          nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
   )
 
-Observateurs$shannon <- vegan::diversity(Observateurs[,3:7])
+Observateurs$shannon <- vegan::diversity(Observateurs[,5:9])
 
-Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,3:7]))
+Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,5:9]))
 Observateurs <- Observateurs %>%
   mutate(Pielou = ifelse(shannon==0, 0, Pielou))
 
@@ -171,13 +171,13 @@ max_etat_bio <- Total%>%
   summarise(etat_bio_max = collapse::fmode(etat_biologique))
 
 Observateurs <- nb_observations %>%
+  left_join(max_technique, by = "observateurs")%>%
+  left_join(max_etat_bio, by = "observateurs")%>%
   left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Lagomorpha"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")%>%
-  left_join(max_technique, by = "observateurs")%>%
-  left_join(max_etat_bio, by = "observateurs")
+  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")
 
 Observateurs <- Observateurs %>%
   mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
@@ -186,10 +186,10 @@ Observateurs <- Observateurs %>%
          nb_lagomorpha = ifelse(is.na(nb_lagomorpha), 0, nb_lagomorpha),
          nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
   )
+str(Observateurs[,5:9])
+Observateurs$shannon <- vegan::diversity(Observateurs[,5:9])
 
-Observateurs$shannon <- vegan::diversity(Observateurs[,3:7])
-
-Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,3:7]))
+Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,5:9]))
 Observateurs <- Observateurs %>%
   mutate(Pielou = ifelse(shannon==0, 0, Pielou))
 
@@ -203,4 +203,59 @@ Observateurs <- Observateurs%>%
          etat_bio_max = paste("Etat bio: ", etat_bio_max, sep="")
   )
 
+########################################
+Observateurs_espece <- Observateurs[,1:4]
 
+liste_cd_noms <- Total %>%
+  group_by(cd_nom)%>%
+  distinct(cd_nom)%>%
+  select(cd_nom)
+
+as.integer(liste_cd_noms[1,])
+
+for (i in 1:nrow(liste_cd_noms)) {
+  cd_nom_value <- as.integer(liste_cd_noms[i,])
+  
+  nb_o <- Total %>%
+    filter(cd_nom == cd_nom_value) %>%
+    group_by(observateurs) %>%
+    summarise(nbr = n(), .groups = "drop") %>%
+    mutate(nbr = ifelse(is.na(nbr), 0, nbr))
+  
+  nom_espece <- Total %>%
+    filter(cd_nom == cd_nom_value) %>%
+    summarise(nom = first(nom_vernaculaire))
+  nom <- nom_espece$nom
+  nom <- paste0("nb_", gsub(" ", "", nom))
+  
+  nb_o <- nb_o %>% rename({{nom}} := nbr)
+  
+  Observateurs_espece <- Observateurs_espece %>%
+    left_join(nb_o, by = "observateurs")
+}
+
+Observateurs_espece[,5:27] <- Observateurs_espece[,5:27] %>% replace(is.na(.), 0)
+
+Observateurs_espece$Shannon <- vegan::diversity(Observateurs_espece[,5:27])
+
+Observateurs_espece$Pielou <- Observateurs_espece$Shannon / log(vegan::specnumber(Observateurs_espece[,5:27]))
+Observateurs_espece <- Observateurs_espece %>%
+  mutate(Pielou = ifelse(Shannon==0, 0, Pielou))
+
+boxplot(Observateurs_espece$Pielou)
+
+t <- Observateurs_espece%>%
+  filter(Pielou>0.9)
+
+
+View(t)
+
+PCAshiny(Observateurs_espece)
+
+Observateurs <- Observateurs %>%
+  mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
+         nb_cetartiodactyla = ifelse(is.na(nb_cetartiodactyla), 0, nb_cetartiodactyla),
+         nb_eulipotyphla = ifelse(is.na(nb_eulipotyphla), 0, nb_eulipotyphla),
+         nb_lagomorpha = ifelse(is.na(nb_lagomorpha), 0, nb_lagomorpha),
+         nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
+  )

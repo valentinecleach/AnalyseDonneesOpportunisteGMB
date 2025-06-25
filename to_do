@@ -42,3 +42,12 @@ Martes martes : Martre des pins, Martre cd_nom 60658
 Martes Pinel, 1792 : cd_nom 194481 -> quel nom_vernaculaire? Peut on les rassembler?
 
 Suppresion de 1 Muntjacs -> Espèce d'Asie?
+git push origin main --force
+git push --set-upstream scripts/Brouillons/BrouillonS4 main
+git push --set-upstream origin main
+git remote -
+
+git push --set-upstream <your-remote-name> main
+git@github.com:user/repo.git
+git@github.com:valentinecleach/AnalyseDonneesOpportunisteGMB.git
+https://github.com/valentinecleach/AnalyseDonneesOpportunisteGMB

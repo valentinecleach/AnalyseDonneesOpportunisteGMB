@@ -32,7 +32,6 @@ library(purrr)
 library(forcats)
 library(targets)
 library(tarchetypes)
-library(ggplot2)
 library(ggpubr)
 
 library(Factoshiny)
