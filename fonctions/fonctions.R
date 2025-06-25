@@ -136,7 +136,6 @@ liste_cd_noms <- Total %>%
 Observateurs_espece <- Observateurs[1]
 
 
-
 cd_nom_ici <- as.integer(liste_cd_noms[i, 1])
 
 nb_o <- Total %>%
