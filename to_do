@@ -2,12 +2,16 @@ To do:
 
 Priorité
 
-- faire une fonction qui adapte un code couleur 
-(dégradé de la couleur de l'ordre)
+- ACP avec les espèces
 
+-séparer 2 bdd et faire analyses croisées espece-etat_bio
+-regarder BDD RIR Ouest
 
-- mettre classif + barplot sur le Rmd
+- faire une fonction qui adapte un code couleur (dégradé de la couleur de l'ordre)
 
+- corriger le problème avec le package
+
+- commencer la modélisation
 
 - changer le 194928 en Cerf muntjac (le remettre? ne participe pas au dynamiques) 
 - code couleur partout
