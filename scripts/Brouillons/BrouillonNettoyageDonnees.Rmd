@@ -60,13 +60,13 @@ GeoN <- GeoN %>%
     cd_nom = ifelse(cd_nom==194481, 60658, cd_nom),
     # Rat
     nom_vernaculaire = ifelse(cd_nom==61585, 
-                              "Rat brun", 
-                              nom_vernaculaire),
-    nom_vernaculaire = ifelse(cd_nom==197057, 
-                              "Rat Fischer", 
-                              nom_vernaculaire)
-  )%>%
-  filter(cd_nom != 194928)%>%
+                              "Rat surmulot, Surmulot, Rat d’égout", 
+                              nom_vernaculaire))%>%
+  filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Corée
+         !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
+         !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
+        !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
+# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
   mutate(nombre = ifelse(nombre_max != nombre_min, 
                          median(c(nombre_max,nombre_min)),
                          nombre_min)
@@ -188,16 +188,16 @@ VisioN_FB <- VisioN_FB %>%
 
 Total <- rbind(VisioN_FB, GeoN)
 
-Total <- Total %>%
-  mutate(observateurs = gsub("-", " ", observateurs), # enlever tirets
-         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
-         observateurs = toupper(observateurs),
-         observateurs = ifelse(observateurs == "NA", NA, observateurs)#majuscule
-  )%>%
-  mutate(observateurs = as.factor(replace(
-    as.character(observateurs),
-    which(is.na(observateurs)),
-    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))) # donner le nom : NA_1, NA_2, ...
+#Total <- Total %>%
+#  mutate(observateurs = gsub("-", " ", observateurs), # enlever tirets
+#         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
+#         observateurs = toupper(observateurs),
+#         observateurs = ifelse(observateurs == "NA", NA, observateurs)#majuscule
+#  )%>%
+#  mutate(observateurs = as.factor(replace(
+#    as.character(observateurs),
+#    which(is.na(observateurs)),
+#    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))) # donner le nom : NA_1, NA_2, ...
 
 any(duplicated(Total))
 ```
