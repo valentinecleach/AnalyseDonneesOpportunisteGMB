@@ -87,3 +87,103 @@ nb_ordre <- function(nom_ordre){
   
   return(nb_o)
 }
+
+
+liste_cd_noms <- Total %>%
+  group_by(cd_nom)%>%
+  distinct(cd_nom)%>%
+  select(cd_nom)
+
+Observateurs_espece <- Observateurs[1]
+
+for (i in 1:dim(liste_cd_noms)[1]){
+  cd_nom_ici <- as.integer(liste_cd_noms[i, 1])
+  
+  nb_o <- Total %>%
+    filter(cd_nom == cd_nom_ici) %>%
+    group_by(observateurs) %>%
+    summarise(nbr = n(), .groups = "drop") %>%
+    mutate(nbr = ifelse(is.na(nbr), 0, nbr))
+  
+  nom_espece <- Total %>%
+    filter(cd_nom == cd_nom_ici) %>%
+    summarise(nom = first(nom_vernaculaire))
+  
+  nom <- nom_espece$nom
+  nom <- paste0("nb_", gsub(" ", "", nom))
+  nb_o <- nb_o %>% rename({{nom}} := nbr)
+  
+  Observateurs_espece <- Observateurs_espece %>%
+    left_join(nb_o, by = "observateurs")
+}
+
+for (i in 2:dim(Observateurs_espece)[2]){
+  Observateurs_espece[[i]] <-  ifelse(is.na(Observateurs_espece[[i]]), 
+                                    0, Observateurs_espece[[i]])
+}
+
+
+Total %>%
+  filter(communes == "Lanvéoc")%>%
+  select(nom_vernaculaire, observateurs, date)%>%
+  print(n=77)
+
+liste_cd_noms <- Total %>%
+  group_by(cd_nom)%>%
+  distinct(cd_nom)%>%
+  select(cd_nom)
+
+Observateurs_espece <- Observateurs[1]
+
+
+
+cd_nom_ici <- as.integer(liste_cd_noms[i, 1])
+
+nb_o <- Total %>%
+  filter(cd_nom == cd_nom_ici) %>%
+  group_by(observateurs) %>%
+  summarise(nbr = n(), .groups = "drop") %>%
+  mutate(nbr = ifelse(is.na(nbr), 0, nbr))
+
+str(nb_o)
+
+nom_espece <- Total %>%
+  filter(cd_nom == cd_nom_ici) %>%
+  summarise(nom = first(nom_vernaculaire))
+
+str(nom_espece)
+
+nom <- nom_espece$nom
+nom <- paste0("nb_", gsub(" ", "", nom))
+nb_o <- nb_o %>% rename({{nom}} := nbr)
+
+str(nb_o)
+
+Observateurs_espece <- Observateurs_espece %>%
+  left_join(nb_o, by = "observateurs")
+
+
+
+for (i in 1:nrow(liste_cd_noms)) {
+  cd_nom_value <- liste_cd_noms[i, 1]
+  
+  nb_o <- Total %>%
+    filter(cd_nom == cd_nom_value) %>%
+    group_by(observateurs) %>%
+    summarise(nbr = n(), .groups = "drop") %>%
+    mutate(nbr = ifelse(is.na(nbr), 0, nbr))
+  
+  nom_espece <- Total %>%
+    filter(cd_nom == cd_nom_value) %>%
+    summarise(nom = first(nom_vernaculaire))
+  nom <- nom_espece$nom
+  nom <- paste0("nb_", gsub(" ", "_", nom))
+  
+  nb_o <- nb_o %>% rename(!!nom := nbr)
+  
+  Observateurs_espece <- Observateurs_espece %>%
+    left_join(nb_o, by = "observateurs")
+}
+
+
+
