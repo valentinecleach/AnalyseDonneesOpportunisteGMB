@@ -136,6 +136,10 @@ liste_cd_noms <- Total %>%
 Observateurs_espece <- Observateurs[1]
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8f303aad5787342e44f8582ee33e8595e7d5b246
 cd_nom_ici <- as.integer(liste_cd_noms[i, 1])
 
 nb_o <- Total %>%

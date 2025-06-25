@@ -2,6 +2,7 @@ To do:
 
 Priorité
 
+<<<<<<< HEAD
 - ACP avec les espèces
 
 -séparer 2 bdd et faire analyses croisées espece-etat_bio
@@ -12,6 +13,14 @@ Priorité
 - corriger le problème avec le package
 
 - commencer la modélisation
+=======
+- faire une fonction qui adapte un code couleur 
+(dégradé de la couleur de l'ordre)
+
+
+- mettre classif + barplot sur le Rmd
+
+>>>>>>> 8f303aad5787342e44f8582ee33e8595e7d5b246
 
 - changer le 194928 en Cerf muntjac (le remettre? ne participe pas au dynamiques) 
 - code couleur partout
