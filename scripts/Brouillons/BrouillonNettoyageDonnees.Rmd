@@ -84,8 +84,8 @@ GeoN <- GeoN %>%
     "Indices",
     ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
            "Entendu/Ultrasons",
-           technique_observation)
-  ))%>%
+           technique_observation)),
+    technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
   mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
                                   "Non renseigné", etat_biologique))%>%
   filter(!jdd_nom %in% c(490,53))%>% 
@@ -155,7 +155,13 @@ VisioN_FB <- VisioN_FB %>%
     technique_observation))%>%
   mutate(technique_observation = ifelse(technique_observation=="Entendu",
                                         "Entendu/Ultrasons",
-                                        technique_observation))%>%
+                                        technique_observation),
+         technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
+  filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Corée
+         !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
+         !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
+        !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
+# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
   mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
          date = as.Date(date_debut),
          cd_nom = as.factor(cd_nom),
@@ -188,16 +194,16 @@ VisioN_FB <- VisioN_FB %>%
 
 Total <- rbind(VisioN_FB, GeoN)
 
-#Total <- Total %>%
-#  mutate(observateurs = gsub("-", " ", observateurs), # enlever tirets
-#         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
-#         observateurs = toupper(observateurs),
-#         observateurs = ifelse(observateurs == "NA", NA, observateurs)#majuscule
-#  )%>%
-#  mutate(observateurs = as.factor(replace(
-#    as.character(observateurs),
-#    which(is.na(observateurs)),
-#    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))) # donner le nom : NA_1, NA_2, ...
+Total <- Total %>%
+  mutate(observateurs = gsub("-", " ", observateurs), # enlever tirets
+         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
+         observateurs = toupper(observateurs),
+         observateurs = ifelse(observateurs == "NA", NA, observateurs)#majuscule
+  )%>%
+  mutate(observateurs = as.factor(replace(
+    as.character(observateurs),
+    which(is.na(observateurs)),
+    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))) # donner le nom : NA_1, NA_2, ...
 
 any(duplicated(Total))
 ```

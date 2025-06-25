@@ -7,8 +7,10 @@ output:
     toc_float: true
 params:
   date_min: '2010-01-01'
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
-
 
 # Statistiques descriptives
 
@@ -42,9 +44,6 @@ library(permute)
 # Graine aléatoire
 set.seed(12345)
 
-# Fonctions
-source("~/work/AnalyseDonneesOpportunisteGMB/fonctions/fonctions.R")
-
 # Importations
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
 Total <- read_delim("Total.csv", delim = ",", 
@@ -59,6 +58,10 @@ Total <- Total%>%
 
 Total_sf <- st_read("Total_sf.shp")
 
+# Fonctions
+source("~/work/AnalyseDonneesOpportunisteGMB/fonctions/fonctions.R")
+
+
 couleur  <- c("Carnivora" = "orangered3",
               "Cetartiodactyla" = "#225d00", 
               "Eulipotyphla" = "bisque4", 
@@ -67,6 +70,7 @@ couleur  <- c("Carnivora" = "orangered3",
 VN <- "VisioNature"
 GN <- "GeoNature"
 ```
+
 Toutes nos données concernent uniquement la Bretagne continentale, hors Loire-Atlantique.
 
 ## 1. Différentes répartitions
@@ -97,6 +101,7 @@ Total%>%
   labs(title = "1b. Répartition de l'état biologique selon les techniques d'observations",
        subtitle = paste(GN))
 ```
+
 Nous remarquons toujours beaucoup de données de VisioNature dont la technique d'observation est inconnue.
 
 ```{r repartition-etat-bio-ordes, warning = FALSE, echo=FALSE, out.width="50%"}
@@ -121,7 +126,10 @@ Total%>%
        subtitle = paste(GN))+
   scale_fill_manual(values = couleur, name = "Ordre")
 ```
-GeoNature observe principalement des indices de rodents et de carnivores. Les lagomorphes sont peu remarqués avec les indices, comparés aux autres dans VisioNature et GeoNature.
+
+GeoNature observe principalement des indices de rodents et de carnivores.
+Les lagomorphes sont peu remarqués avec les indices, comparés aux autres dans VisioNature et GeoNature.
+
 ```{r}
 application_tous_ordres(repartition_espece, 
                         repartition = etat_biologique)
@@ -131,7 +139,9 @@ application_tous_ordres(repartition_espece,
 ```
 
 ### Répartition des ordres
-Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformément les 4 autres ordres. C’est peut-être dû au fort intérêt de GMB pour la loutre, mais ce n’est pas tant le cas que ça (voir figure de la répartition des ordres sans le loutres)
+
+Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformément les 4 autres ordres.
+C’est peut-être dû au fort intérêt de GMB pour la loutre, mais ce n’est pas tant le cas que ça (voir figure de la répartition des ordres sans le loutres)
 
 ```{r repartition-des-ordes, echo=FALSE, out.width="50%"}
 
@@ -180,7 +190,9 @@ Total%>%
   scale_fill_manual(values = couleur)+
   scale_color_manual(values = couleur)
 ```
-Nous nous sommes demandés à quoi ressemblerait la répartition des ordres sans la loutre car elle est une espèce dont le GMB se préoccupe beaucoup. Ca ne change pas drastiquement la distribution.
+
+Nous nous sommes demandés à quoi ressemblerait la répartition des ordres sans la loutre car elle est une espèce dont le GMB se préoccupe beaucoup.
+Ca ne change pas drastiquement la distribution.
 
 ```{r repartition-especes, fig.width=10, fig.height=7}
 
@@ -226,7 +238,8 @@ Total%>%
   scale_fill_manual(values = couleur)
 ```
 
-Nous remarquons une inversion entre les lapins et les lièvres entre les deux bases de données. Peut-être lié a la période pendant laquelle les BDD sont remplies.
+Nous remarquons une inversion entre les lapins et les lièvres entre les deux bases de données.
+Peut-être lié a la période pendant laquelle les BDD sont remplies.
 
 ## 2. Description temporelle des bases de données
 
@@ -267,14 +280,13 @@ Total%>%
 
 VisioNature a très peu de données avant 2010 et GeoNature avant 1990.\
 
-J'aurais focalisé l'étude sur la période [2010 - maintenant] pour les séries temporelles, car avant il y a peu de données. \
+J'aurais focalisé l'étude sur la période [2010 - maintenant] pour les séries temporelles, car avant il y a peu de données.\
 
 GéoNature a surtout des données entre 2010 et 2015, et VisioNature après 2015.\
 
-Peut-être que ça pourrait être intéressant de regarder par rapport au nombre  d'observateurs? 
+Peut-être que ça pourrait être intéressant de regarder par rapport au nombre d'observateurs?
 Si il y a plus d'observateurs, alors peut-être qu’il y aura plus d'observations.
-Peut-être qu'on pourra pondérer là dessus? 
-
+Peut-être qu'on pourra pondérer là dessus?
 
 ```{r nmbre-données, warning = FALSE, echo=FALSE, out.width="50%"}
 Total%>%
@@ -301,11 +313,13 @@ Total%>%
       subtitle = paste(GN),
        y="Nombre d’individus")
 ```
+
 La plupart des observations ne contiennent qu'un animal mais certains en contiennent plusieurs.\
 
 Il faudrait peut-être les prendre en compte, mais les données avec beaucoup d'animaux observés (ex: 400 obs d'un coup) risquent de causer des problèmes pour créer un modèle.\
 
-Ensuite, on a essayer d'observer les proportions d'espèces dans le temps. Dans "other" il y a toutes les espèces qui représentent moins de 3% des observations de la période.\
+Ensuite, on a essayer d'observer les proportions d'espèces dans le temps.
+Dans "other" il y a toutes les espèces qui représentent moins de 3% des observations de la période.\
 
 ```{r, echo=FALSE, out.width="50%"}
 
@@ -404,9 +418,11 @@ Total%>%
 
 \
 
-Nous remarquons que depuis les années 1980, il semble avoir de moins en moins de "other" donc d'espèces peu présentes. Les principales espèces sont peut être de plus en plus dominantes. 
+Nous remarquons que depuis les années 1980, il semble avoir de moins en moins de "other" donc d'espèces peu présentes.
+Les principales espèces sont peut être de plus en plus dominantes.
 
-Nous remarquons aussi que GeoNature a des données assez differentes pour [2000-2005) que pour les autres périodes avec beaucoup de rats bruns. Nous n'observons pas quelque chose de similaire chez VisioNature. 
+Nous remarquons aussi que GeoNature a des données assez differentes pour [2000-2005) que pour les autres périodes avec beaucoup de rats bruns.
+Nous n'observons pas quelque chose de similaire chez VisioNature.
 
 ## 3. Répresentation cartographique des données
 
@@ -455,7 +471,8 @@ ggplot() +
   theme_bw()
 ```
 
-Il semble y avoir un lieu avec une forte densité proche de Sizun dans la BDD GeoNature. On remarque aussi que les observations ont lieu surtout au nord-ouest de la Bretagne et au sud entre le Morbihan et l'Ille-et-Vilaine.\
+Il semble y avoir un lieu avec une forte densité proche de Sizun dans la BDD GeoNature.
+On remarque aussi que les observations ont lieu surtout au nord-ouest de la Bretagne et au sud entre le Morbihan et l'Ille-et-Vilaine.\
 
 Dans VisioNature, on a deux points avec une très forte densité sont probablement dues à nos deux principaux contributeurs (voir la partie 4), nous décidons de les supprimer pour vérifier.
 
@@ -541,6 +558,7 @@ ggplot() +
   facet_grid(. ~ ordre)
 
 ```
+
 On ne voit pas grand chose sur la carte de VisioNature à part les 2 principaux observateurs..
 Concernant la base de données GeoNature, on dirait que les espèces ont un peu près la même répartition en Bretagne (nord Finistere et Côte d'Armor et sud Ille-et-Vilaine et Morbihan)
 
@@ -599,20 +617,19 @@ graph_ordre_tranche_annee("Lagomorpha")
 graph_ordre_tranche_annee("Rodentia")
 ```
 
-\ 
-On dirait que plus on avance dans les années, plus on retrouve d'individus aux sud de la Bretagne. Ceci peut être car nous avons plus de données de VisioNature au fil du temps qui provient d'ornithologues et les ornithologues sont souvent proches des littoraux.\
-
+  On dirait que plus on avance dans les années, plus on retrouve d'individus aux sud de la Bretagne.
+Ceci peut être car nous avons plus de données de VisioNature au fil du temps qui provient d'ornithologues et les ornithologues sont souvent proches des littoraux.\
 
 ## 4. Étude des observateurs
 
-###  Étude des principaux observateurs
+### Étude des principaux observateurs
+
 Étudier les principaux observateurs peut être important parce qu'ils participent grandement au recueil des données donc un changement de leur comportement implique également un changement du comportement de la base de données.
 
 Ils pourraient introduire des biais:\
 - pour un endroit du territoire, s'ils enregistent toujours des observations au même endroit\
 - pour une espece, s'ils sont intéressé par une espèce\
 - en enregistrant pendant une durée précise dans le temps\
-
 
 ```{r nombre-total-observateurs}
 Total %>%
@@ -623,9 +640,12 @@ Total %>%
   filter(bdd_originale == "VisioNature")%>%
   summarize(nb_observateurs = n_distinct(observateurs))
 ```
-Pour GeoNature, il y a en tout 2778 observateurs qui peuvent être une ou 2 personnes. Certains observateurs sont anonymes et sont attribués un code.\
 
-Pour VisioNature, il y a 3662 observateurs. 1813 des observations n'ont pas d'observateur attribué.\
+Pour GeoNature, il y a en tout 2778 observateurs qui peuvent être une ou 2 personnes.
+Certains observateurs sont anonymes et sont attribués un code.\
+
+Pour VisioNature, il y a 3662 observateurs.
+1813 des observations n'ont pas d'observateur attribué.\
 
 On transforme tous les noms en majuscule pour éviter des problèmes.\
 
@@ -678,7 +698,8 @@ Total_summary_VN%>%
 ```
 
 Nous remarquons que nous avons des observateurs avec un très grand nombre d'observations comme attendu.
-Nous ne savons pas si deleted deleted est un observateur. Nous pouvons imaginer que c'est les observations de tous les membres qui ont supprimés leurs comptes.
+Nous ne savons pas si deleted deleted est un observateur.
+Nous pouvons imaginer que c'est les observations de tous les membres qui ont supprimés leurs comptes.
 
 Pour étudier facilement leur données, nous créons une fonction qui donne rapidement quelques graphiques.
 
@@ -761,6 +782,7 @@ Nous remarquons que:\
 - DELETED DELETED, semble être surtout dans le finistère ce qui est étonnant si ce sont plusieurs personnes.
 
 ### Habitudes des observateurs?
+
 ```{r}
 
 Total%>%
@@ -812,9 +834,11 @@ Total%>%
                               "12" = "Decembre"))
 
 ```
+
 \
 
 ### Differences parmi les observateurs
+
 ```{r Creation-BDD-Observateurs}
 nb_observations <- Total %>%
   group_by(observateurs) %>%
@@ -865,7 +889,8 @@ Observateurs <- Observateurs%>%
 rm(max_etat_bio, max_technique)
 ```
 
-On se demande a quoi ressemble la répartition des Indice de Pielou 
+On se demande a quoi ressemble la répartition des Indice de Pielou
+
 ```{r Indices-Equitabilite}
 boxplot(Observateurs$Pielou, 
         main="Répartition des Indice de Pielou",
@@ -873,18 +898,17 @@ boxplot(Observateurs$Pielou,
 
 summary(Observateurs$Pielou)
 ```
-On remarque qu'il y a enormément d'observateurs qui on un Indice nul, ou presque.
-Ceci est normal car beaucoup ont observé uniquement une observation. 
-(Par exemple, tous les NA ont été considéré comme des observateurs uniques, 
-et d'autres ont observé a plusieurs.) 
-On a 4032 observateurs qui ont uniquement une observation tandis qu'il y a 7869
-observateurs dans la base de donnée.
 
-Le 4e quartile est aussi assez sérré. Il y a donc beaucoup d'individus avec une 
-assez bonne diversité dans leurs observations. 
-(1/4 d'entre eux sont entre 0.86 et 1 d'Indice.) 
+On remarque qu'il y a enormément d'observateurs qui on un Indice nul, ou presque.
+Ceci est normal car beaucoup ont observé uniquement une observation.
+(Par exemple, tous les NA ont été considéré comme des observateurs uniques, et d'autres ont observé a plusieurs.) On a 4032 observateurs qui ont uniquement une observation tandis qu'il y a 7869 observateurs dans la base de donnée.
+
+Le 4e quartile est aussi assez sérré.
+Il y a donc beaucoup d'individus avec une assez bonne diversité dans leurs observations.
+(1/4 d'entre eux sont entre 0.86 et 1 d'Indice.)
 
 On fait une ACP sur cette base de donnée, et on obtiens ceci:
+
 ```{r ACP}
 res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(7,8),
              quanti.sup=c(11,12,13,14,15),graph=FALSE)
@@ -892,18 +916,21 @@ plot.PCA(res.PCA,choix='var')
 plot.PCA(res.PCA,invisible=c('ind','ind.sup'), label =c('quali'))
 summary(res.PCA)
 ```
-On a environ 83% d'explication des axes avec uniquement les 2 premières 
-dimension ce qui est très bien. 
 
-Le premier axe semble représenter un grand nombre d'observations, et 
-le deuxieme axe la diversité.
+On a environ 83% d'explication des axes avec uniquement les 2 premières dimension ce qui est très bien.
 
-Les Individus ayant principalement des "technique biologique: autre" sont ceux qui ont beaucoup d'observation. Ceux ayant surtout remarqué des animaux morts, ont peu d'observations. De même pour une technique d'ob Inconnu et Entendu/Ultrasons.
+Le premier axe semble représenter un grand nombre d'observations, et le deuxieme axe la diversité.
 
-Les individus qui ont principalement observé des animaux mort due a un impact routier ont peu de diversité dans les espèces qu'ils remarquent. Pareil pour Entendu/Ultrasons, Inconnu et Indices, et Trouvé Mort.
+Les Individus ayant principalement des "technique biologique: autre" sont ceux qui ont beaucoup d'observation.
+Ceux ayant surtout remarqué des animaux morts, ont peu d'observations.
+De même pour une technique d'ob Inconnu et Entendu/Ultrasons.
+
+Les individus qui ont principalement observé des animaux mort due a un impact routier ont peu de diversité dans les espèces qu'ils remarquent.
+Pareil pour Entendu/Ultrasons, Inconnu et Indices, et Trouvé Mort.
 Les animaux avec une tech d'obs Non Renseigné (ou Vu mais moins) le sont par des gens avec une grande diversité d'observations.
 
 Clustering : On voit pas grand chose
+
 ```{r}
 res.HCPC<-HCPC(res.PCA,nb.clust=2,consol=FALSE,graph=FALSE)
 plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
@@ -917,4 +944,3 @@ plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
 plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
 plot.HCPC(res.HCPC,choice='3D.map',ind.names=FALSE,centers.plot=FALSE,angle=90,title='Hierarchical tree on the factor map')
 ```
-
