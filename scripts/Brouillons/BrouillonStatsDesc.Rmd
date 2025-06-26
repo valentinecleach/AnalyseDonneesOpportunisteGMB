@@ -936,9 +936,8 @@ plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
 plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
 plot.HCPC(res.HCPC,choice='3D.map',ind.names=FALSE,centers.plot=FALSE,angle=90,title='Hierarchical tree on the factor map')
 
-Factoshiny(Observateurs[,-c(1)])
 
-res.HCPC<-HCPC(res.PCA,nb.clust=4,consol=FALSE,graph=FALSE)
+res.HCPC<-HCPC(res.PCA,nb.clust=3,consol=FALSE,graph=FALSE)
 plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
 plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
 plot.HCPC(res.HCPC,choice='3D.map',ind.names=FALSE,centers.plot=FALSE,angle=90,title='Hierarchical tree on the factor map')

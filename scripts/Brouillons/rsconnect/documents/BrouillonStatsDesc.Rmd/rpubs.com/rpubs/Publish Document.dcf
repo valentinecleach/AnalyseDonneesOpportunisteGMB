@@ -1,4 +1,4 @@
-name: Document
+name: Publish Document
 title:
 username:
 account: rpubs
@@ -6,5 +6,5 @@ server: rpubs.com
 hostUrl: rpubs.com
 appId: https://api.rpubs.com/api/v1/document/1325628/c3f9215f4804443d9c8ce84bd1b50248
 bundleId: https://api.rpubs.com/api/v1/document/1325628/c3f9215f4804443d9c8ce84bd1b50248
-url: http://rpubs.com/publish/claim/1325628/d93044b14ad343d8932b9aa46e372644
+url: http://rpubs.com/valentine_cleach/1325628/edit
 version: 1

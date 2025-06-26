@@ -22,106 +22,11 @@ Total%>%
   theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
 
 
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees")
-Total <- read_delim("Total.csv", delim = ",", 
-                    escape_double = FALSE, trim_ws = TRUE)
-Total <- Total%>%
-  mutate_at(c("bdd_originale", 
-              "etat_biologique", "technique_observation", 
-              "communes", "observateurs", 
-              "famille", "ordre", 
-              "nom_vernaculaire", "nom_valide"), 
-            .funs = as.factor)
-
-NA_table <- Total%>%
-  filter(is.na(observateurs))
-view(NA_table)
-summary(NA_table)
-
-view(Total)
-view(Total%>%
-  arrange(observateurs)
-)
-
-nb_observations <- Total %>%
-  group_by(observateurs) %>%
-  summarise(total_obs = n(), .groups = "drop")
-
-max_technique <- Total%>%
-  group_by(observateurs) %>%
-  summarise(tech_obs_max = collapse::fmode(technique_observation))
-
-max_etat_bio <- Total%>%
-    group_by(observateurs) %>%
-  summarise(etat_bio_max = collapse::fmode(etat_biologique))
-
-Observateurs <- nb_observations %>%
-  left_join(max_technique, by = "observateurs")%>%
-  left_join(max_etat_bio, by = "observateurs")%>%
-  left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Lagomorpha"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")
-
-Observateurs <- Observateurs %>%
-  mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
-         nb_cetartiodactyla = ifelse(is.na(nb_cetartiodactyla), 0, nb_cetartiodactyla),
-         nb_eulipotyphla = ifelse(is.na(nb_eulipotyphla), 0, nb_eulipotyphla),
-         nb_lagomorpha = ifelse(is.na(nb_lagomorpha), 0, nb_lagomorpha),
-         nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
-  )
-
-Observateurs$shannon <- vegan::diversity(Observateurs[,5:9])
-
-Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,5:9]))
-Observateurs <- Observateurs %>%
-  mutate(Pielou = ifelse(shannon==0, 0, Pielou))
-
-Observateurs <- Observateurs%>%
-  mutate(prop_carnivora = nb_carnivora / total_obs,
-         prop_cetartiodactyla = nb_cetartiodactyla / total_obs,
-         prop_eulipotyphla = nb_eulipotyphla / total_obs,
-         prop_lagomorpha = nb_lagomorpha / total_obs,
-         prop_rodentia = nb_rodentia / total_obs,
-         tech_obs_max = paste("Tech d'obs: ", tech_obs_max, sep=""),
-         etat_bio_max = paste("Etat bio: ", etat_bio_max, sep="")
-  )
-
-
-
-boxplot(Observateurs$Pielou, 
-        main="Répartition des Indice de Pielou",
-        ylab="Indice de Pielou")
-
-summary(Observateurs$Pielou)
-
-Observateurs <- Observateurs %>%
-  filter(observateurs != "BELLIER DANIEL")
-
 
 
 Factoshiny(Observateurs)
 Factoshiny(Observateurs[,-1])
 
-t <- Total%>%
-  select(nom_vernaculaire, cd_nom)
-
-summary(as.factor(Total$ordre))
-summary(Total%>%
-      mutate_all(as.factor)%>%
-      select(nom_vernaculaire, cd_nom)%>%
-        arrange(desc(cd_nom)))
-Total%>%
-  filter(ordre == "Carnivora")%>%
-  ggplot(aes(nom_vernaculaire))+
-  geom_bar()+
-  coord_flip()
-
-Total %>%
-  filter(nom_vernaculaire == "Genette commune, Genette")%>%
-  select(date, cd_nom, nom_valide, nom_vernaculaire, observateurs, communes, 
-         etat_biologique, technique_observation, bdd_originale)
 
 99999004 # hermine / belette -> on sait pas
 99999005 # Puton, Putois / Vison
@@ -139,79 +44,14 @@ Total %>%
   geom_bar()+
   coord_flip()
 
-
-Total %>%
-  filter(nom_vernaculaire == "Hermine")%>%
-  select(cd_nom, nom_valide, observateurs, communes, bdd_originale)%>%
-  print(n=20)
-
-Total %>%
-  filter(nom_vernaculaire == "Hérisson d'Europe",
-         technique_observation == "Entendu/Ultrasons")%>%
-  select(date, cd_nom, nom_valide, observateurs, communes, bdd_originale)%>%
-  print(n=20)
-
-Total <- Total %>%
-  mutate(technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))
-
-Total %>%
-  filter(technique_observation == 2)
-
-#############
-nb_observations <- Total %>%
-  group_by(observateurs) %>%
-  summarise(total_obs = n(), .groups = "drop")
-
-max_technique <- Total%>%
-  group_by(observateurs) %>%
-  summarise(tech_obs_max = collapse::fmode(technique_observation))
-
-max_etat_bio <- Total%>%
-  group_by(observateurs) %>%
-  summarise(etat_bio_max = collapse::fmode(etat_biologique))
-
-Observateurs <- nb_observations %>%
-  left_join(max_technique, by = "observateurs")%>%
-  left_join(max_etat_bio, by = "observateurs")%>%
-  left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Lagomorpha"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")
-
-Observateurs <- Observateurs %>%
-  mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
-         nb_cetartiodactyla = ifelse(is.na(nb_cetartiodactyla), 0, nb_cetartiodactyla),
-         nb_eulipotyphla = ifelse(is.na(nb_eulipotyphla), 0, nb_eulipotyphla),
-         nb_lagomorpha = ifelse(is.na(nb_lagomorpha), 0, nb_lagomorpha),
-         nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
-  )
-str(Observateurs[,5:9])
-Observateurs$shannon <- vegan::diversity(Observateurs[,5:9])
-
-Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,5:9]))
-Observateurs <- Observateurs %>%
-  mutate(Pielou = ifelse(shannon==0, 0, Pielou))
-
-Observateurs <- Observateurs%>%
-  mutate(prop_carnivora = nb_carnivora / total_obs,
-         prop_cetartiodactyla = nb_cetartiodactyla / total_obs,
-         prop_eulipotyphla = nb_eulipotyphla / total_obs,
-         prop_lagomorpha = nb_lagomorpha / total_obs,
-         prop_rodentia = nb_rodentia / total_obs,
-         tech_obs_max = paste("Tech d'obs: ", tech_obs_max, sep=""),
-         etat_bio_max = paste("Etat bio: ", etat_bio_max, sep="")
-  )
-
 ########################################
+
 Observateurs_espece <- Observateurs[,1:4]
 
 liste_cd_noms <- Total %>%
   group_by(cd_nom)%>%
   distinct(cd_nom)%>%
   select(cd_nom)
-
-as.integer(liste_cd_noms[1,])
 
 for (i in 1:nrow(liste_cd_noms)) {
   cd_nom_value <- as.integer(liste_cd_noms[i,])
@@ -244,18 +84,159 @@ Observateurs_espece <- Observateurs_espece %>%
 
 boxplot(Observateurs_espece$Pielou)
 
-t <- Observateurs_espece%>%
-  filter(Pielou>0.9)
+colonne <- as.numeric(Observateurs_espece[[2]])
+diviseur <- as.data.frame(matrix(rep(colonne, 23), 
+                                 ncol = 23, 
+                                 nrow = nrow(Observateurs_espece), 
+                                 byrow = FALSE))
 
 
-View(t)
+Observateurs_espece[paste(names(Observateurs_espece)[5:27], "_prop", sep="")] <- Observateurs_espece[5:27] / diviseur
+
 
 PCAshiny(Observateurs_espece)
 
-Observateurs <- Observateurs %>%
-  mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
-         nb_cetartiodactyla = ifelse(is.na(nb_cetartiodactyla), 0, nb_cetartiodactyla),
-         nb_eulipotyphla = ifelse(is.na(nb_eulipotyphla), 0, nb_eulipotyphla),
-         nb_lagomorpha = ifelse(is.na(nb_lagomorpha), 0, nb_lagomorpha),
-         nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
-  )
+
+# stats desc comparaison espece et etat bio
+par(mfrow = c(2, 1))
+
+plot(Total$technique_observation)
+
+Total%>%
+  filter(bdd_originale == VN)%>%
+  ggplot(aes(technique_observation, nom_vernaculaire)) + 
+  geom_count()+
+  theme_bw()+
+  labs(subtitle = VN)+
+  scale_y_discrete(labels = label_wrap(50))
+
+Total%>%
+  filter(bdd_originale == GN)%>%
+  ggplot(aes(technique_observation, nom_vernaculaire)) + 
+  geom_count()+
+  theme_bw()+
+  labs(subtitle = GN)+
+  scale_y_discrete(labels = label_wrap(35))
+  
+Total%>%
+  filter(bdd_originale == GN)%>%
+  ggplot(aes(nom_vernaculaire)) + 
+  geom_bar()+
+  facet_grid(.~technique_observation)+
+  theme_bw()+
+  labs(subtitle = GN)+
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(35))
+
+Total%>%
+  filter(bdd_originale == VN)%>%
+  ggplot(aes(nom_vernaculaire)) + 
+  geom_bar()+
+  facet_grid(.~technique_observation)+
+  theme_bw()+
+  labs(subtitle = VN)+
+  coord_flip()+
+  scale_x_discrete(labels = label_wrap(35))
+
+
+collision_faune_diro <- read_csv("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes/collision_faune_diro.csv")
+summary(collision_faune_diro$espece)
+
+collision_faune_diro <- collision_faune_diro%>%
+  mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
+              "grp_espece", "espece", "commentaire", "commune"), 
+            as.factor)
+
+collision_faune_diro <- collision_faune_diro %>%
+  filter(!(espece %in% c("amphibien", "amphibiens", "autre", "autre oiseau",
+                         "castor", "chat", "chauve-souris", "chien", "chouette",
+                         "nr", "oiseaux sauf rapace", "rapace diurne", 
+                         "rapace nocturne", "rapaces nocturnes", "rapaces diurnes",
+                         "reptile", "reptiles")))
+
+
+str(collision_faune_diro)
+
+collision_faune_diro <- collision_faune_diro %>%
+  mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")))
+
+collision_faune_diro%>%
+  ggplot(aes(mois))+
+  labs(title="Barplot des observation selon le mois",
+       y="Nombre d'observations",
+       subtitle="DIRO",
+       x="Mois")+ 
+  theme_bw()+
+  geom_bar()+
+  scale_x_discrete(labels=c("01" = "Janvier", 
+                            "02" = "Février",
+                            "03" = "Mars",
+                            "04" = "Avril",
+                            "05" = "Mai",
+                            "06" = "Juin",
+                            "07" = "Juillet",
+                            "08" = "Aout",
+                            "09" = "Septembre",
+                            "10" = "Octobre",
+                            "11" = "Novembre",
+                            "12" = "Decembre"))
+
+collision_faune_diro%>%
+  ggplot(aes(as.character(annee)))+
+  labs(title="Barplot des observation selon l'année",
+       y="Nombre d'observations",
+       subtitle="DIRO",
+       x="")+ 
+  theme_bw()+
+  geom_bar()
+
+
+barplot(collision_faune_diro$espece)
+
+collision_faune_diro %>%
+  ggplot(aes(espece))+
+  geom_bar()+
+  coord_flip()
+
+chat 199
+chouette 4
+renard 6339
+Non renseigné 270
+sanglier 3610
+
+
+
+
+collision_faune_diro %>%
+  mutate(espece = ifelse (espece == "vison d'amérique",
+                          "Vison d'Amérique, Vison",
+                          ifelse(espece == "sanglier",
+                                 "Sanglier",
+                                 ifelse(espece == "renard",
+                                        "Renard roux, Renard, Goupil",
+                                        ifelse(espece == "rat musqué",
+                                               "Rat musqué",
+                                               ifelse(
+                                                 ...
+                                               ))))))
+"Vison d'Amérique, Vison" = "vison d'amérique"
+"Sanglier" = "sanglier"
+"Renard roux, Renard, Goupil" = "renard"
+"Rat musqué" = "rat musqué"
+"Rat surmulot, Surmulot, Rat d'égout" 
+"Rat noir, Rat commun"
+"Ragondin" = "ragondin"
+"Putois d'Europe, Putois, Furet" = "putois"
+"Martre des pins, Martre" = "martre"
+"Loutre d'Europe, Loutre commune, Loutre" = "loutre"
+"Lièvre d'Europe" = "lièvre"
+"Lapin de garenne" = "lapin"
+"Hermine" = "hermine"
+"Hérisson d'Europe" = "hérisson"
+"Fouine" = "fouine"
+"Écureuil roux" = "écureuil"
+"Daim européen, Daim" 
+"Chevreuil européen, Chevreuil, Brocard (mâle), Chevrette (femelle)" = "chevreuil"
+"Cerf élaphe" = "cerf/biche"
+"Blaireau européen, Blaireau" = "blaireau"
+"Belette d'Europe, Belette" = "belette"

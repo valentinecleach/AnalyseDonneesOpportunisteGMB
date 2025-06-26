@@ -90,7 +90,8 @@ GeoN <- GeoN %>%
                                   "Non renseigné", etat_biologique))%>%
   filter(!jdd_nom %in% c(490,53))%>% 
   # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
-  # 53:  Données faunebretagne.org 
+  # 53:  Données faunebretagne.org
+  mutate(technique_observation = ifelse(technique_observation == "Inconnu", "Vu", technique_observation))%>%
   mutate(date = as.Date(date_debut),
          cd_nom = as.factor(cd_nom),
          ordre = as.factor(ordre),
@@ -162,6 +163,7 @@ VisioN_FB <- VisioN_FB %>%
          !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
         !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
 # Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
+  mutate(technique_observation = ifelse(technique_observation == "Inconnu", "Vu", technique_observation))%>%
   mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
          date = as.Date(date_debut),
          cd_nom = as.factor(cd_nom),
