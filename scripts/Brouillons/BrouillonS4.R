@@ -169,17 +169,6 @@ diro <- collision_faune_diro%>%
     geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
   )
 
-
-
-collision_faune_diro%>%
-  filter(!is.na(geom))
-
-collision_faune_diro$geom_x <- as.numeric(str_sub(scan(collision_faune_diro$geom, "")[2], 2, -1))
-  
-geom_y = as.numeric(str_sub(scan(text = geom, what = "")[3], 1, -2)))
-
-View(diro)
-
 diro_sf <- st_as_sf(diro, 
                     coords = c("geom_x", "geom_y"), 
                     crs = 2154)
@@ -199,34 +188,33 @@ carte_44 <- st_read("Masque44.shp")
 carte_44 <- st_transform(carte_44, 2154)
 carte_44 <- st_buffer(carte_44, dist = 200) 
 
+carte_bretagne_44_simple <- st_simplify(carte_bretagne_44, dTolerance = 100) # adjust dTolerance as needed
+carte_44_simple <- st_simplify(carte_44, dTolerance = 100)
 
 
 #filtre
-total_bretagne_44 <- st_filter(diro_sf, carte_bretagne_44, .predicate = st_within)
-total_44 <- st_filter(diro_sf, carte_44, .predicate = st_within)
+total_bretagne_44 <- st_filter(diro_sf, carte_bretagne_44_simple, .predicate = st_within)
+total_44 <- st_filter(diro_sf, carte_44_simple, .predicate = st_within)
+
 total_44_id_synthese <- total_44 %>%
   st_drop_geometry() %>%
   select(id_synthese)
 
-que_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
+DIRO_bret_sf <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
 
-# Verifications
-ggplot() +
-  geom_sf(data = que_bretagne) +
-  labs(title = "Points in Bretagne (sauf 44)")
 
 # Verifications
 ggplot() +
   geom_sf(data = diro_sf) +
   labs(title = "DIRO Map")
 
-Total_Conti <- que_bretagne %>%
-  st_drop_geometry()
+# Total_Conti <- que_bretagne %>%
+#   st_drop_geometry()
 
 
-st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
-
-write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
+# st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
+# 
+# write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
 
 
 
@@ -329,3 +317,66 @@ collision_faune_diro %>%
 "Cerf élaphe" = "cerf/biche"
 "Blaireau européen, Blaireau" = "blaireau"
 "Belette d'Europe, Belette" = "belette" 
+
+
+# Load required libraries
+library(sf)
+library(dplyr)
+library(ggplot2)
+
+# ---- 1. Data preparation ----
+
+# Convert DIRO data frame to sf object
+diro_sf <- st_as_sf(diro, coords = c("geom_x", "geom_y"), crs = 2154)
+
+# ---- 2. Import and preprocess masks ----
+
+# Read and process Bretagne mask
+carte_bretagne_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp") %>%
+  st_transform(2154) %>%
+  st_simplify(dTolerance = 100)
+
+# Read and process 44 mask
+carte_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44/Masque44.shp") %>%
+  st_transform(2154) %>%
+  st_simplify(dTolerance = 100)
+
+# ---- 3. Fast spatial filtering ----
+
+# Optional: Use bounding box crop to speed up
+diro_sf_bbox_bretagne <- st_crop(diro_sf, st_bbox(carte_bretagne_44))
+diro_sf_bbox_44 <- st_crop(diro_sf, st_bbox(carte_44))
+
+# Filter points within Bretagne and 44
+sf::sf_use_s2(FALSE)
+carte_bretagne_44 <- st_make_valid(carte_bretagne_44)
+carte_bretagne_44 <- st_simplify(carte_bretagne_44, dTolerance = 500) # try higher if needed
+
+# st_join is usually faster than st_filter for these cases
+total_bretagne_44 <- st_join(diro_sf_bbox_bretagne, carte_bretagne_44, join = st_within, left = FALSE)
+total_44 <- st_join(diro_sf_bbox_44, carte_44, join = st_within, left = FALSE)
+
+# ---- 4. Extract id_synthese for 44 ----
+
+total_44_id_synthese <- total_44 %>%
+  st_drop_geometry() %>%
+  select(id)
+
+# ---- 5. Anti-join: Points in Bretagne but not in 44 ----
+
+DIRO_bret_sf <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id")
+
+# ---- 6. Plot for verification ----
+
+ggplot() +
+  geom_sf(data = diro_sf) +
+  labs(title = "Carte de tous points DIRO")+
+  geom_sf(carte_bretagne)
+
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
+carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
+carte_bretagne <- st_set_crs(carte_bretagne, 2154)
+
+ggplot() +
+  geom_sf(data = carte_bretagne)+
+  geom_sf(data = DIRO_bret_sf)
