@@ -140,25 +140,122 @@ Total%>%
 
 
 collision_faune_diro <- read_csv("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes/collision_faune_diro.csv")
-summary(collision_faune_diro$espece)
 
-collision_faune_diro <- collision_faune_diro%>%
+# collision_faune_diro%>%
+#   filter(commentaire == "Chameaux")
+
+diro <- collision_faune_diro%>%
   mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
               "grp_espece", "espece", "commentaire", "commune"), 
-            as.factor)
-
-collision_faune_diro <- collision_faune_diro %>%
+            as.factor)%>%
   filter(!(espece %in% c("amphibien", "amphibiens", "autre", "autre oiseau",
                          "castor", "chat", "chauve-souris", "chien", "chouette",
                          "nr", "oiseaux sauf rapace", "rapace diurne", 
                          "rapace nocturne", "rapaces nocturnes", "rapaces diurnes",
-                         "reptile", "reptiles")))
+                         "reptile", "reptiles")),
+         !is.na(geom))%>%
+  mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")),
+         espece = ifelse(commentaire == "Furet", 
+                         "Putois d'Europe, Putois, Furet", espece))%>%
+  mutate(bdd_originale = "DIRO",
+         technique_observation = "Vu",
+         etat_biologique = "Trouvé mort : impact routier")%>%
+  select(-date_maj, -annee, -mois, -commentaire, -grp_espece)%>%
+  mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
+              "espece", "commune"), 
+            as.factor) %>%
+  mutate(
+    geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
+    geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
+  )
 
 
-str(collision_faune_diro)
 
-collision_faune_diro <- collision_faune_diro %>%
-  mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")))
+collision_faune_diro%>%
+  filter(!is.na(geom))
+
+collision_faune_diro$geom_x <- as.numeric(str_sub(scan(collision_faune_diro$geom, "")[2], 2, -1))
+  
+geom_y = as.numeric(str_sub(scan(text = geom, what = "")[3], 1, -2)))
+
+View(diro)
+
+diro_sf <- st_as_sf(diro, 
+                    coords = c("geom_x", "geom_y"), 
+                    crs = 2154)
+
+ggplot() +
+  geom_sf(data = diro_sf) +
+  labs(title = "Carte de tous points DIRO")
+
+#importation des cartes
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale")
+carte_bretagne_44 <- st_read("Masque_Bretagne_Continentale.shp")
+carte_bretagne_44 <- st_transform(carte_bretagne_44, 2154)
+carte_bretagne_44 <- st_buffer(carte_bretagne_44, dist = 200)
+
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44")
+carte_44 <- st_read("Masque44.shp")
+carte_44 <- st_transform(carte_44, 2154)
+carte_44 <- st_buffer(carte_44, dist = 200) 
+
+
+
+#filtre
+total_bretagne_44 <- st_filter(diro_sf, carte_bretagne_44, .predicate = st_within)
+total_44 <- st_filter(diro_sf, carte_44, .predicate = st_within)
+total_44_id_synthese <- total_44 %>%
+  st_drop_geometry() %>%
+  select(id_synthese)
+
+que_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
+
+# Verifications
+ggplot() +
+  geom_sf(data = que_bretagne) +
+  labs(title = "Points in Bretagne (sauf 44)")
+
+# Verifications
+ggplot() +
+  geom_sf(data = diro_sf) +
+  labs(title = "DIRO Map")
+
+Total_Conti <- que_bretagne %>%
+  st_drop_geometry()
+
+
+st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
+
+write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
+
+
+
+collision_faune_diro%>%
+  filter(is.na(geom))%>%
+  print(n=262)%>%
+  group_by(date)%>%
+  summarise(n())
+
+collision_faune_diro%>%
+  filter(is.na(geom))%>%
+  print(n=262)%>%
+  group_by(espece)%>%
+  summarise(n())
+
+collision_faune_diro %>% 
+  filter(is.na(geom),
+         date == as.Date("2022-07-01"))%>%
+  select(espece)
+# 1 chevreuil, ils savent pas où en 2022
+
+
+collision_faune_diro%>%
+  filter(year(date) == "2024",
+         !is.na(geom))
+
+
+
+summary(as.factor(Total$technique_observation))
 
 collision_faune_diro%>%
   ggplot(aes(mois))+
@@ -198,14 +295,6 @@ collision_faune_diro %>%
   geom_bar()+
   coord_flip()
 
-chat 199
-chouette 4
-renard 6339
-Non renseigné 270
-sanglier 3610
-
-
-
 
 collision_faune_diro %>%
   mutate(espece = ifelse (espece == "vison d'amérique",
@@ -239,4 +328,4 @@ collision_faune_diro %>%
 "Chevreuil européen, Chevreuil, Brocard (mâle), Chevrette (femelle)" = "chevreuil"
 "Cerf élaphe" = "cerf/biche"
 "Blaireau européen, Blaireau" = "blaireau"
-"Belette d'Europe, Belette" = "belette"
+"Belette d'Europe, Belette" = "belette" 
