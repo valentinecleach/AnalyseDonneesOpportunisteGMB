@@ -91,7 +91,9 @@ GeoN <- GeoN %>%
   filter(!jdd_nom %in% c(490,53))%>% 
   # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
   # 53:  Données faunebretagne.org
-  mutate(technique_observation = ifelse(technique_observation == "Inconnu", "Vu", technique_observation))%>%
+  mutate(technique_observation = ifelse(technique_observation == "Inconnu", 
+                                        "Vu", technique_observation),
+         champs_additionnels = NA)%>%
   mutate(date = as.Date(date_debut),
          cd_nom = as.factor(cd_nom),
          ordre = as.factor(ordre),
@@ -118,7 +120,7 @@ GeoN <- GeoN %>%
          "y_centroid_4326",
          "comment_occurrence",
          "technique_observation",
-         "etat_biologique", "bdd_originale")
+         "etat_biologique", "bdd_originale", "champs_additionnels")
 
 donnees_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
                                      delim = ";", 
@@ -169,7 +171,7 @@ VisioN_FB <- VisioN_FB %>%
                                                              "{'death_cause': 'UNKNOWN_TRANSPORT'}"),
                                   "Trouvé mort : impact routier",
                                   etat_biologique),
-         etat_biologique = ifelse(grepl("ROUT", toupper(comment_occurrence)), 
+         etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "Trouvé mort") & grepl("ROUT", toupper(comment_occurrence))), 
                                   "Trouvé mort : impact routier",
                                   etat_biologique)
          )%>%
@@ -201,7 +203,7 @@ VisioN_FB <- VisioN_FB %>%
          "y_centroid_4326",
          "comment_occurrence",
          "technique_observation",
-         "etat_biologique", "bdd_originale")
+         "etat_biologique", "bdd_originale", "champs_additionnels")
 
 Total <- rbind(VisioN_FB, GeoN)
 
@@ -262,8 +264,8 @@ Total_Conti <- que_bretagne %>%
   st_drop_geometry()
 
 
-st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
+#st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
 
-write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
+#write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
 ```
 

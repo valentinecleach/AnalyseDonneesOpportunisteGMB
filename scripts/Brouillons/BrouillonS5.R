@@ -19,5 +19,33 @@ VM <- donnees_VisioNature_FB%>%
          etat_biologique = ifelse(grepl("ROUT", toupper(comment_occurrence)), 
                                   "Trouvé mort : impact routier",
                                   etat_biologique)
-         )%>%
-  select(comment_occurrence, champs_additionnels, etat_biologique)
+         )
+
+########################
+## Répartition UNKOWN ##
+########################
+
+rm(list=setdiff(ls(), "Total"))
+
+
+t1 <- Total%>%
+  filter(bdd_originale == "VisioNature",
+         champs_additionnels == "{'death_cause': 'UNKNOWN'}")%>%
+  ggplot(aes(nom_vernaculaire))+
+  geom_bar()+coord_flip()+labs(title = "Death_cause : UNKNOWN")
+
+t2 <- Total%>%
+  filter(bdd_originale == "VisioNature",
+         etat_biologique == "Trouvé mort : impact routier")%>%
+  ggplot(aes(nom_vernaculaire))+
+  geom_bar()+coord_flip()+labs(title = "Impacte routier")
+
+ggarrange(t1, t2)
+
+Total%>%
+  filter(bdd_originale == "VisioNature",
+         champs_additionnels == "{'death_cause': 'UNKNOWN'}")%>%
+  group_by(observateurs)%>%
+  filter(n()>30)%>%
+  ggplot(aes(observateurs))+
+  geom_bar()+coord_flip()+labs(title = "Death_cause : UNKNOWN")
