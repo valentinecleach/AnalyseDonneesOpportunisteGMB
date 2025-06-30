@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2025-06-26" />
+<meta name="date" content="2025-06-30" />
 
 <title>Nettoyage des données opportunistes du GMB</title>
 
@@ -1466,7 +1466,7 @@ border-radius: 0px;
 
 
 <h1 class="title toc-ignore">Nettoyage des données opportunistes du GMB</h1>
-<h4 class="date">2025-06-26</h4>
+<h4 class="date">2025-06-30</h4>
 
 </div>
 
@@ -1708,6 +1708,15 @@ VisioN_FB &lt;- VisioN_FB %&gt;%
         !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%&gt;% # Carni Introduit
 # Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
   mutate(technique_observation = ifelse(technique_observation == &quot;Inconnu&quot;, &quot;Vu&quot;, technique_observation))%&gt;%
+  mutate(etat_biologique = ifelse(champs_additionnels %in% c(&quot;{&#39;death_cause&#39;: &#39;ROAD_VEHICLE&#39;}&quot;,
+                                                             &quot;{&#39;death_cause&#39;: &#39;OTHER_TRANSPORT&#39;}&quot;,
+                                                             &quot;{&#39;death_cause&#39;: &#39;UNKNOWN_TRANSPORT&#39;}&quot;),
+                                  &quot;Trouvé mort : impact routier&quot;,
+                                  etat_biologique),
+         etat_biologique = ifelse(grepl(&quot;ROUT&quot;, toupper(comment_occurrence)), 
+                                  &quot;Trouvé mort : impact routier&quot;,
+                                  etat_biologique)
+         )%&gt;%
   mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
          date = as.Date(date_debut),
          cd_nom = as.factor(cd_nom),

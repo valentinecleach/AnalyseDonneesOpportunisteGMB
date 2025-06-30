@@ -1,28 +1,54 @@
 # Brouillon S4
 
 summary(as.factor(Total$nom_vernaculaire))
+params <- NA
+params$date_min <- '1980-01-01'
 
-
-
-library(slider)
-slide_mean()
 
 Total%>%
   filter(date > params$date_min,
          etat_biologique == "Trouvé mort : impact routier")%>%
   mutate(
     year = as.numeric(format(date, "%Y")),
-    year_group = cut(year, 
-                     breaks = seq(1980, max(year), by = 1), 
-                     right = FALSE),
     nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.02)
   ) %>%
-  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  ggplot(aes(year, fill = nom_vernaculaire_grp)) +
   geom_bar(position = "fill") +
-  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+  coord_flip()+
+  labs(title="Répartition des espèces mort par impact routier dans le temps",
+       subtitle = "GeoNature et VisioNature",
+       x = "Années", y = "Proportion") 
 
 
+Total%>%
+  filter(date > params$date_min,
+         etat_biologique %in% c("Trouvé mort","Trouvé mort : impact routier"))%>%
+  ggplot(aes(date, color = ordre))+
+  labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
+       subtitle = paste(VN))+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")+
+  scale_colour_manual(values=couleur)
 
+Total %>%
+  filter(date > params$date_min,
+         etat_biologique %in% c("Trouvé mort","Trouvé mort : impact routier"))%>%
+  mutate(
+    year = as.numeric(format(date, "%Y"))
+  ) %>%
+  group_by(year)%>%
+  summarise(n())%>%
+  print(n=45)
+
+Total%>%
+  mutate(
+    year = as.numeric(format(date, "%Y"))
+  ) %>%
+  filter(etat_biologique %in% c("Trouvé mort","Trouvé mort : impact routier"),
+        year == 1980
+  )%>%
+  print(n=10)
 
 Factoshiny(Observateurs)
 Factoshiny(Observateurs[,-1])
@@ -98,7 +124,7 @@ PCAshiny(Observateurs_espece)
 
 
 # stats desc comparaison espece et etat bio
-par(mfrow = c(2, 1))
+par(mfrow = c(1, 1))
 
 plot(Total$technique_observation)
 
@@ -108,7 +134,15 @@ Total%>%
   geom_count()+
   theme_bw()+
   labs(subtitle = VN)+
-  scale_y_discrete(labels = label_wrap(50))
+  scale_y_discrete(labels = label_wrap(45))
+
+Total%>%
+  filter(bdd_originale == VN)%>%
+  ggplot(aes(etat_biologique, nom_vernaculaire)) + 
+  geom_count()+
+  theme_bw()+
+  labs(subtitle = VN)+
+  scale_y_discrete(labels = label_wrap(45))
 
 Total%>%
   filter(bdd_originale == GN)%>%
@@ -116,7 +150,7 @@ Total%>%
   geom_count()+
   theme_bw()+
   labs(subtitle = GN)+
-  scale_y_discrete(labels = label_wrap(35))
+  scale_y_discrete(labels = label_wrap(45))
   
 Total%>%
   filter(bdd_originale == GN)%>%
@@ -139,6 +173,9 @@ Total%>%
   scale_x_discrete(labels = label_wrap(35))
 
 
+####################
+#####   DIRO    ####
+####################
 collision_faune_diro <- read_csv("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes/collision_faune_diro.csv")
 
 # collision_faune_diro%>%
@@ -168,53 +205,6 @@ diro <- collision_faune_diro%>%
     geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
     geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
   )
-
-diro_sf <- st_as_sf(diro, 
-                    coords = c("geom_x", "geom_y"), 
-                    crs = 2154)
-
-ggplot() +
-  geom_sf(data = diro_sf) +
-  labs(title = "Carte de tous points DIRO")
-
-#importation des cartes
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale")
-carte_bretagne_44 <- st_read("Masque_Bretagne_Continentale.shp")
-carte_bretagne_44 <- st_transform(carte_bretagne_44, 2154)
-carte_bretagne_44 <- st_buffer(carte_bretagne_44, dist = 200)
-
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44")
-carte_44 <- st_read("Masque44.shp")
-carte_44 <- st_transform(carte_44, 2154)
-carte_44 <- st_buffer(carte_44, dist = 200) 
-
-carte_bretagne_44_simple <- st_simplify(carte_bretagne_44, dTolerance = 100) # adjust dTolerance as needed
-carte_44_simple <- st_simplify(carte_44, dTolerance = 100)
-
-
-#filtre
-total_bretagne_44 <- st_filter(diro_sf, carte_bretagne_44_simple, .predicate = st_within)
-total_44 <- st_filter(diro_sf, carte_44_simple, .predicate = st_within)
-
-total_44_id_synthese <- total_44 %>%
-  st_drop_geometry() %>%
-  select(id_synthese)
-
-DIRO_bret_sf <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
-
-
-# Verifications
-ggplot() +
-  geom_sf(data = diro_sf) +
-  labs(title = "DIRO Map")
-
-# Total_Conti <- que_bretagne %>%
-#   st_drop_geometry()
-
-
-# st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
-# 
-# write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
 
 
 
@@ -319,17 +309,39 @@ collision_faune_diro %>%
 "Belette d'Europe, Belette" = "belette" 
 
 
-# Load required libraries
+
 library(sf)
 library(dplyr)
 library(ggplot2)
 
-# ---- 1. Data preparation ----
 
-# Convert DIRO data frame to sf object
-diro_sf <- st_as_sf(diro, coords = c("geom_x", "geom_y"), crs = 2154)
 
-# ---- 2. Import and preprocess masks ----
+carte_bretagne_44_simple <- st_simplify(carte_bretagne_44, dTolerance = 100) # adjust dTolerance as needed
+carte_44_simple <- st_simplify(carte_44, dTolerance = 100)
+
+
+#filtre
+total_bretagne_44 <- st_filter(diro_sf, carte_bretagne_44_simple, .predicate = st_within)
+total_44 <- st_filter(diro_sf, carte_44_simple, .predicate = st_within)
+
+total_44_id_synthese <- total_44 %>%
+  st_drop_geometry() %>%
+  select(id_synthese)
+
+DIRO_bret_sf <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
+
+
+
+write.csv(diro, "~/work/AnalyseDonneesOpportunisteGMB/donnees/diro.csv")
+
+
+# ---- 1.
+
+diro_sf <- st_as_sf(diro, 
+                    coords = c("geom_x", "geom_y"), 
+                    crs = 2154)
+
+# ---- 2.
 
 # Read and process Bretagne mask
 carte_bretagne_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp") %>%
@@ -341,37 +353,28 @@ carte_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44/Masq
   st_transform(2154) %>%
   st_simplify(dTolerance = 100)
 
-# ---- 3. Fast spatial filtering ----
 
-# Optional: Use bounding box crop to speed up
-diro_sf_bbox_bretagne <- st_crop(diro_sf, st_bbox(carte_bretagne_44))
-diro_sf_bbox_44 <- st_crop(diro_sf, st_bbox(carte_44))
+ggplot() +  
+#  geom_sf(carte_bretagne)+
+  geom_sf(data = diro_sf) +
+  labs(title = "Carte de tous points DIRO")
 
-# Filter points within Bretagne and 44
-sf::sf_use_s2(FALSE)
-carte_bretagne_44 <- st_make_valid(carte_bretagne_44)
-carte_bretagne_44 <- st_simplify(carte_bretagne_44, dTolerance = 500) # try higher if needed
+#filtre
+total_bretagne_44 <- st_filter(diro_sf, carte_bretagne_44, .predicate = st_within)
+total_44 <- st_filter(diro_sf, carte_44, .predicate = st_within)
 
-# st_join is usually faster than st_filter for these cases
-total_bretagne_44 <- st_join(diro_sf_bbox_bretagne, carte_bretagne_44, join = st_within, left = FALSE)
-total_44 <- st_join(diro_sf_bbox_44, carte_44, join = st_within, left = FALSE)
 
-# ---- 4. Extract id_synthese for 44 ----
+# ---- 4. 
 
-total_44_id_synthese <- total_44 %>%
+total_44_id <- total_44 %>%
   st_drop_geometry() %>%
   select(id)
 
-# ---- 5. Anti-join: Points in Bretagne but not in 44 ----
+# ---- 5. Anti-join
 
-DIRO_bret_sf <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id")
+DIRO_bret_sf <- anti_join(total_bretagne_44, total_44_id, by = "id")
 
-# ---- 6. Plot for verification ----
-
-ggplot() +
-  geom_sf(data = diro_sf) +
-  labs(title = "Carte de tous points DIRO")+
-  geom_sf(carte_bretagne)
+# ---- 6. Plot 
 
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
 carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
@@ -381,9 +384,6 @@ ggplot() +
   geom_sf(data = carte_bretagne)+
   geom_sf(data = DIRO_bret_sf)
 
-DIRO%>%
-  group_by(espece)%>%
-  summarize(n())
 
 DIRO <- st_drop_geometry(DIRO_bret_sf)
 

@@ -106,3 +106,41 @@ Observateurs <- Observateurs%>%
   )
 
 
+Observateurs <- Observateurs %>%
+  filter(!(observateurs %in% c("BELLIER_DANIEL", "CHAPUIS_MARTINE")))
+Factoshiny(Observateurs)
+
+
+####################
+#####   DIRO    ####
+####################
+collision_faune_diro <- read_csv("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes/collision_faune_diro.csv")
+
+# collision_faune_diro%>%
+#   filter(commentaire == "Chameaux")
+
+diro <- collision_faune_diro%>%
+  mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
+              "grp_espece", "espece", "commentaire", "commune"), 
+            as.factor)%>%
+  filter(!(espece %in% c("amphibien", "amphibiens", "autre", "autre oiseau",
+                         "castor", "chat", "chauve-souris", "chien", "chouette",
+                         "nr", "oiseaux sauf rapace", "rapace diurne", 
+                         "rapace nocturne", "rapaces nocturnes", "rapaces diurnes",
+                         "reptile", "reptiles")),
+         !is.na(geom))%>%
+  mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")),
+         espece = ifelse(commentaire == "Furet", 
+                         "Putois d'Europe, Putois, Furet", espece))%>%
+  mutate(bdd_originale = "DIRO",
+         technique_observation = "Vu",
+         etat_biologique = "Trouvé mort : impact routier")%>%
+  select(-date_maj, -annee, -mois, -commentaire, -grp_espece)%>%
+  mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
+              "espece", "commune"), 
+            as.factor) %>%
+  mutate(
+    geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
+    geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
+  )
+

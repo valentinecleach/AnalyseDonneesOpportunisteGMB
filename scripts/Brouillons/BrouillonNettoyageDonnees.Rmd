@@ -164,6 +164,15 @@ VisioN_FB <- VisioN_FB %>%
         !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
 # Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
   mutate(technique_observation = ifelse(technique_observation == "Inconnu", "Vu", technique_observation))%>%
+  mutate(etat_biologique = ifelse(champs_additionnels %in% c("{'death_cause': 'ROAD_VEHICLE'}",
+                                                             "{'death_cause': 'OTHER_TRANSPORT'}",
+                                                             "{'death_cause': 'UNKNOWN_TRANSPORT'}"),
+                                  "Trouvé mort : impact routier",
+                                  etat_biologique),
+         etat_biologique = ifelse(grepl("ROUT", toupper(comment_occurrence)), 
+                                  "Trouvé mort : impact routier",
+                                  etat_biologique)
+         )%>%
   mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
          date = as.Date(date_debut),
          cd_nom = as.factor(cd_nom),
@@ -247,7 +256,7 @@ que_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synt
 # Verifications
 ggplot() +
   geom_sf(data = que_bretagne) +
-  labs(title = "Points in Bretagne (sauf 44)")
+  labs(title = "Points en Bretagne (sauf dans le 44)")
 
 Total_Conti <- que_bretagne %>%
   st_drop_geometry()
