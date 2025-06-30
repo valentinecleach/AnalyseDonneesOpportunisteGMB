@@ -380,3 +380,10 @@ carte_bretagne <- st_set_crs(carte_bretagne, 2154)
 ggplot() +
   geom_sf(data = carte_bretagne)+
   geom_sf(data = DIRO_bret_sf)
+
+DIRO%>%
+  group_by(espece)%>%
+  summarize(n())
+
+DIRO <- st_drop_geometry(DIRO_bret_sf)
+
