@@ -1,6 +1,11 @@
+rm(list=setdiff(ls(), "Total"))
+
+
 #############
 ## Road VN ##
 #############
+
+
 
 
 setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
@@ -219,16 +224,21 @@ repartition_espece_cluster(cluster = 2)
 repartition_espece_cluster(cluster = 3)
 
 
-#################
+#############
 ### DIRO ####
 #############
-
-# ---- 1.
 
 collision_faune_diro <- read_csv("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes/collision_faune_diro.csv")
 
 
 diro <- collision_faune_diro%>%
+  mutate(
+    geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
+    geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
+  )
+
+
+diro <- diro %>%
   mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
               "grp_espece", "espece", "commentaire", "commune"), 
             as.factor)%>%
@@ -247,40 +257,23 @@ diro <- collision_faune_diro%>%
   select(-date_maj, -annee, -mois, -commentaire, -grp_espece)%>%
   mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
               "espece", "commune"), 
-            as.factor) %>%
-  mutate(
-    geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
-    geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
-  )
-
+            as.factor) 
 
 diro_sf <- st_as_sf(diro, 
                     coords = c("geom_x", "geom_y"), 
                     crs = 2154)
+
 diro_sf <- st_transform(diro_sf, 
                         st_crs(4326))
-# ---- 2.
 
-CRS = 4326
-
-# Read and process Bretagne mask
 carte_bretagne_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp") %>%
   st_transform(2154)%>%
-  st_transform(st_crs(CRS))
+  st_transform(st_crs(4326))
 
-
-# Read and process 44 mask
 carte_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44/Masque44.shp") %>%
   st_transform(2154) %>%
-  st_transform(st_crs(CRS))
+  st_transform(st_crs(4326))
 
-
-ggplot() +  
-  #  geom_sf(carte_bretagne)+
-  geom_sf(data = diro_sf) +
-  labs(title = "Carte de tous points DIRO")
-
-#filtre
 total_bretagne_44 <- st_filter(diro_sf, 
                                carte_bretagne_44, 
                                .predicate = st_within)
@@ -288,29 +281,16 @@ total_44 <- st_filter(diro_sf,
                       carte_44, 
                       .predicate = st_within)
 
-
-# ---- 4. 
-
 total_44_id <- total_44 %>%
   st_drop_geometry() %>%
   select(id)
 
-# ---- 5. 
-
-DIRO_bret_sf <- anti_join(total_bretagne_44, 
-                          total_44_id, by = "id")
-
-# ---- 6. Plot 
-
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
-carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
-carte_bretagne <- st_set_crs(carte_bretagne, 2154)
-carte_bretagne <- st_transform(carte_bretagne, st_crs(CRS))
-
+diro_sf <- anti_join(total_bretagne_44, 
+                     total_44_id, 
+                     by = "id")
 
 ggplot() +
-  geom_sf(data = carte_bretagne)+
-  geom_sf(data = DIRO_bret_sf)
+  geom_sf(data = carte_bretagne_44) +
+  geom_sf(data = diro_sf)
 
-
-DIRO <- st_drop_geometry(DIRO_bret_sf)
+diro <- st_drop_geometry(diro_sf)

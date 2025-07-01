@@ -124,10 +124,15 @@ Observateurs <- Observateurs %>%
 ####################
 collision_faune_diro <- read_csv("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes/collision_faune_diro.csv")
 
-# collision_faune_diro%>%
-#   filter(commentaire == "Chameaux")
 
 diro <- collision_faune_diro%>%
+  mutate(
+    geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
+    geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
+  )
+
+
+diro <- diro %>%
   mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
               "grp_espece", "espece", "commentaire", "commune"), 
             as.factor)%>%
@@ -146,11 +151,40 @@ diro <- collision_faune_diro%>%
   select(-date_maj, -annee, -mois, -commentaire, -grp_espece)%>%
   mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
               "espece", "commune"), 
-            as.factor) %>%
-  mutate(
-    geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
-    geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
-  )
+            as.factor) 
 
-#Factoshiny(Observateurs)
+diro_sf <- st_as_sf(diro, 
+                    coords = c("geom_x", "geom_y"), 
+                    crs = 2154)
 
+diro_sf <- st_transform(diro_sf, 
+                        st_crs(4326))
+
+carte_bretagne_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp") %>%
+  st_transform(2154)%>%
+  st_transform(st_crs(4326))
+
+carte_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44/Masque44.shp") %>%
+  st_transform(2154) %>%
+  st_transform(st_crs(4326))
+
+total_bretagne_44 <- st_filter(diro_sf, 
+                               carte_bretagne_44, 
+                               .predicate = st_within)
+total_44 <- st_filter(diro_sf, 
+                      carte_44, 
+                      .predicate = st_within)
+
+total_44_id <- total_44 %>%
+  st_drop_geometry() %>%
+  select(id)
+
+diro_sf <- anti_join(total_bretagne_44, 
+                     total_44_id, 
+                     by = "id")
+
+ggplot() +
+  geom_sf(data = carte_bretagne_44) +
+  geom_sf(data = diro_sf)
+
+diro <- st_drop_geometry(diro_sf)

@@ -256,9 +256,9 @@ total_44_id_synthese <- total_44 %>%
 que_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
 
 # Verifications
-ggplot() +
-  geom_sf(data = que_bretagne) +
-  labs(title = "Points en Bretagne (sauf dans le 44)")
+# ggplot() +
+#   geom_sf(data = que_bretagne) +
+#   labs(title = "Points en Bretagne (sauf dans le 44)")
 
 Total_Conti <- que_bretagne %>%
   st_drop_geometry()
@@ -267,5 +267,73 @@ Total_Conti <- que_bretagne %>%
 #st_write(que_bretagne, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total_sf.shp")
 
 #write.csv(Total_Conti, "~/work/AnalyseDonneesOpportunisteGMB/donnees/Total.csv")
+```
+## Nettoyage de la base de donnée DIRO:
+Geométrie
+```{r}
+collision_faune_diro <- read_csv("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes/collision_faune_diro.csv")
+
+diro <- collision_faune_diro%>%
+  mutate(
+    geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
+    geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
+  )%>%
+  filter(!is.na(geom))
+
+diro_sf <- st_as_sf(diro, 
+                    coords = c("geom_x", "geom_y"), 
+                    crs = 2154)
+
+diro_sf <- st_transform(diro_sf, 
+                        st_crs(4326))
+
+carte_bretagne_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp") %>%
+  st_transform(2154)%>%
+  st_transform(st_crs(4326))
+
+carte_44 <- st_read("~/work/AnalyseDonneesOpportunisteGMB/donnees/Masque_44/Masque44.shp") %>%
+  st_transform(2154) %>%
+  st_transform(st_crs(4326))
+
+total_bretagne_44 <- st_filter(diro_sf, 
+                               carte_bretagne_44, 
+                               .predicate = st_within)
+total_44 <- st_filter(diro_sf, 
+                      carte_44, 
+                      .predicate = st_within)
+
+total_44_id <- total_44 %>%
+  st_drop_geometry() %>%
+  select(id)
+
+diro_sf <- anti_join(total_bretagne_44, 
+                     total_44_id, 
+                     by = "id")
+
+# ggplot() +
+#   geom_sf(data = carte_bretagne_44) +
+#   geom_sf(data = diro_sf)
+```
+
+Données
+```{r}
+diro_sf <- diro_sf %>%
+  mutate(espece = as.character(espece)) %>%
+  filter(!(espece %in% c("amphibien", "amphibiens", "autre", "autre oiseau",
+                         "castor", "chat", "chauve-souris", "chien", "chouette",
+                         "nr", "oiseaux sauf rapace", "rapace diurne", 
+                         "rapace nocturne", "rapaces nocturnes", "rapaces diurnes",
+                         "reptile", "reptiles")))%>%
+  mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")),
+         espece = ifelse(commentaire == "Furet", 
+                         "Putois d'Europe, Putois, Furet", espece))%>%
+  mutate(bdd_originale = "DIRO",
+         technique_observation = "Vu",
+         etat_biologique = "Trouvé mort : impact routier")%>%
+  select(-date_maj, -annee, -mois, -commentaire, -grp_espece)%>%
+  mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
+              "espece", "commune"), 
+            as.factor) 
+
 ```
 
