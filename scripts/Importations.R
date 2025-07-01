@@ -72,9 +72,15 @@ max_etat_bio <- Total%>%
   group_by(observateurs) %>%
   summarise(etat_bio_max = collapse::fmode(etat_biologique))
 
+max_bdd <- Total%>%
+  group_by(observateurs) %>%
+  summarise(bdd_max = collapse::fmode(bdd_originale))
+
+
 Observateurs <- nb_observations %>%
   left_join(max_technique, by = "observateurs")%>%
   left_join(max_etat_bio, by = "observateurs")%>%
+  left_join(max_bdd, by= "observateurs")%>%
   left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
@@ -89,9 +95,9 @@ Observateurs <- Observateurs %>%
          nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
   )
 
-Observateurs$shannon <- vegan::diversity(Observateurs[,5:9])
+Observateurs$shannon <- vegan::diversity(Observateurs[,6:10])
 
-Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,5:9]))
+Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,6:10]))
 Observateurs <- Observateurs %>%
   mutate(Pielou = ifelse(shannon==0, 0, Pielou))
 
@@ -102,13 +108,15 @@ Observateurs <- Observateurs%>%
          prop_lagomorpha = nb_lagomorpha / total_obs,
          prop_rodentia = nb_rodentia / total_obs,
          tech_obs_max = paste("Tech d'obs: ", tech_obs_max, sep=""),
-         etat_bio_max = paste("Etat bio: ", etat_bio_max, sep="")
+         etat_bio_max = paste("Etat bio: ", etat_bio_max, sep=""),
+         bdd_max = as.character(bdd_max)
   )
 
 
 Observateurs <- Observateurs %>%
   filter(!(observateurs %in% c("BELLIER_DANIEL", "CHAPUIS_MARTINE")))
-Factoshiny(Observateurs)
+
+
 
 
 ####################
@@ -143,4 +151,6 @@ diro <- collision_faune_diro%>%
     geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
     geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
   )
+
+#Factoshiny(Observateurs)
 
