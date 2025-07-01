@@ -11,9 +11,14 @@ Priorité
 - discuter du reste des unkown avec Franck Jeudi
 
 - DIRO 
-    -> mettre dans nettoyage données.
     -> rassembler fouine - martre - hermine etc dans mustelidé
-
+    -> corriger le problème avec espece == NA 
+    -> regarder si ceux ci sont similaire aux autres comme dans 
+    Unstructured citizen science data fail to
+ detect long-term population declines of
+ common birds in Denmark
+    
+    
 - FAIRE LA NOTE D'ETAPE
 
 - faire une fonction qui adapte un code couleur (dégradé de la couleur de l'ordre)
