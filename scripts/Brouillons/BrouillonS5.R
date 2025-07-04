@@ -294,3 +294,4 @@ ggplot() +
   geom_sf(data = diro_sf)
 
 diro <- st_drop_geometry(diro_sf)
+
