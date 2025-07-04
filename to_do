@@ -2,12 +2,10 @@ To do:
 
 Priorité
 
-- lire la docu
+- RANGER LE PROJET
 
-- Refaire les ACP (-> Voir mes notes sur papier) 
-    * nom_num à coté
+- Annexes de LA NOTE D'ETAPE
 
-- 
 - discuter du reste des unkown avec Franck Jeudi
 
 - DIRO 
@@ -19,7 +17,6 @@ Priorité
  common birds in Denmark
     
     
-- FAIRE LA NOTE D'ETAPE
 
 - faire une fonction qui adapte un code couleur (dégradé de la couleur de l'ordre)
 
@@ -49,3 +46,21 @@ Questions:
 
 Martes martes : Martre des pins, Martre cd_nom 60658
 Martes Pinel, 1792 : cd_nom 194481 -> quel nom_vernaculaire? Peut on les rassembler?
+
+#################################################
+Nettoyage du projet:
+
+--- TIPS: ---
+library(formatR)
+tidy.source()
+
+
+# working directory
+wd <- list()
+# commonly used paths in my working directory
+wd$donnees   <- "C:/Users/richpauloo/Documents/Github/my_project/donnees/"
+wd$output <- "C:/Users/richpauloo/Documents/Github/my_project/output/"
+sr <- read_csv(paste0(wd$data, "survey_results.csv"))
+
+
+house files? -> ggthemr
