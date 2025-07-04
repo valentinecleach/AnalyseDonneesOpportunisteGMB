@@ -1,3 +1,0 @@
-export("carni", "couleur", "data", "GN", "haut_pielou",
-       "nom_vernaculaire_grp", "params", "repartition_espece", "t",
-       "technique_order", "Total", "Total_sf", "VN")
