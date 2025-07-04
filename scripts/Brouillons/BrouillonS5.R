@@ -295,3 +295,34 @@ ggplot() +
 
 diro <- st_drop_geometry(diro_sf)
 
+
+# Carte bretagne
+setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
+carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
+carte_bretagne <- st_set_crs(carte_bretagne, 2154)
+carte_bretagne <- st_transform(carte_bretagne, 4326)
+
+
+# GeoNature
+
+clust_1 <- Total%>%
+  filter(clust == 1)
+
+carte_44 <- 
+  st_transform(2154) %>%
+  st_transform(st_crs(4326))
+
+  
+grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+                                         cellsize = c(0.12, 0.09))
+)
+clust_1 <- 
+grid_sf$density <- lengths(st_intersects(grid_sf, GN_sf))
+grid_sf <- st_intersection(grid_sf, carte_bretagne)
+ggplot() +
+  geom_sf(data = carte_bretagne) + 
+  labs(title = "Densité des observations en bretagne",
+       subtitle = GN) +
+  geom_sf(data = grid_sf, aes(fill = density)) +
+  scale_fill_gradient(low="gray97", high="gray15") +
+  theme_bw()
