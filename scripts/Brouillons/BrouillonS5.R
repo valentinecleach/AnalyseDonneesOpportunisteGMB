@@ -1,61 +1,5 @@
 rm(list=setdiff(ls(), "Total"))
 
-
-#############
-## Road VN ##
-#############
-
-
-
-
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees_brutes")
-
-donnees_VisioNature_FB <- read_delim("VisioN_FB_2025-06-05T09_19_40.789Z.csv",
-                                     delim = ";", 
-                                     escape_double = FALSE,
-                                     trim_ws = TRUE)
-
-VM <- donnees_VisioNature_FB%>%
-  mutate(etat_biologique = ifelse(champs_additionnels %in% c("{'death_cause': 'ROAD_VEHICLE'}",
-                                                             "{'death_cause': 'OTHER_TRANSPORT'}",
-                                                             "{'death_cause': 'UNKNOWN_TRANSPORT'}"),
-                                  "Trouvé mort : impact routier",
-                                  etat_biologique),
-         etat_biologique = ifelse(grepl("ROUT", toupper(comment_occurrence)), 
-                                  "Trouvé mort : impact routier",
-                                  etat_biologique)
-         )
-
-########################
-## Répartition UNKOWN ##
-########################
-
-rm(list=setdiff(ls(), "Total"))
-
-
-t1 <- Total%>%
-  filter(bdd_originale == "VisioNature",
-         champs_additionnels == "{'death_cause': 'UNKNOWN'}")%>%
-  ggplot(aes(nom_vernaculaire))+
-  geom_bar()+coord_flip()+labs(title = "Death_cause : UNKNOWN")
-
-t2 <- Total%>%
-  filter(bdd_originale == "VisioNature",
-         etat_biologique == "Trouvé mort : impact routier")%>%
-  ggplot(aes(nom_vernaculaire))+
-  geom_bar()+coord_flip()+labs(title = "Impacte routier")
-
-ggarrange(t1, t2)
-
-Total%>%
-  filter(bdd_originale == "VisioNature",
-         champs_additionnels == "{'death_cause': 'UNKNOWN'}")%>%
-  group_by(observateurs)%>%
-  filter(n()>30)%>%
-  ggplot(aes(observateurs))+
-  geom_bar()+coord_flip()+labs(title = "Death_cause : UNKNOWN")
-
-
 res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(2,3,4),quanti.sup=c(1,5,6,7,8,9),graph=FALSE)
 plot.PCA(res.PCA,choix='var') # Corrélation negative entre Pielou, 
 #                               une proportion de rongeurs elevé, et 
@@ -135,25 +79,7 @@ PCAshiny(Observateurs_espece)
 
 
 res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(2,3,4),quanti.sup=c(12,13,14,15,16),graph=FALSE)
-plot.PCA(res.PCA,choix='var') # Corrélation positive entre les variables
-plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali'))
-summary(res.PCA)
-# Dim 1: Nombre d'observations (positif)
-# Dim 2: Shannon et pielou (positif)
-
 res.HCPC<-HCPC(res.PCA,nb.clust=3,consol=FALSE,graph=FALSE)
-plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
-plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
-summary(res.HCPC)
-# On a 3 clusters
-# Le 1er : peu de diversité et peu d'observations (surtout visioNature)
-# 2e : forte diversité (surtout geonature)
-# 3e : peu de diversité et de nombreuses observations (pas plus visionature ni geonature)
-
-res.HCPC$data.clust # retourne toutes les valeurs et l'appartenance au cluster pour chaque individu
-res.HCPC$data.clust[1,]$clust # pour le premier individu
-table(res.HCPC$data.clust$clust) # donne le tableau des fréquences par cluster
-
 Observateurs_clust <- res.HCPC$data.clust%>%
   mutate(observateurs = Observateurs$observateurs)
 
@@ -164,11 +90,6 @@ Total_clust <- Total %>%
     Observateurs_clust$clust == 3 ~ 3,
     .default = NA
   ))
-
-str(Total)
-str(Observateurs_clust)
-
-library(dplyr)
 
 Total <- Total %>%
   filter(!(observateurs %in% c("CHAPUIS_MARTINE", "BELLIER_DANIEL")))%>%
@@ -188,20 +109,6 @@ Cluster_1 %>%
   scale_x_discrete(labels = label_wrap(40)) +
   coord_flip()+theme_bw()
 
-Total%>%
-  filter(clust == 1)%>%
-  count(nom_vernaculaire, sort = TRUE) %>%
-  ggplot(aes(x = reorder(nom_vernaculaire, n), 
-             y = n)) +
-  geom_col() +
-  coord_flip() +
-  labs(
-    title = "Répartition des espèces du Cluster 1",
-    x = "Nom vernaculaire"
-  ) +
-  scale_x_discrete(labels = label_wrap(40)) +
-  theme_bw()+
-  theme(axis.text=element_text(size=8))
 
 repartition_espece_cluster <- function(bdd = Total, cluster){
   bdd %>%

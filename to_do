@@ -4,8 +4,6 @@ Priorité
 
 - RANGER LE PROJET
 
-- Annexes de LA NOTE D'ETAPE
-
 - discuter du reste des unkown avec Franck Jeudi
 
 - DIRO 
@@ -15,6 +13,8 @@ Priorité
     Unstructured citizen science data fail to
  detect long-term population declines of
  common birds in Denmark
+ 
+ - commencer la modélisation
     
     
 
@@ -22,7 +22,7 @@ Priorité
 
 - corriger le problème avec le package
 
-- commencer la modélisation
+
 
 - faire une fonction qui adapte un code couleur 
 (dégradé de la couleur de l'ordre)
@@ -54,13 +54,6 @@ Nettoyage du projet:
 library(formatR)
 tidy.source()
 
-
-# working directory
-wd <- list()
-# commonly used paths in my working directory
-wd$donnees   <- "C:/Users/richpauloo/Documents/Github/my_project/donnees/"
-wd$output <- "C:/Users/richpauloo/Documents/Github/my_project/output/"
-sr <- read_csv(paste0(wd$data, "survey_results.csv"))
 
 
 house files? -> ggthemr
