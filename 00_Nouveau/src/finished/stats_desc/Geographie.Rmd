@@ -1,18 +1,25 @@
 ## 3. Répresentation cartographique des données
 
+```{r, include=FALSE}
+source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
+wd <- set_wd()
+
+# Graine aléatoire
+set.seed(12345)
+# Importations
+Total <- st_read(paste0(wd$data,"Total.shp"))
+carte_bretagne <- st_read(paste0(wd$data,"masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
+
+Total <- transform_Total()
+carte_bretagne <- transforme_carte(carte_bretagne)
+```
+
 ```{r cartes-densite}
-
-# Carte bretagne
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
-carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
-carte_bretagne <- st_set_crs(carte_bretagne, 2154)
-carte_bretagne <- st_transform(carte_bretagne, 4326)
-
 
 # GeoNature
 
-GN_sf <- Total_sf %>%
-  filter(bdd_rgn == GN)
+GN_sf <- Total %>%
+  filter(bdd_originale == GN)
 
 grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
                                          cellsize = c(0.12, 0.09))
@@ -29,8 +36,8 @@ ggplot() +
 
 # VisioNature
 
-VN_sf <- Total_sf %>%
-  filter(bdd_rgn == VN)
+VN_sf <- Total %>%
+  filter(bdd_originale == VN)
 
 grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
                                          cellsize = c(0.12, 0.09)))
@@ -52,7 +59,7 @@ Dans VisioNature, on a deux points avec une très forte densité sont probableme
 
 ```{r}
 VN_sf_modif <- VN_sf%>%
-  filter(!obsrvtr %in% c("BELLIER DANIEL", "CHAPUIS MARTINE"))
+  filter(!observateurs %in% c("BELLIER DANIEL", "CHAPUIS MARTINE"))
 
 grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
                                          cellsize = c(0.12, 0.09))
@@ -70,20 +77,14 @@ ggplot() +
 ```
 
 ```{r, fig.width=10, fig.height=7}
-# Carte bretagne
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
-carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
-carte_bretagne <- st_set_crs(carte_bretagne, 2154)
-carte_bretagne <- st_transform(carte_bretagne, 4326)
-
 # Données geographique
 
-GN_sf <- Total_sf%>% 
-  dplyr::filter(bdd_rgn == GN)%>%
+GN_sf <- Total%>% 
+  dplyr::filter(bdd_originale == GN)%>%
   dplyr::select(ordre, date)
 
-VN_sf <- Total_sf%>% 
-  dplyr::filter(bdd_rgn == VN)%>%
+VN_sf <- Total%>% 
+  dplyr::filter(bdd_originale == VN)%>%
   dplyr::select(ordre, date)
 
 ordres <- unique(VN_sf$ordre)
@@ -141,49 +142,6 @@ Nous prenons la base de données avec toutes les données et je selectionne 40 0
 Pour info, la graine aléatoire est figée a 12345.
 
 ```{r graphiques-date-et-ordre}
-
-graph_ordre_tranche_annee <- function(ordre_voulu){
-  # Creation de la BDD
-  ordre_data <- Total_sf %>% filter(ordre == ordre_voulu)
-  bdd_props <- prop.table(table(ordre_data$bdd_rgn))
-  n_bdd1 <- round(5000 * bdd_props[1])
-  n_bdd2 <- 5000 - n_bdd1
-  bdd1 <- ordre_data %>% 
-    filter(bdd_rgn == "GeoNature") %>% 
-    sample_n(min(n_bdd1, n()))
-  bdd2 <- ordre_data %>% 
-    filter(bdd_rgn == "VisioNature") %>% 
-    sample_n(min(n_bdd2, n()))
-  
-  ordre_graph <- bind_rows(bdd1, bdd2) %>%
-    mutate(
-      grp_date = case_when(
-        date >= as.Date("2010-01-01") & date <= as.Date("2014-12-31") ~ "1. Entre 2010 et 2015",
-        date >= as.Date("2015-01-01") & date <= as.Date("2019-12-31") ~ "2. Entre 2015 et 2020",
-        date > as.Date("2019-12-31") ~ "3. Après 2020",
-        TRUE ~ NA_character_
-      )
-    ) %>%
-    filter(date > as.Date("2010-01-01")) %>%
-    sample_frac(1)
-  
-  # Transformation pour des données de la carte
-  carte_ordre <- ordre_graph %>%
-    select(grp_date, ordre, date) %>%
-    filter(ordre == ordre_voulu)
-  
-  # Plot
-  ggplot() +
-    geom_sf(data = carte_bretagne) + 
-    labs(
-      title = paste("Carte des observations en Bretagne des", ordre_voulu),
-      subtitle = "Toutes données"
-    ) +
-    geom_sf(data = carte_ordre, size = 0.01) +
-    theme_bw() + 
-    facet_grid(. ~ grp_date)
-}
-
 graph_ordre_tranche_annee("Carnivora")
 graph_ordre_tranche_annee("Cetartiodactyla")
 graph_ordre_tranche_annee("Eulipotyphla")

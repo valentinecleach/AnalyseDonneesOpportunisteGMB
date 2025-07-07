@@ -1,195 +1,147 @@
 ## 3. Répresentation cartographique des données
 
-```{r cartes-densite}
+```{r, include=FALSE}
+# Packages
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringi)
+library(stringr)
+library(sf)
+library(rsample)
+library(patchwork)
+library(scales)
+library(viridis)
+library(lubridate)
+library(purrr)
+library(forcats)
+library(targets)
+library(tarchetypes)
+library(ggpubr)
+library(collapse)
+library(vegan)
+library(permute)
 
-# Carte bretagne
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
-carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
-carte_bretagne <- st_set_crs(carte_bretagne, 2154)
-carte_bretagne <- st_transform(carte_bretagne, 4326)
+source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
 
-
-# GeoNature
-
-GN_sf <- Total_sf %>%
-  filter(bdd_rgn == GN)
-
-grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
-                                         cellsize = c(0.12, 0.09))
-              )
-grid_sf$density <- lengths(st_intersects(grid_sf, GN_sf))
-grid_sf <- st_intersection(grid_sf, carte_bretagne)
-ggplot() +
-  geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne",
-       subtitle = GN) +
-  geom_sf(data = grid_sf, aes(fill = density)) +
-  scale_fill_gradient(low="gray97", high="gray15") +
-  theme_bw()
-
-# VisioNature
-
-VN_sf <- Total_sf %>%
-  filter(bdd_rgn == VN)
-
-grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
-                                         cellsize = c(0.12, 0.09)))
-grid_sf$density <- lengths(st_intersects(grid_sf, VN_sf))
-grid_sf <- st_intersection(grid_sf, carte_bretagne)
-ggplot() +
-  geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne",
-       subtitle = VN) +
-  geom_sf(data = grid_sf, aes(fill = density)) +
-  scale_fill_gradient(low="grey97", high="gray15") +
-  theme_bw()
-```
-
-Il semble y avoir un lieu avec une forte densité proche de Sizun dans la BDD GeoNature.
-On remarque aussi que les observations ont lieu surtout au nord-ouest de la Bretagne et au sud entre le Morbihan et l'Ille-et-Vilaine.\
-
-Dans VisioNature, on a deux points avec une très forte densité sont probablement dues à nos deux principaux contributeurs (voir la partie 4), nous décidons de les supprimer pour vérifier.
-
-```{r}
-VN_sf_modif <- VN_sf%>%
-  filter(!obsrvtr %in% c("BELLIER DANIEL", "CHAPUIS MARTINE"))
-
-grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
-                                         cellsize = c(0.12, 0.09))
-)
-grid_sf$density <- lengths(st_intersects(grid_sf, VN_sf_modif))
-grid_sf <- st_intersection(grid_sf, carte_bretagne)
-ggplot() +
-  geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne",
-       subtitle = "VisioNature, sans les deux principaux observateurs") +
-  geom_sf(data = grid_sf, aes(fill = density)) +
-  scale_fill_gradient(low="grey97", high="gray15") +
-  theme_bw()
-
-```
-
-```{r, fig.width=10, fig.height=7}
-# Carte bretagne
-setwd("~/work/AnalyseDonneesOpportunisteGMB/donnees/DepartementsOuest")
-carte_bretagne <- st_read("LIM_ADM_DepartementsOuest.shp")
-carte_bretagne <- st_set_crs(carte_bretagne, 2154)
-carte_bretagne <- st_transform(carte_bretagne, 4326)
-
-# Données geographique
-
-GN_sf <- Total_sf%>% 
-  dplyr::filter(bdd_rgn == GN)%>%
-  dplyr::select(ordre, date)
-
-VN_sf <- Total_sf%>% 
-  dplyr::filter(bdd_rgn == VN)%>%
-  dplyr::select(ordre, date)
-
-ordres <- unique(VN_sf$ordre)
-
-grid <- st_make_grid(carte_bretagne, 
-                     cellsize = c(0.12, 0.09)) %>%
-  st_sf() %>%
-  st_set_crs(4326)
-
-# VisioNature
-grid_list <- map(ordres, function(o) {
-  vis_ord <- VN_sf %>% filter(ordre == o)
-  grid_tmp <- grid
-  grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
-  grid_tmp$ordre <- o
-  grid_tmp
-})
-grid_sf <- bind_rows(grid_list)
-grid_sf <- st_intersection(grid_sf, carte_bretagne)
-ggplot() +
-  geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne selon les ordres",
-       subtitle = VN) +
-  geom_sf(data = grid_sf, aes(fill = density), color = NA) +
-  scale_fill_gradient(low="gray90", high="gray15") +
-  theme_bw() +
-  facet_grid(. ~ ordre)
-
-# GeoNature
-grid_list <- map(ordres, function(o) {
-  vis_ord <- GN_sf %>% filter(ordre == o)
-  grid_tmp <- grid
-  grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
-  grid_tmp$ordre <- o
-  grid_tmp
-})
-grid_sf <- bind_rows(grid_list)
-grid_sf <- st_intersection(grid_sf, carte_bretagne)
-ggplot() +
-  geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne selon les ordres",
-       subtitle = "GeoNature") +
-  geom_sf(data = grid_sf, aes(fill = density), color = NA) +
-  scale_fill_gradient(low="gray90", high="gray15") +
-  theme_bw() +
-  facet_grid(. ~ ordre)
-
-```
-
-On ne voit pas grand chose sur la carte de VisioNature à part les 2 principaux observateurs..
-Concernant la base de données GeoNature, on dirait que les espèces ont un peu près la même répartition en Bretagne (nord Finistere et Côte d'Armor et sud Ille-et-Vilaine et Morbihan)
-
-Nous prenons la base de données avec toutes les données et je selectionne 40 000 ou 50 000 données avec les proportions.\
-
-Pour info, la graine aléatoire est figée a 12345.
-
-```{r graphiques-date-et-ordre}
-
-graph_ordre_tranche_annee <- function(ordre_voulu){
-  # Creation de la BDD
-  ordre_data <- Total_sf %>% filter(ordre == ordre_voulu)
-  bdd_props <- prop.table(table(ordre_data$bdd_rgn))
-  n_bdd1 <- round(5000 * bdd_props[1])
-  n_bdd2 <- 5000 - n_bdd1
-  bdd1 <- ordre_data %>% 
-    filter(bdd_rgn == "GeoNature") %>% 
-    sample_n(min(n_bdd1, n()))
-  bdd2 <- ordre_data %>% 
-    filter(bdd_rgn == "VisioNature") %>% 
-    sample_n(min(n_bdd2, n()))
+wd <- set_wd()
   
-  ordre_graph <- bind_rows(bdd1, bdd2) %>%
-    mutate(
-      grp_date = case_when(
-        date >= as.Date("2010-01-01") & date <= as.Date("2014-12-31") ~ "1. Entre 2010 et 2015",
-        date >= as.Date("2015-01-01") & date <= as.Date("2019-12-31") ~ "2. Entre 2015 et 2020",
-        date > as.Date("2019-12-31") ~ "3. Après 2020",
-        TRUE ~ NA_character_
-      )
-    ) %>%
-    filter(date > as.Date("2010-01-01")) %>%
-    sample_frac(1)
-  
-  # Transformation pour des données de la carte
-  carte_ordre <- ordre_graph %>%
-    select(grp_date, ordre, date) %>%
-    filter(ordre == ordre_voulu)
-  
-  # Plot
-  ggplot() +
-    geom_sf(data = carte_bretagne) + 
-    labs(
-      title = paste("Carte des observations en Bretagne des", ordre_voulu),
-      subtitle = "Toutes données"
-    ) +
-    geom_sf(data = carte_ordre, size = 0.01) +
-    theme_bw() + 
-    facet_grid(. ~ grp_date)
-}
+set.seed(12345)
 
-graph_ordre_tranche_annee("Carnivora")
-graph_ordre_tranche_annee("Cetartiodactyla")
-graph_ordre_tranche_annee("Eulipotyphla")
-graph_ordre_tranche_annee("Lagomorpha")
-graph_ordre_tranche_annee("Rodentia")
+source(paste0(wd$src,"/functions/stats_desc.R"))
+  
+Total <- st_read(paste0(wd$data,"Total.shp"))
+carte_bretagne <- st_read(paste0(wd$data,"masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
+  
+Total <- transform_Total()
+carte_bretagne <- transforme_carte(carte_bretagne)
 ```
 
-  On dirait que plus on avance dans les années, plus on retrouve d'individus aux sud de la Bretagne.
-Ceci peut être car nous avons plus de données de VisioNature au fil du temps qui provient d'ornithologues et les ornithologues sont souvent proches des littoraux.\
+## 4. Étude des observateurs
+
+### Étude des principaux observateurs
+
+Étudier les principaux observateurs peut être important parce qu'ils participent grandement au recueil des données donc un changement de leur comportement implique également un changement du comportement de la base de données.
+
+Ils pourraient introduire des biais:\
+- pour un endroit du territoire, s'ils enregistent toujours des observations au même endroit\
+- pour une espece, s'ils sont intéressé par une espèce\
+- en enregistrant pendant une durée précise dans le temps\
+
+```{r nombre-total-observateurs}
+Total %>%
+  filter(bdd_originale == "GeoNature")%>%
+  summarize(nb_observateurs = n_distinct(observateurs))
+
+Total %>% 
+  filter(bdd_originale == "VisioNature")%>%
+  summarize(nb_observateurs = n_distinct(observateurs))
+```
+
+Pour GeoNature, il y a en tout 2778 observateurs qui peuvent être une ou 2 personnes.
+Certains observateurs sont anonymes et sont attribués un code.\
+
+Pour VisioNature, il y a 3662 observateurs.
+1813 des observations n'ont pas d'observateur attribué.\
+
+On transforme tous les noms en majuscule pour éviter des problèmes.\
+
+Nous cherchons les observateurs qui ont le plus contribué aux deux bases de données.\
+
+```{r lollipop-plot-observateurs}
+Total_summary_GN <- Total %>%
+  filter(bdd_originale == "GeoNature")%>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 500) %>%
+  arrange(nbr_obs_obr)
+
+Total_summary_GN$observateurs<- factor(Total_summary_GN$observateurs,
+                                       levels = Total_summary_GN$observateurs)
+
+Total_summary_VN <- Total %>%
+  filter(bdd_originale == "VisioNature")%>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 500) %>%
+  arrange(nbr_obs_obr)
+
+Total_summary_VN$observateurs <- factor(Total_summary_VN$observateurs,
+                                      levels = Total_summary_VN$observateurs)
+
+Total_summary_GN%>%
+  filter(!is.na(observateurs))%>%
+  ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()+
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="GeoNature")+
+  theme_bw()+
+  theme(axis.text=element_text(size=6))
+
+Total_summary_VN%>%
+  filter(!is.na(observateurs))%>%
+  ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()+
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="VisioNature")+
+  theme_bw()+
+  theme(axis.text=element_text(size=6))
+```
+
+Nous remarquons que nous avons des observateurs avec un très grand nombre d'observations comme attendu.
+Nous ne savons pas si deleted deleted est un observateur.
+Nous pouvons imaginer que c'est les observations de tous les membres qui ont supprimés leurs comptes.
+
+Pour étudier facilement leur données, nous créons une fonction qui donne rapidement quelques graphiques.
+
+```{r stats-observateur, fig.width=10, fig.height=7}
+stats_observateur(nom_obs="Bellier_Daniel", 
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Chapuis_Martine", 
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Seite_Francois",
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Deleted_Deleted",
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Simonnet_Franck", 
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Le_Campion_Thomas",
+                  carte=carte_bretagne)
+
+```
+
+Nous remarquons que:\
+- BELLIER DANIEL observe beaucoup de rongeurs autour de Rennes.\
+- CHAPUIS MARTINE observe uniquement a un endroit précis.\
+- DELETED DELETED, semble être surtout dans le finistère ce qui est étonnant si ce sont plusieurs personnes.

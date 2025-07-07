@@ -1,40 +1,89 @@
-### Differences parmi les observateurs
+# ACP
+```{r, include=FALSE}
+# Packages
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringi)
+library(stringr)
+library(sf)
+library(rsample)
+library(patchwork)
+library(scales)
+library(viridis)
+library(lubridate)
+library(purrr)
+library(forcats)
+library(targets)
+library(tarchetypes)
+library(ggpubr)
+library(collapse)
+library(vegan)
+library(permute)
+library(Factoshiny)
+
+source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
+
+wd <- set_wd()
+  
+set.seed(12345)
+
+source(paste0(wd$src,"/functions/analysedonnees.R"))
+  
+Total <- st_read(paste0(wd$data,"Total.shp"))
+
+Total <- transform_Total()
+```
+
+
+# Ordres
 
 ```{r Creation-BDD-Observateurs}
-nb_observations <- Total %>%
+Total_notsf <- Total%>%
+  st_drop_geometry
+
+nb_observations <- Total_notsf %>%
   group_by(observateurs) %>%
   summarise(total_obs = n(), .groups = "drop")
 
-max_technique <- Total%>%
+max_technique <- Total_notsf%>%
   group_by(observateurs) %>%
   summarise(tech_obs_max = collapse::fmode(technique_observation))
 
-max_etat_bio <- Total%>%
+max_etat_bio <- Total_notsf%>%
   group_by(observateurs) %>%
   summarise(etat_bio_max = collapse::fmode(etat_biologique))
 
+max_bdd <- Total_notsf%>%
+  group_by(observateurs) %>%
+  summarise(bdd_max = collapse::fmode(bdd_originale))
+
+
 Observateurs <- nb_observations %>%
+  left_join(max_technique, by = "observateurs")%>%
+  left_join(max_etat_bio, by = "observateurs")%>%
+  left_join(max_bdd, by = "observateurs")%>%
   left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Lagomorpha"), by = "observateurs") %>%
-  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")%>%
-  left_join(max_technique, by = "observateurs")%>%
-  left_join(max_etat_bio, by = "observateurs")
+  left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")
 
+Observateurs <- Observateurs%>%
+  select(observateurs, total_obs, tech_obs_max, etat_bio_max, bdd_max,
+         nb_carnivora, nb_cetartiodactyla, 
+         nb_eulipotyphla, nb_lagomorpha, nb_rodentia)
+```
+
+```{r}
 Observateurs <- Observateurs %>%
   mutate(nb_carnivora = ifelse(is.na(nb_carnivora), 0, nb_carnivora),
-         nb_cetartiodactyla = ifelse(is.na(nb_cetartiodactyla), 0, nb_cetartiodactyla),
+         nb_cetartiodactyla = ifelse(is.na(nb_cetartiodactyla), 
+                                     0, nb_cetartiodactyla),
          nb_eulipotyphla = ifelse(is.na(nb_eulipotyphla), 0, nb_eulipotyphla),
          nb_lagomorpha = ifelse(is.na(nb_lagomorpha), 0, nb_lagomorpha),
          nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
   )
-
-Observateurs$shannon <- vegan::diversity(Observateurs[,3:7])
-
-Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,3:7]))
-Observateurs <- Observateurs %>%
-  mutate(Pielou = ifelse(shannon==0, 0, Pielou))
 
 Observateurs <- Observateurs%>%
   mutate(prop_carnivora = nb_carnivora / total_obs,
@@ -47,7 +96,15 @@ Observateurs <- Observateurs%>%
          )
 
 
-rm(max_etat_bio, max_technique)
+```
+
+```{r}
+Observateurs$shannon <- vegan::diversity(Observateurs[,5:10])
+
+Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,5:10]))
+Observateurs <- Observateurs %>%
+  mutate(Pielou = ifelse(shannon==0, 0, Pielou))
+
 ```
 
 On se demande a quoi ressemble la répartition des Indice de Pielou
@@ -60,47 +117,112 @@ boxplot(Observateurs$Pielou,
 summary(Observateurs$Pielou)
 ```
 
-On remarque qu'il y a enormément d'observateurs qui on un Indice nul, ou presque.
-Ceci est normal car beaucoup ont observé uniquement une observation.
-(Par exemple, tous les NA ont été considéré comme des observateurs uniques, et d'autres ont observé a plusieurs.) On a 4032 observateurs qui ont uniquement une observation tandis qu'il y a 7869 observateurs dans la base de donnée.
+```{r}
+res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(2,3,4,5),quanti.sup=c(1,6,7,8,9,10),graph=FALSE)
+plot.PCA(res.PCA,choix='var') # Corrélation negative entre Pielou, 
+#                               une proportion de rongeurs elevé, et 
+#                               une proportion de carnviores élevés
+plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali'))
+summary(res.PCA)
 
-Le 4e quartile est aussi assez sérré.
-Il y a donc beaucoup d'individus avec une assez bonne diversité dans leurs observations.
-(1/4 d'entre eux sont entre 0.86 et 1 d'Indice.)
+```
 
-On fait une ACP sur cette base de donnée, et on obtiens ceci:
+Dim 1: Shannon et Pielou
+Dim 2: Prop Carnivores et rongeurs
+Dim 3: Prop Eulipotyphles (+ rongeurs, carnivores)                       
+Dim 4: ?
 
-```{r ACP}
-res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(7,8),
-             quanti.sup=c(11,12,13,14,15),graph=FALSE)
-plot.PCA(res.PCA,choix='var')
-plot.PCA(res.PCA,invisible=c('ind','ind.sup'), label =c('quali'))
+```{r}
+res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(2,3,4,5),quanti.sup=c(11,13,14,15,12),graph=FALSE)
+plot.PCA(res.PCA,choix='var') # Corrélation positive entre les variables
+plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali'))
 summary(res.PCA)
 ```
 
-On a environ 83% d'explication des axes avec uniquement les 2 premières dimension ce qui est très bien.
-
-Le premier axe semble représenter un grand nombre d'observations, et le deuxieme axe la diversité.
-
-Les Individus ayant principalement des "technique biologique: autre" sont ceux qui ont beaucoup d'observation.
-Ceux ayant surtout remarqué des animaux morts, ont peu d'observations.
-De même pour une technique d'ob Inconnu et Entendu/Ultrasons.
-
-Les individus qui ont principalement observé des animaux mort due a un impact routier ont peu de diversité dans les espèces qu'ils remarquent.
-Pareil pour Entendu/Ultrasons, Inconnu et Indices, et Trouvé Mort.
-Les animaux avec une tech d'obs Non Renseigné (ou Vu mais moins) le sont par des gens avec une grande diversité d'observations.
-
-Clustering : On voit pas grand chose
+ Dim 1: Nombre d'observations (positif)
+ Dim 2: Shannon et pielou (positif)
 
 ```{r}
-res.HCPC<-HCPC(res.PCA,nb.clust=2,consol=FALSE,graph=FALSE)
-plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
-plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
-plot.HCPC(res.HCPC,choice='3D.map',ind.names=FALSE,centers.plot=FALSE,angle=90,title='Hierarchical tree on the factor map')
-
 
 res.HCPC<-HCPC(res.PCA,nb.clust=3,consol=FALSE,graph=FALSE)
 plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
 plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
-plot.HCPC(res.HCPC,choice='3D.map',ind.names=FALSE,centers.plot=FALSE,angle=90,title='Hierarchical tree on the factor map')
+summary(res.HCPC)
+
 ```
+
+On a 3 clusters
+Le 1er : peu de diversité et peu d'observations (surtout visioNature)
+2e : forte diversité (surtout geonature)
+3e : peu de diversité et de nombreuses observations (pas plus visionature ni geonature)
+
+# Espèces
+
+```{r}
+# On a la même chose avec (48%) 1er axe et 3e de l'ACP des espèces. 
+Observateurs_espece <- Observateurs[,1:5]
+
+liste_cd_noms <- Total %>%
+  group_by(cd_nom)%>%
+  distinct(cd_nom)%>%
+  select(cd_nom)
+
+for (i in 1:nrow(liste_cd_noms)) {
+  cd_nom_value <- as.integer(liste_cd_noms[i,])
+  
+  nb_o <- Total %>%
+    filter(cd_nom == cd_nom_value) %>%
+    group_by(observateurs) %>%
+    summarise(nbr = n(), .groups = "drop") %>%
+    mutate(nbr = ifelse(is.na(nbr), 0, nbr))
+  
+  nom_espece <- Total %>%
+    filter(cd_nom == cd_nom_value) %>%
+    summarise(nom = first(nom_vernaculaire))
+  nom <- nom_espece$nom
+  nom <- paste0("nb_", gsub(" ", "", nom))
+  
+  nb_o <- nb_o %>% rename({{nom}} := nbr)
+  
+  Observateurs_espece <- Observateurs_espece %>%
+    left_join(nb_o, by = "observateurs")
+}
+
+Observateurs_espece[,6:28] <- Observateurs_espece[,6:28] %>% replace(is.na(.), 0)
+
+Observateurs_espece$Shannon <- vegan::diversity(Observateurs_espece[,6:28])
+
+Observateurs_espece$Pielou <- Observateurs_espece$Shannon / log(vegan::specnumber(Observateurs_espece[,6:28]))
+Observateurs_espece <- Observateurs_espece %>%
+  mutate(Pielou = ifelse(Shannon==0, 0, Pielou))
+
+colonne <- as.numeric(Observateurs_espece[[2]])
+diviseur <- as.data.frame(matrix(rep(colonne, 23), 
+                                 ncol = 23, 
+                                 nrow = nrow(Observateurs_espece), 
+                                 byrow = FALSE))
+
+Observateurs_espece[paste(names(Observateurs_espece)[6:28], "_prop", sep="")] <- Observateurs_espece[6:28] / diviseur
+```
+
+```{r}
+res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(2,3,4),quanti.sup=c(12,13,14,15,16),graph=FALSE)
+res.HCPC<-HCPC(res.PCA,nb.clust=3,consol=FALSE,graph=FALSE)
+Observateurs_clust <- res.HCPC$data.clust%>%
+  mutate(observateurs = Observateurs$observateurs)
+
+Total_clust <- Total %>%
+  mutate(clust = case_when(
+    Observateurs_clust$clust == 1 ~ 1,
+    Observateurs_clust$clust == 2 ~ 2,
+    Observateurs_clust$clust == 3 ~ 3,
+    .default = NA
+  ))
+```
+
+```{r}
+repartition_espece_cluster(cluster = 1)
+repartition_espece_cluster(cluster = 2)
+repartition_espece_cluster(cluster = 3)
+```
+

@@ -147,7 +147,6 @@ Dans la BDD GeoNature, principalement des carnivores, puis relativement uniform�
 C’est peut-être dû au fort intérêt de GMB pour la loutre, mais ce n’est pas tant le cas que ça (voir figure de la répartition des ordres sans le loutres)
 
 ```{r repartition-des-ordes, echo=FALSE, out.width="50%"}
-
 Total%>%
   filter(date > params$date_min,
          bdd_originale == VN)%>%
@@ -257,6 +256,16 @@ Total%>%
   theme_bw()+
   geom_line(stat="density")+
   scale_colour_manual(values=couleur)
+
+Total%>%
+  filter(date > params$date_min)%>%
+  ggplot(aes(date, color = ordre))+
+  labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
+       subtitle = "Les bases de donnée GéoNature et VisioNature réunis")+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")+
+  scale_colour_manual(values=couleur)
   
   
 Total%>%
@@ -265,16 +274,6 @@ Total%>%
   ggplot(aes(date, color = ordre))+
   labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
        subtitle = paste(GN))+ 
-  facet_grid(ordre ~ .)+
-  theme_bw()+
-  geom_line(stat="density")+
-  scale_colour_manual(values=couleur)
-
-Total%>%
-  filter(date > params$date_min)%>%
-  ggplot(aes(date, color = ordre))+
-  labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
-       subtitle = "Base de donnée complète")+ 
   facet_grid(ordre ~ .)+
   theme_bw()+
   geom_line(stat="density")+
@@ -429,3 +428,59 @@ Les principales espèces sont peut être de plus en plus dominantes.
 
 Nous remarquons aussi que GeoNature a des données assez differentes pour [2000-2005) que pour les autres périodes avec beaucoup de rats bruns.
 Nous n'observons pas quelque chose de similaire chez VisioNature.
+
+
+
+### Habitudes des observateurs?
+
+```{r}
+
+Total%>%
+  ggplot(aes(as.factor(wday(date, 
+                            week_start = getOption("lubridate.week.start", 1)))))+
+  labs(title="Barplot des observation selon le jour de la semaine",
+       y="Nombre d'observations",
+       x="Jour de la semaine")+ 
+  theme_bw()+
+  geom_bar()+
+  scale_x_discrete(labels=c("1" = "Lundi", 
+                            "2" = "Mardi",
+                            "3" = "Mercredi",
+                            "4" = "Jeudi",
+                            "5" = "Vendredi",
+                            "6" = "Samedi",
+                            "7" = "Dimanche"))
+
+
+Total %>%
+  filter(date > params$date_min)%>%
+  mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)%>%
+  ggplot(aes(jour_annee)) +
+  labs(title="Frequence des observations selon le jour de l'année",
+       y="Proportion",
+       x="Jour de l'année")+
+  geom_density()
+
+
+Total%>%
+    filter(date > params$date_min)%>%
+    ggplot(aes(factor(month(date))))+
+    labs(title="Barplot des observation selon le mois",
+         y="Nombre d'observations",
+         x="Mois")+ 
+    theme_bw()+
+    geom_bar()+
+    scale_x_discrete(labels=c("1" = "Janvier", 
+                              "2" = "Février",
+                              "3" = "Mars",
+                              "4" = "Avril",
+                              "5" = "Mai",
+                              "6" = "Juin",
+                              "7" = "Juillet",
+                              "8" = "Aout",
+                              "9" = "Septembre",
+                              "10" = "Octobre",
+                              "11" = "Novembre",
+                              "12" = "Decembre"))
+
+```
