@@ -1,0 +1,60 @@
+To do:
+
+Priorité
+
+- RANGER LE PROJET: Presque fini/ Okay (?)
+
+- discuter du reste des unkown avec Franck
+
+- faire fonctions pour proportion par rapport a x dans le temps 
+calc_prop <- function(parrapportaquoi, unitedetemps){
+
+}
+
+Relire cours de GLM : préparer fiche étape quoi regarder, différents modèles, etc...
+
+
+- DIRO 
+    -> rassembler fouine - martre - hermine etc dans mustelidÃ©
+    -> corriger le problème avec espece == NA 
+    -> regarder si ceux ci sont similaire aux autres comme dans 
+    Unstructured citizen science data fail to
+ detect long-term population declines of
+ common birds in Denmark
+ 
+ - commencer la modélisation
+    
+    
+
+- faire une fonction qui adapte un code couleur (dÃ©gradÃ© de la couleur de l'ordre)
+
+- corriger le problÃ¨me avec le package
+
+- code couleur partout
+- numÃ©roter les figures
+- map rÃ©partition selon les ordres
+
+- cartes interactives avec mapview -> Transformer tous les points en points par couleur selon ordres?
+- travail sur les especes
+
+- continuer le truc de moyennes mobiles
+- corrÃ©lations entre les variables? 
+
+- RANGER LE PROJET
+
+Lien vers la note d'Ã©tape: 
+https://www.overleaf.com/read/vtvhpbxjjqkf#1a2624
+
+Questions:
+
+Martes martes : Martre des pins, Martre cd_nom 60658
+Martes Pinel, 1792 : cd_nom 194481 -> quel nom_vernaculaire? Peut on les rassembler?
+
+#################################################
+Nettoyage du projet:
+
+--- TIPS: ---
+library(formatR)
+tidy.source()
+
+house files? -> ggthemr
