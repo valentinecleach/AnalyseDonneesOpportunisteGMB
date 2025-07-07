@@ -65,3 +65,57 @@ application_tous_ordres <- function(fonction, repartition_cherche=NA){
                  repartition = {{repartition_cherche}})
   return(list(p1,p2,p3,p4,p5))
 }
+
+
+stats_observateur <- function(nom_obs, carte){
+  
+  # Date
+  p1 <- Total %>%
+    filter(observateurs == toupper(nom_obs),
+           date > params$date_min) %>%
+    ggplot(aes(date))+
+    labs(title="Répartition des dates",
+         subtitle = paste("Données de ", nom_obs)) + 
+    theme_bw()+
+    geom_line(stat="density")+
+    scale_x_date(
+      breaks = seq(from = min(Total$date), 
+                   to = max(Total$date), 
+                   by = "2 years"),               
+      labels = scales::label_date("%Y")
+    )
+  
+  # Ordres
+  p2 <- 
+    Total%>%
+    filter(date > params$date_min,
+           observateurs == toupper(nom_obs))%>%
+    ggplot(aes(ordre,fill=ordre, color = ordre))+
+    geom_bar()+
+    labs(title=" Répartition des differents ordres",
+         subtitle = paste("Données de ", nom_obs))+
+    theme_bw()+
+    scale_fill_manual(values = couleur)+
+    scale_color_manual(values = couleur)+
+    theme(legend.position = "none") +
+    theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))+
+    coord_flip()
+  
+  # Carte
+  geo_obsteur <- Total %>% 
+    filter(date > params$date_min) %>%
+    filter(observateurs == toupper(nom_obs)) %>%
+    dplyr::select(ordre,
+                  date)
+  p3 <- ggplot() +
+    geom_sf(data = carte) + 
+    labs(title = "Carte des observations",
+         subtitle = paste("Données de ", nom_obs)) +
+    geom_sf(data = geo_obsteur, size=0.01) +
+    theme_bw()
+  
+  
+  # Affichage des plots
+  p1 + p2 + p3
+}
+

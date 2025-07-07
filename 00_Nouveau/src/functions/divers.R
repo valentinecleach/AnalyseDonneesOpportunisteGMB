@@ -9,3 +9,28 @@ set_wd <- function(){
   
   return(wd)
 }
+
+transform_Total <- function(){
+  Total <- Total %>%
+    mutate_at(c("bdd_rgn", 
+                "ett_blg", "tchnq_b", 
+                "communs", "obsrvtr", 
+                "famille", "ordre", 
+                "nm_vrnc", "nom_vld"), 
+              .funs = as.factor)%>%
+    rename(bdd_originale = bdd_rgn,
+           etat_biologique = ett_blg,
+           technique_observation = tchnq_b,
+           nom_vernaculaire = nm_vrnc,
+           nom_valide = nom_vld,
+           observateurs = obsrvtr)
+  return(Total)
+}
+
+transforme_carte <- function(carte){
+  carte <- carte%>%
+    st_set_crs(2154)%>%
+    st_transform(4326)
+}
+
+

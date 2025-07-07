@@ -19,3 +19,20 @@ nb_ordre <- function(nom_ordre){
   
   return(nb_o)
 }
+
+repartition_espece_cluster <- function(bdd = Total, cluster){
+  bdd %>%
+    filter(clust == cluster) %>%
+    count(nom_vernaculaire, sort = TRUE) %>%
+    ggplot(aes(x = reorder(nom_vernaculaire, n), 
+               y = n)) +
+    geom_col() +
+    coord_flip() +
+    labs(
+      title = paste0("Répartition des espèces du cluster ", cluster),
+      x = "Nom vernaculaire"
+    ) +
+    scale_x_discrete(labels = label_wrap(40)) +
+    theme_bw() +
+    theme(axis.text=element_text(size=8))
+}
