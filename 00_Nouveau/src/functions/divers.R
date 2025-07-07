@@ -28,9 +28,11 @@ transform_Total <- function(){
 }
 
 transforme_carte <- function(carte){
-  carte <- carte%>%
-    st_set_crs(2154)%>%
-    st_transform(4326)
+  if (is.na(st_crs(carte)$epsg)) {
+    carte <- st_set_crs(carte, 2154)
+  }
+  carte <- st_transform(carte, 4326)
+  return(carte)
 }
 
 
