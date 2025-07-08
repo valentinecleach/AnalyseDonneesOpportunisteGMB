@@ -21,7 +21,7 @@ Total <- Total %>% st_transform(2154)
 
 st_is_longlat(Total) # devrait être FALSE pour les mètres.
 
-grid_spacing <- 20000  # size of squares, in units of the CRS (i.e. meters for 5514)
+grid_spacing <- 10000  # size of squares, in units of the CRS (i.e. meters for 5514)
 
 quadrillage <- st_make_grid(Total, square = T, 
                             cellsize = c(grid_spacing, grid_spacing))
@@ -53,6 +53,33 @@ Total <- Total %>%
   rename("grid_ID" = "ID",
          "grid_geom" = "geometry")%>%
   select(-"grid_geom")
+
+
+#####
+#### Quadrillage masque  NON Utilisé
+#####
+
+grille_20x20 <- st_read(
+  paste0(wd$data, "masques/grille_20x20/METROP_L9320X20.shp")
+)
+Total <- transforme_carte(Total)
+st_crs(Total)
+st_crs(grille_20x20)
+grille_20x20 <- grille_20x20%>%
+  st_transform(st_crs(Total))
+
+Total <- st_join(Total, grille_20x20, left = TRUE)
+
+ggplot() +
+  geom_sf(data = grille_20x20) 
+
+
+  geom_sf_text(
+    data = grille_20x20,
+    aes(label = Nom),
+    size = 3,
+    color = "forestgreen"
+  )
 
 #####
 ##### Paysages Bretons 
