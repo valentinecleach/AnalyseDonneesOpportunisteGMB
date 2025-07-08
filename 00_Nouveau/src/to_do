@@ -6,13 +6,12 @@ Priorité
 
 - discuter du reste des unkown avec Franck
 
-
-2x2, 5x5, 10x10, 20x20
-nombre de carrée positif par an par espèce.
-
-4 graphes par espèce , 1 par grandeur de maille.
-
-courbe ROC?
+Taille des mailles : 
+- classif supervisé sur les mailles (cluster) selon la géométrie?
+  -> peut etre mettre coordonnées x et y séparément ducoup
+- courbe ROC? 
+  en comparant les différentes courbes ROC pour 2km, 5km, 10km, 20km...
+---> ca va pas marcher je crois?
 
 
 - faire fonctions pour proportion par rapport a x dans le temps 

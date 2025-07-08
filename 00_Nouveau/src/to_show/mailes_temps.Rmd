@@ -1,5 +1,5 @@
 ---
-title: "Analyse descriptive des donnÃ©es opportunistes du GMB"
+title: "Mailles dans le temps"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   bookdown::html_document2:
@@ -12,9 +12,7 @@ editor_options:
     wrap: sentence
 ---
 
-# Statistiques descriptives
-
-```{r packages-imports, include = FALSE}
+```{r packages-imports}
 # Packages
 library(readr)
 library(ggplot2)
@@ -25,7 +23,6 @@ library(sf)
 library(rsample)
 library(patchwork)
 library(scales)
-library(viridis)
 library(lubridate)
 library(purrr)
 library(forcats)
@@ -49,9 +46,86 @@ set.seed(12345)
 # Importations
 Total <- st_read(paste0(wd$data,"Total.shp"))
 Total <- transform_Total()
-```
 
-```{r}
+
+#' Applique une fonction qui plot qqe chose a tous les ordres
+#'
+#' @param bdd La base de donnée sur laquelle faire la 
+#' @param taille_en_km La longueur des cotés des mailles
+#'
+#' @return La base de donnée, avec la colonne en +
+#' @export
+#'
+#' @examples
+#' 
+creer_maille <- function(bdd, taille_en_km){
+  bdd <- transforme_carte(bdd)
+  bdd <- st_transform(bdd, 2154)
+  
+  grid_spacing <- 1000 * taille_en_km
+  
+  Grid <- st_make_grid(bdd, 
+                       cellsize = c(grid_spacing, grid_spacing), 
+                       square = TRUE)
+  Grid <- st_sf(ID = seq_along(Grid), geometry = Grid)
+  Grid <- st_transform(Grid, 2154)
+  
+  Grid <- st_make_valid(Grid)
+  bdd <- st_make_valid(bdd)
+  
+  nom_colonne <- paste0("Grid", taille_en_km,"km")
+  names(Grid)[1] <- nom_colonne
+  bdd <- st_join(bdd, Grid, left=TRUE)
+
+  return(bdd)
+}
+
+histogramme_maillage_pos <- function(colonne, espece, taille){
+  nbr_maille_par_date <- Total%>%
+    filter(cd_nom == espece,
+           date>as.Date("1980-01-01"))%>%
+    group_by(year(date), {{colonne}})%>%
+    summarise(n())
+  nb_mailles_par_date <- st_drop_geometry(nbr_maille_par_date)
+  names(nb_mailles_par_date)[1] <- "Annee"
+  p <- nb_mailles_par_date %>%
+    ggplot()+
+    geom_bar(aes(x= Annee))+
+    theme_bw()+
+    labs(title = paste0("Maillage de ", taille , "km"),
+         y="Nombre de mailles")
+  return(p)
+}
+
+
+#' Fait l'histogramme pour le 4 possibilités de maillage
+#'
+#' @param espece Le cd_nom choisi
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+#' 
+pour_chaque_maillage <- function(espece){
+  p1 <- histogramme_maillage_pos(Grid2km, taille = 2, espece)
+  p2 <- histogramme_maillage_pos(Grid5km, taille = 5, espece)
+  p3 <- histogramme_maillage_pos(Grid10km, taille = 10, espece)
+  p4 <- histogramme_maillage_pos(Grid20km, taille = 20, espece)
+  
+  p <- ggarrange(p1, p2, p3, p4) 
+  
+  nom_espece <- Total%>%
+    filter(cd_nom == espece)%>%
+    st_drop_geometry()%>%
+    select(nom_vernaculaire)%>%
+    head(1)
+  nom_espece <- as.character(nom_espece[[1]])
+  
+  annotate_figure(p, top = text_grob( nom_espece, 
+                                      color = "forestgreen", face = "bold", size = 14))
+}
+
 
 
 Total <- creer_maille(bdd = Total, taille_en_km = 2)
@@ -62,10 +136,6 @@ Total <- creer_maille(bdd = Total, taille_en_km = 20)
 liste_cd_nom <- Total%>%
   st_drop_geometry()%>%
   distinct(cd_nom)
-
-```
-
-```{r}
 
 pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][1]))
 pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][2]))

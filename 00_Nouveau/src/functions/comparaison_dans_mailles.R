@@ -1,15 +1,15 @@
 histogramme_maillage_pos <- function(colonne, espece, taille){
   nbr_maille_par_date <- Total%>%
     filter(cd_nom == espece,
-           date>as.Date("1980-01-01"))%>%
-    group_by(year(date), {{colonne}})%>%
+           date>as.Date("1980-01-01")) %>%
+    group_by(year(date), {{colonne}}) %>%
     summarise(n())
   nb_mailles_par_date <- st_drop_geometry(nbr_maille_par_date)
   names(nb_mailles_par_date)[1] <- "Annee"
   p <- nb_mailles_par_date %>%
-    ggplot()+
-    geom_bar(aes(x= Annee))+
-    theme_bw()+
+    ggplot() +
+    geom_bar(aes(x= Annee)) +
+    theme_bw() +
     labs(title = paste0("Maillage de ", taille , "km"),
          y="Nombre de mailles")
   return(p)
