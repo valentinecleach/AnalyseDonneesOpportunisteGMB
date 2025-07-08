@@ -80,13 +80,17 @@ for (i in 1:23){
     
     nom <- Total%>%
       filter(cd_nom == cd_nom_i)%>%
-      distinct(nom_vernaculaire)[2]
+      distinct(nom_vernaculaire)
     
+    nom <- as.character(nom[[1]][1]) 
     cbind(avant, apres, cd_nom_i, nom)
-    db <- rbind()
-    mot <- rbind(mot, paste0("avant :", avant, " après :", apres,
-          " \ ", cd_nom_i, " \ ",
-          nom))
-    }
+  }
 }
+
+nom <- Total%>%
+  filter(cd_nom == 60577)%>%
+  distinct(nom_vernaculaire)
+as.character(nom)
+as.character(nom[[1]][1])
+
 

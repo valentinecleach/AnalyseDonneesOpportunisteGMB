@@ -12,7 +12,7 @@ test <- Total%>%
 
 
 test <- test %>%
-  filter(date>as.Date("2007-01-01"))%>%
+  filter(date>as.Date("2010-01-01"))%>%
   group_by(year = year(date),cd_nom)%>%
   summarise(nombre = n())
 
@@ -25,15 +25,20 @@ test <- test %>%
 
 
 t <- test %>%
-  filter(cd_nom == 61587)
+  filter(cd_nom != 61587)
 
 t %>%
   ggplot()+
   geom_point(aes(year, proportion))
 
 glm(data = t, proportion~year)
+?ts
 
+t <- ts(t$proportion, start = 2007)
+plot(t)
 
+acf(t)
+pacf(t)
 
 prop_espece <- function(espece, bdd){
   

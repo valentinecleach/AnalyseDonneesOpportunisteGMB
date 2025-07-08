@@ -2,16 +2,23 @@ To do:
 
 Priorité
 
-- RANGER LE PROJET: Presque fini/ Okay (?)
+- CONTACTER CELUI DU MAIL: Simon rapidement. 
+Demander une visio d'ici la fin de la semaine
 
 - discuter du reste des unkown avec Franck
+
+- mail a Eric Petit. Faire des séries temp avant ça?
+  -> Publier sur rpubs un truc propre
+  -> Mail propre
+
+
 
 Taille des mailles : 
 - classif supervisé sur les mailles (cluster) selon la géométrie?
   -> peut etre mettre coordonnées x et y séparément ducoup
 - courbe ROC? 
   en comparant les différentes courbes ROC pour 2km, 5km, 10km, 20km...
----> ca va pas marcher je crois?
+  ---> ca va pas marcher je crois?
 
 
 - faire fonctions pour proportion par rapport a x dans le temps 
