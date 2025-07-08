@@ -1,7 +1,9 @@
 wd <- set_wd()
 
-source("~/work/AnalyseDonneesOpportunisteGMB/fonctions/fonctions.R")
-
+source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/functions/divers.R", 
+       encoding="utf-8")
+Total <- st_read(paste0(wd$data,"Total.shp"))
+Total <- transform_Total()
 
 #### Nettoyage de données ####
 # Total:

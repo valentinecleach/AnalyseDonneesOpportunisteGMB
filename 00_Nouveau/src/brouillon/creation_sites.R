@@ -10,50 +10,16 @@ wd <- set_wd()
 set.seed(12345)
 Total <- st_read(paste0(wd$data,"Total.shp"))
 Total <- transform_Total()
-
+source(paste0(wd$src,"functions/cartographie.R"), encoding="utf-8")
 
 #####
 ##### Quadrillage
 #####
 
-Total <- transforme_carte(Total)
-Total <- Total %>% st_transform(2154) 
-
-st_is_longlat(Total) # devrait être FALSE pour les mètres.
-
-grid_spacing <- 10000  # size of squares, in units of the CRS (i.e. meters for 5514)
-
-quadrillage <- st_make_grid(Total, square = T, 
-                            cellsize = c(grid_spacing, grid_spacing))
-  
-Grid  <- st_as_sf(Total) %>%
-  st_make_grid(square = T, 
-               cellsize = c(grid_spacing, grid_spacing))%>%
-  cbind(data.frame(ID = sprintf(paste("GRID%0",nchar(length(.)),"d",sep=""), 
-                                1:length(.))))
-
-Grid <- st_as_sf(Grid)
-
-ggplot() +
-  geom_sf(data = quadrillage)+
-  geom_sf(data = Total)
-
-Total <- st_join(Total, Grid, left=TRUE)
-
-Total <- transforme_carte(Total)
-
-t <- Total%>%
-  filter(ID == "GRID007")
-
-ggplot() +
-  geom_sf(data = Grid)+
-  geom_sf(data = t)
-
-Total <- Total %>%
-  rename("grid_ID" = "ID",
-         "grid_geom" = "geometry")%>%
-  select(-"grid_geom")
-
+Total <- creer_maille(bdd = Total, taille_en_km = 2)
+Total <- creer_maille(bdd = Total, taille_en_km = 5)
+Total <- creer_maille(bdd = Total, taille_en_km = 10)
+Total <- creer_maille(bdd = Total, taille_en_km = 20)
 
 #####
 #### Quadrillage masque  NON Utilisé

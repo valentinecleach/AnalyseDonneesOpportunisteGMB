@@ -10,6 +10,16 @@ set_wd <- function(){
   return(wd)
 }
 
+#' Corrige les noms et les mets en factor
+#'
+#' @param 
+#' @param 
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+#' 
 transform_Total <- function(){
   Total <- Total %>%
     mutate_at(c("bdd_rgn", 
@@ -27,6 +37,15 @@ transform_Total <- function(){
   return(Total)
 }
 
+#' Change les CRS de la carte pour ce qu'on veuilles
+#'
+#' @param carte La carte a modifier
+#'
+#' @return carte
+#' @export
+#'
+#' @examples
+#' 
 transforme_carte <- function(carte){
   if (is.na(st_crs(carte)$epsg)) {
     carte <- st_set_crs(carte, 2154)

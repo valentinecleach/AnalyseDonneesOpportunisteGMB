@@ -40,3 +40,41 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
     theme_bw() + 
     facet_grid(. ~ grp_date)
 }
+
+
+## Grid
+
+
+#' Applique une fonction qui plot qqe chose a tous les ordres
+#'
+#' @param bdd La base de donnée sur laquelle faire la 
+#' @param taille_en_km La longueur des cotés des mailles
+#'
+#' @return La base de donnée, avec la colonne en +
+#' @export
+#'
+#' @examples
+#' 
+creer_maille <- function(bdd, taille_en_km){
+  bdd <- transforme_carte(bdd)
+  bdd <- st_transform(bdd, 2154)
+  
+  grid_spacing <- 1000 * taille_en_km
+  
+  Grid <- st_make_grid(bdd, 
+                       cellsize = c(grid_spacing, grid_spacing), 
+                       square = TRUE)
+  Grid <- st_sf(ID = seq_along(Grid), geometry = Grid)
+  Grid <- st_transform(Grid, 2154)
+  
+  Grid <- st_make_valid(Grid)
+  bdd <- st_make_valid(bdd)
+  
+  nom_colonne <- paste0("Grid", taille_en_km,"km")
+  names(Grid)[1] <- nom_colonne
+  bdd <- st_join(bdd, Grid, left=TRUE)
+  bdd <- bdd%>%
+    select(-"geometry")
+  
+  return(bdd)
+}
