@@ -5,7 +5,8 @@ library(tigris)
 
 rm(list=setdiff(ls(), "Total"))
 
-source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
+source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R",
+       encoding="utf-8")
 wd <- set_wd()
 set.seed(12345)
 Total <- st_read(paste0(wd$data,"Total.shp"))
@@ -20,32 +21,6 @@ Total <- creer_maille(bdd = Total, taille_en_km = 2)
 Total <- creer_maille(bdd = Total, taille_en_km = 5)
 Total <- creer_maille(bdd = Total, taille_en_km = 10)
 Total <- creer_maille(bdd = Total, taille_en_km = 20)
-
-#####
-#### Quadrillage masque  NON Utilisé
-#####
-
-grille_20x20 <- st_read(
-  paste0(wd$data, "masques/grille_20x20/METROP_L9320X20.shp")
-)
-Total <- transforme_carte(Total)
-st_crs(Total)
-st_crs(grille_20x20)
-grille_20x20 <- grille_20x20%>%
-  st_transform(st_crs(Total))
-
-Total <- st_join(Total, grille_20x20, left = TRUE)
-
-ggplot() +
-  geom_sf(data = grille_20x20) 
-
-
-  geom_sf_text(
-    data = grille_20x20,
-    aes(label = Nom),
-    size = 3,
-    color = "forestgreen"
-  )
 
 #####
 ##### Paysages Bretons 
