@@ -73,8 +73,6 @@ creer_maille <- function(bdd, taille_en_km){
   nom_colonne <- paste0("Grid", taille_en_km,"km")
   names(Grid)[1] <- nom_colonne
   bdd <- st_join(bdd, Grid, left=TRUE)
-  bdd <- bdd%>%
-    select(-"geometry")
-  
+
   return(bdd)
 }

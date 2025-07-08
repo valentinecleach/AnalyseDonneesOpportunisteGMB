@@ -1,31 +1,36 @@
-histogramme_maillage_pos <- function(colonne, espece, taille){
-  nbr_maille_par_date <- Total%>%
-    filter(cd_nom == espece)%>%
-    group_by(year(date), {{colonne}})%>%
-    summarise(n())
-  nb_mailles_par_date <- st_drop_geometry(nbr_maille_par_date)
-  names(nb_mailles_par_date)[1] <- "Annee"
-   p <- nb_mailles_par_date %>%
-    ggplot()+
-    geom_bar(aes(x= Annee))+
-    theme_bw()+
-    labs(title = paste0("Maillage de ", taille , "km"),
-         y="Nombre de mailles")
-   return(p)
-}
-
-pour_chaque_maillage <- function(espece){
-  p1 <- histogramme_maillage_pos(Grid2km, taille = 2, espece)
-  p2 <- histogramme_maillage_pos(Grid5km, taille = 5, espece)
-  p3 <- histogramme_maillage_pos(Grid10km, taille = 10, espece)
-  p4 <- histogramme_maillage_pos(Grid20km, taille = 20, espece)
-  
-  p <- ggarrange(p1, p2, p3, p4) 
-  
-  annotate_figure(p, top = text_grob( as.character(espece), 
-                                        color = "red", face = "bold", size = 14))
-  
-}
 
 # Test
-pour_chaque_maillage(60674)
+liste_cd_nom <- Total%>%
+  st_drop_geometry()%>%
+  distinct(cd_nom)
+liste_cd_nom[[1]]
+
+for (i in 1:23){
+  pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][i]))
+}
+
+source(paste0(wd$src,"functions/comparaison_dans_mailles.R"), encoding="utf-8")
+
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][1]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][2]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][3]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][4]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][5]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][6]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][7]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][8]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][9]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][10]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][11]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][12]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][13]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][14]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][15]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][16]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][17]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][18]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][19]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][20]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][21]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][22]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][23s]))
