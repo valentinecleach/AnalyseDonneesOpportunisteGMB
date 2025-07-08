@@ -6,6 +6,15 @@ Priorité
 
 - discuter du reste des unkown avec Franck
 
+
+2x2, 5x5, 10x10, 20x20
+nombre de carrée positif par an par espèce.
+
+4 graphes par espèce , 1 par grandeur de maille.
+
+courbe ROC?
+
+
 - faire fonctions pour proportion par rapport a x dans le temps 
 calc_prop <- function(parrapportaquoi, unitedetemps){
 
