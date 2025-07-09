@@ -2,53 +2,75 @@
 #### Proportion
 #########
 
-# -> préparer sur papier les différentes options, savoir bien ce qu'on veut faire
-
-summary(as.factor(Total$cd_nom))
-
-
-Total %>%
-  filter(cd_nom == 61714)
-
-Total%>%
-  distinct(nom_vernaculaire, cd_nom)
-
-t <- Total%>%
-  st_drop_geometry() %>%
-  filter(cd_nom %in% c(61714, 61028))%>%
-  select(date, nom_vernaculaire, cd_nom, famille_paysage, Grid5km)%>%
-  filter(date > as.Date("2010-01-01")) %>%
-  group_by(year = year(date), Grid5km) %>%
-  summarise(famille_paysage_max = case_when(
-    mean(famille_paysage == "Paysage cultive avec talus")> 0.5 ~  "Paysage cultive avec talus",
-    mean(famille_paysage == "Paysage de bocage e maille elargie")> 0.5 ~  "Paysage de bocage e maille elargie",
-    mean(famille_paysage == "Paysage boise et de bosquets")> 0.5 ~  "Paysage boise et de bosquets",
-    mean(famille_paysage == "Paysage cultive e ragosses")> 0.5 ~  "Paysage cultive e ragosses",
-    mean(famille_paysage == "Paysage de littoral urbanise")> 0.5 ~  "Paysage de littoral urbanise",
-    mean(famille_paysage == "Paysage de bocage dense sur collines")> 0.5 ~  "Paysage de bocage dense sur collines",
-    mean(famille_paysage == "Paysage de cultures legumieres")> 0.5 ~  "Paysage de cultures legumieres",
-    mean(famille_paysage == "Paysage associe e la presence d'eau")> 0.5 ~  "Paysage associe e la presence d'eau"
-    ),
-    proportion_lapin = mean(cd_nom == 61714), famille_paysage)
 
 Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
 
+tab_glm <- function(espece_interet, benchmark, taillegrid = "Grid20km"){
+  
+  taillegrid <- st_drop_geometry(Total)[taillegrid]
+
+  tab <- Total%>%
+    st_drop_geometry() %>%
+    filter(cd_nom %in% c(espece_interet, benchmark))%>%
+    select(date, nom_vernaculaire, cd_nom, famille_paysage, {{taillegrid}})%>%
+    filter(date > as.Date("2010-01-01")) %>%
+    group_by(year = year(date), {{taillegrid}}) %>%
+    summarise(
+      famille_paysage_max = Mode(famille_paysage), .groups = "drop",
+      proportion_lapin = sum(cd_nom == espece_interet)/n()
+    )
+  
+  return(tab)  
+}
+
+t2 <- tab_glm(61714, 60585)
+
+str(t2)
+
 
 t <- Total%>%
   st_drop_geometry() %>%
   filter(cd_nom %in% c(61714, 60585))%>%
-  select(date, nom_vernaculaire, cd_nom, famille_paysage, Grid5km)%>%
+  select(date, nom_vernaculaire, cd_nom, famille_paysage, Grid20km)%>%
   filter(date > as.Date("2010-01-01")) %>%
-  group_by(year = year(date), Grid5km) %>%
+  group_by(year = year(date), Grid20km) %>%
   summarise(
     famille_paysage_max = Mode(famille_paysage), .groups = "drop",
     proportion_lapin = sum(cd_nom == 61714)/n()
     )
 
-reg <- lm(data = t, proportion_lapin ~ year)
+gridxkm <- paste0("Grid", 20, "km")
+{{gridxkm}}
+reg <- glm(data = t, proportion_lapin ~ year, family = binomial)
+?glm
+summary(reg)
 plot(reg)
 
+plot(x=t$year, y=t$proportion_lapin)
 
+t2 <- t %>%
+  mutate(grp_year = case_when(
+    (year < as.Date("2018-01-01")) ~ "Avant2018",
+    (year >= as.Date("2018-01-01")) ~ "Apres2018" ))
+
+Total%>%
+  st_drop_geometry()%>%
+  filter(year(date)>as.Date("2020-01-01"))
+
+class(Total$year)
+
+summary(t2)
+t2$grp_year <- as.factor(t2$grp_year)
+t2$famille_paysage_max <- as.factor(t2$famille_paysage_max)
+reg <- lm(data = t2, proportion_lapin ~ grp_year)
+
+
+t$year <- as.factor(t$year)
+t$famille_paysage_max <- as.factor(t$famille_paysage_max)
+
+
+class(t$year)
+class(t$famille_paysage_max)
