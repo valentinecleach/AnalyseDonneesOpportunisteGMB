@@ -31,9 +31,6 @@ wd <- set_wd()
 set.seed(12345)
 Total <- transforme_carte(Total)
 
-
-st_crs(Total)
-
 famille_paysage <- st_read(
   paste0(wd$data, "masques/famille_paysage/famille_paysages.shp")
 )

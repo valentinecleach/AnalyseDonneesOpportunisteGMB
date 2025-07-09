@@ -17,7 +17,7 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
       grp_date = case_when(
         date >= as.Date("2010-01-01") & date <= as.Date("2014-12-31") ~ "1. Entre 2010 et 2015",
         date >= as.Date("2015-01-01") & date <= as.Date("2019-12-31") ~ "2. Entre 2015 et 2020",
-        date > as.Date("2019-12-31") ~ "3. AprÃ¨s 2020",
+        date > as.Date("2019-12-31") ~ "3. Après 2020",
         TRUE ~ NA_character_
       )
     ) %>%
@@ -75,4 +75,53 @@ creer_maille <- function(bdd, taille_en_km){
   bdd <- st_join(bdd, Grid, left=TRUE)
 
   return(bdd)
+}
+
+#' ajoute et nettoie les familles de paysages
+#'
+#' @param 
+#'
+#' @return La base de donnée, avec les colonne en +
+#' @export
+#'
+#' @examples
+#' 
+ajout_famille_paysage <- function(){
+  Total <- transforme_carte(Total)
+  
+  famille_paysage <- st_read(
+    paste0(wd$data, "masques/famille_paysage/famille_paysages.shp")
+  )
+  
+  famille_paysage$Nom <- gsub("\uFFFD\uFFFD", "a", famille_paysage$Nom)
+  famille_paysage$Nom <- gsub("\uFFFD", "e", famille_paysage$Nom)
+  
+  famille_paysage$Famille <- gsub("\uFFFD\uFFFD", "a", famille_paysage$Famille)
+  famille_paysage$Famille <- gsub("\uFFFD", "e", famille_paysage$Famille)
+  
+  
+  famille_paysage <- famille_paysage%>%
+    transforme_carte()%>%
+    filter(CODE_REG != 39)%>%
+    st_buffer(famille_paysage, dist = 200)
+  
+  Total <- st_join(Total, famille_paysage, left = TRUE)
+  
+  Total_sans_na <- Total%>%
+    filter(!is.na(Nom))
+  
+  Total <- Total%>%
+    mutate(Nom = ifelse(is.na(Nom), 
+                        Total$Nom[st_nearest_feature(Total, Total_sans_na)], 
+                        Nom),
+           Famille = ifelse(is.na(Famille), 
+                            Total$Famille[st_nearest_feature(Total, Total_sans_na)], 
+                            Famille))
+  
+  Total <- Total %>%
+    rename("paysage_ID" = "CODE_REG",
+           "paysage_nom" = "Nom",
+           "famille_paysage" = "Famille")
+  
+  return(Total)
 }

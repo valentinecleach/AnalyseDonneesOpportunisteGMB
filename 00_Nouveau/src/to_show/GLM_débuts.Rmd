@@ -31,6 +31,9 @@ library(tarchetypes)
 library(ggpubr)
 library(collapse)
 library(vegan)
+library(tidyverse)   
+library(ggspatial)   
+library(tigris)
 library(permute)
 ```
 
@@ -50,6 +53,7 @@ Total <- st_read(paste0(wd$data,"Total.shp"))
 
 ```{r}
 Total <- transform_Total()
+Total <- ajout_famille_paysage()
 ```
 
 ```{r creation-mailles}
