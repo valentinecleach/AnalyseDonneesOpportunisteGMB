@@ -13,6 +13,8 @@ editor_options:
 ---
 
 ```{r packages, include = FALSE}
+# -*- coding: UTF-8 -*-
+
 #' Packages
 library(readr)
 library(ggplot2)
@@ -57,7 +59,9 @@ Total <- ajout_famille_paysage()
 ```
 
 ```{r creation-mailles}
-# Création des mailles
+# Creation des mailles
+library(sf)
+
 Total <- creer_maille(bdd = Total, taille_en_km = 2)
 Total <- creer_maille(bdd = Total, taille_en_km = 5)
 Total <- creer_maille(bdd = Total, taille_en_km = 10)

@@ -1,3 +1,26 @@
+# -*- coding: UTF-8 -*-
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringi)
+library(stringr)
+library(sf)
+library(rsample)
+library(patchwork)
+library(scales)
+library(lubridate)
+library(purrr)
+library(forcats)
+library(targets)
+library(tarchetypes)
+library(ggpubr)
+library(collapse)
+library(vegan)
+library(tidyverse)   
+library(ggspatial)   
+library(tigris)
+library(permute)
+
 
 graph_ordre_tranche_annee <- function(ordre_voulu){
   # Creation de la BDD
@@ -17,7 +40,7 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
       grp_date = case_when(
         date >= as.Date("2010-01-01") & date <= as.Date("2014-12-31") ~ "1. Entre 2010 et 2015",
         date >= as.Date("2015-01-01") & date <= as.Date("2019-12-31") ~ "2. Entre 2015 et 2020",
-        date > as.Date("2019-12-31") ~ "3. Après 2020",
+        date > as.Date("2019-12-31") ~ "3. Apres 2020",
         TRUE ~ NA_character_
       )
     ) %>%
@@ -34,7 +57,7 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
     geom_sf(data = carte_bretagne) + 
     labs(
       title = paste("Carte des observations en Bretagne des", ordre_voulu),
-      subtitle = "Toutes données"
+      subtitle = "Toutes donnees"
     ) +
     geom_sf(data = carte_ordre, size = 0.01) +
     theme_bw() + 
