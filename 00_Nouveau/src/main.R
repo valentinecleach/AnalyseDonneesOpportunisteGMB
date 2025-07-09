@@ -1,11 +1,10 @@
 wd <- set_wd()
 
-source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/functions/divers.R", 
-       encoding="utf-8")
+source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/functions/divers.R")
 Total <- st_read(paste0(wd$data,"Total.shp"))
 Total <- transform_Total()
 
-#### Nettoyage de donnÃ©es ####
+#### Nettoyage de données ####
 # Total:
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Total.Rmd"), 
                   output_file = paste0(wd$output, "cleaning/Total.html"))

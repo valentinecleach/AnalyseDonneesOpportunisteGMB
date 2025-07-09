@@ -3,8 +3,8 @@ Avant_2018 <- Total %>%
   filter(date<as.Date("2018-01-01"))
 
 Après_2018 <- Total %>%
-  st_drop_geometry()%>%
-  filter(date>=as.Date("2018-01-01"))
+  st_drop_geometry() %>%
+  filter(date >= as.Date("2018-01-01"))
 
 median(Total$date)
 mean(Total$date)
@@ -92,5 +92,6 @@ nom <- Total%>%
   distinct(nom_vernaculaire)
 as.character(nom)
 as.character(nom[[1]][1])
+
 
 

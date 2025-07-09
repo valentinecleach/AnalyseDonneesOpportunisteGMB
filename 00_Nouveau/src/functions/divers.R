@@ -27,7 +27,7 @@ transform_Total <- function(){
                 "communs", "obsrvtr", 
                 "famille", "ordre", 
                 "nm_vrnc", "nom_vld"), 
-              .funs = as.factor)%>%
+              .funs = as.factor) %>%
     rename(bdd_originale = bdd_rgn,
            etat_biologique = ett_blg,
            technique_observation = tchnq_b,

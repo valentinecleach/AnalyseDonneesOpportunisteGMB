@@ -8,16 +8,15 @@ Mode <- function(x) {
   ux[which.max(tabulate(match(x, ux)))]
 }
 
-tab_glm <- function(espece_interet, benchmark, taillegrid = "Grid20km"){
-  
-  taillegrid <- st_drop_geometry(Total)[taillegrid]
 
+tab_glm <- function(espece_interet, espece_benchmark, taillegrid = "Grid10km"){
+  
   tab <- Total%>%
     st_drop_geometry() %>%
-    filter(cd_nom %in% c(espece_interet, benchmark))%>%
-    select(date, nom_vernaculaire, cd_nom, famille_paysage, {{taillegrid}})%>%
+    filter(cd_nom %in% c(espece_interet, espece_benchmark))%>%
+    select(date, nom_vernaculaire, cd_nom, famille_paysage, !!sym(taillegrid))%>%
     filter(date > as.Date("2010-01-01")) %>%
-    group_by(year = year(date), {{taillegrid}}) %>%
+    group_by(year = year(date), !!sym(taillegrid)) %>%
     summarise(
       famille_paysage_max = Mode(famille_paysage), .groups = "drop",
       proportion_lapin = sum(cd_nom == espece_interet)/n()
@@ -27,24 +26,52 @@ tab_glm <- function(espece_interet, benchmark, taillegrid = "Grid20km"){
 }
 
 t2 <- tab_glm(61714, 60585)
+reg <- glm(data = t2, 
+           proportion_lapin ~ year)
+summary(reg)
 
-str(t2)
+t3 <- t2 %>%
+  filter(!(proportion_lapin %in% c(0, 1)))
+reg <- glm(data = t3, 
+           proportion_lapin ~ year)
+summary(reg)
+plot(reg)
+
+t3 <- t2 %>%
+  filter(!(proportion_lapin %in% c(0, 1)))
+reg <- glm(data = t3, 
+           proportion_lapin ~ year+famille_paysage_max)
+summary(reg)
+plot(reg)
 
 
-t <- Total%>%
-  st_drop_geometry() %>%
-  filter(cd_nom %in% c(61714, 60585))%>%
-  select(date, nom_vernaculaire, cd_nom, famille_paysage, Grid20km)%>%
-  filter(date > as.Date("2010-01-01")) %>%
-  group_by(year = year(date), Grid20km) %>%
-  summarise(
-    famille_paysage_max = Mode(famille_paysage), .groups = "drop",
-    proportion_lapin = sum(cd_nom == 61714)/n()
-    )
+t4 <- t3%>%
+  mutate(year = as.factor(year))
+reg <- glm(data = t4, 
+           proportion_lapin ~ year)
+summary(reg)
 
-gridxkm <- paste0("Grid", 20, "km")
-{{gridxkm}}
-reg <- glm(data = t, proportion_lapin ~ year, family = binomial)
+
+
+reg <- glm(data = t2, 
+           proportion_lapin ~ year, 
+           family = binomial)
+summary(reg)
+
+reg <- glm(data = t3, 
+           proportion_lapin ~ year, 
+           family = binomial)
+summary(reg)
+
+reg <- glm(data = t4, 
+           proportion_lapin ~ year, 
+           family = binomial)
+summary(reg)
+plot(reg)
+
+
+
+
 ?glm
 summary(reg)
 plot(reg)

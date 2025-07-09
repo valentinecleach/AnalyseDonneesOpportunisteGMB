@@ -9,7 +9,7 @@
 #' 
 nb_ordre <- function(nom_ordre){
   nb_o <- Total %>%
-    filter(ordre==nom_ordre)%>%
+    filter(ordre == nom_ordre) %>%
     group_by(observateurs) %>%
     summarise(nbr = n(), .groups = "drop")
   
@@ -29,7 +29,7 @@ repartition_espece_cluster <- function(bdd = Total, cluster){
     geom_col() +
     coord_flip() +
     labs(
-      title = paste0("Répartition des espèces du cluster ", cluster),
+      title = paste0("R�partition des espaces du cluster ", cluster),
       x = "Nom vernaculaire"
     ) +
     scale_x_discrete(labels = label_wrap(40)) +

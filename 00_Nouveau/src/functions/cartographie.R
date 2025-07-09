@@ -24,7 +24,7 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
     filter(date > as.Date("2010-01-01")) %>%
     sample_frac(1)
   
-  # Transformation pour des donnÃ©es de la carte
+  # Transformation pour des données de la carte
   carte_ordre <- ordre_graph %>%
     select(grp_date, ordre, date) %>%
     filter(ordre == ordre_voulu)
@@ -34,7 +34,7 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
     geom_sf(data = carte_bretagne) + 
     labs(
       title = paste("Carte des observations en Bretagne des", ordre_voulu),
-      subtitle = "Toutes donnÃ©es"
+      subtitle = "Toutes données"
     ) +
     geom_sf(data = carte_ordre, size = 0.01) +
     theme_bw() + 

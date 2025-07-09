@@ -1,8 +1,8 @@
-#' Fait un barplot selon les espèces. Les espèces sont rangés sur le plot
+#' Fait un barplot selon les esp�ces. Les esp�ces sont rang�s sur le plot
 #'
-#' @param bdd La base de donnée
-#' @param nom_ordre Le nom de l'ordre parmis lesquels ont veut...
-#' @param repartition ce quon veut etudier
+#' @param bdd La base de donn�e
+#' @param nom_ordre Le nom de l'ordre parmi lesquels ont veut...
+#' @param repartition ce qu'on veut �tudier
 #' @param date_min  la date minimum
 #'
 #' @return Une liste de plots
@@ -73,11 +73,11 @@ stats_observateur <- function(nom_obs, carte){
   p1 <- Total %>%
     filter(observateurs == toupper(nom_obs),
            date > params$date_min) %>%
-    ggplot(aes(date))+
-    labs(title="Répartition des dates",
+    ggplot(aes(date)) +
+    labs(title = "Répartition des dates",
          subtitle = paste("Données de ", nom_obs)) + 
-    theme_bw()+
-    geom_line(stat="density")+
+    theme_bw() +
+    geom_line(stat = "density") +
     scale_x_date(
       breaks = seq(from = min(Total$date), 
                    to = max(Total$date), 
@@ -87,18 +87,18 @@ stats_observateur <- function(nom_obs, carte){
   
   # Ordres
   p2 <- 
-    Total%>%
+    Total %>%
     filter(date > params$date_min,
-           observateurs == toupper(nom_obs))%>%
-    ggplot(aes(ordre,fill=ordre, color = ordre))+
-    geom_bar()+
-    labs(title=" Répartition des differents ordres",
-         subtitle = paste("Données de ", nom_obs))+
-    theme_bw()+
-    scale_fill_manual(values = couleur)+
-    scale_color_manual(values = couleur)+
+           observateurs == toupper(nom_obs)) %>%
+    ggplot(aes(ordre,fill=ordre, color = ordre)) +
+    geom_bar() +
+    labs(title = " Répartition des differents ordres",
+         subtitle = paste("Données de ", nom_obs)) +
+    theme_bw() +
+    scale_fill_manual(values = couleur) +
+    scale_color_manual(values = couleur) +
     theme(legend.position = "none") +
-    theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))+
+    theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5)) +
     coord_flip()
   
   # Carte
