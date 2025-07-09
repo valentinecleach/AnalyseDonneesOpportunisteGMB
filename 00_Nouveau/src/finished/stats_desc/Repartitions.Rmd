@@ -12,6 +12,7 @@ editor_options:
     wrap: sentence
 ---
 
+
 # Statistiques descriptives
 
 ```{r packages-imports, include = FALSE}
@@ -35,8 +36,11 @@ library(ggpubr)
 library(collapse)
 library(vegan)
 library(permute)
+library(bookdown)
 
 source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
+source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/stats_desc.R")
+
 
 wd <- set_wd()
 
@@ -47,7 +51,8 @@ set.seed(12345)
 Total <- st_read(paste0(wd$data,"Total.shp"))
 ```
 
-```{r} 
+
+```{r, inlcude = FALSE} 
 Total <- Total %>%
   mutate_at(c("bdd_rgn", 
               "ett_blg", "tchnq_b", 
@@ -200,7 +205,7 @@ Ca ne change pas drastiquement la distribution.
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == GN)%>%
+         bdd_originale == "GeoNature")%>%
   count(nom_vernaculaire, ordre, sort = TRUE) %>%
   ggplot(aes(x = reorder(nom_vernaculaire, n), 
              y = n, fill = ordre, color = ordre)) +
@@ -208,8 +213,8 @@ Total%>%
   coord_flip() +
   facet_wrap(~ ordre, scales = "free_y") +
   labs(
-    title = "Répartition des espèces",
-        subtitle = paste(GN),
+    title = "4a. R�partition des esp�ces",
+        subtitle = paste("GeoNature"),
     y = "Nombre d'observations", x = "Nom vernaculaire"
   ) +
   scale_x_discrete(labels = label_wrap(40)) +
@@ -221,7 +226,7 @@ Total%>%
 
 Total%>%
   filter(date > params$date_min,
-         bdd_originale == GN)%>%
+         bdd_originale == )%>%
   count(nom_vernaculaire, ordre, sort = TRUE) %>%
   ggplot(aes(x = reorder(nom_vernaculaire, n), 
              y = n, fill = ordre, color = ordre)) +
@@ -229,7 +234,7 @@ Total%>%
   coord_flip() +
   facet_wrap(~ ordre, scales = "free_y") +
   labs(
-    title = "Répartition des espèces",
+    title = "4b. R�partition des esp�ces",
         subtitle = paste(GN),
     y = "Nombre d'observations", x = "Nom vernaculaire"
   ) +
@@ -250,7 +255,7 @@ Total%>%
   filter(date > params$date_min,
          bdd_originale == VN)%>%
   ggplot(aes(date, color = ordre))+
-  labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
+  labs(title=paste("5a. Fr�quence des observations dans le temps depuis", params$date_min),
        subtitle = paste(VN))+ 
   facet_grid(ordre ~ .)+
   theme_bw()+
@@ -260,7 +265,7 @@ Total%>%
 Total%>%
   filter(date > params$date_min)%>%
   ggplot(aes(date, color = ordre))+
-  labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
+  labs(title=paste("5b. Fréquence des observations dans le temps depuis", params$date_min),
        subtitle = "Les bases de donnée GéoNature et VisioNature réunis")+ 
   facet_grid(ordre ~ .)+
   theme_bw()+
@@ -272,7 +277,7 @@ Total%>%
   filter(date > params$date_min,
          bdd_originale == GN)%>%
   ggplot(aes(date, color = ordre))+
-  labs(title=paste("Fréquence des observations dans le temps depuis", params$date_min),
+  labs(title=paste("5c. Fréquence des observations dans le temps depuis", params$date_min),
        subtitle = paste(GN))+ 
   facet_grid(ordre ~ .)+
   theme_bw()+
@@ -299,7 +304,7 @@ Total%>%
   theme_bw()+
   scale_fill_grey(start = 0.2,
                   end = 0.8) + 
-  labs(title="Le nombre d'individus enregistré par observation reparti dans le temps",
+  labs(title="6a. Le nombre d'individus enregistré par observation reparti dans le temps",
        subtitle = paste(VN),
        y="Nombre d’individus")
 
@@ -311,7 +316,7 @@ Total%>%
   theme_bw()+
   scale_fill_grey(start = 0.2,
                   end = 0.8) + 
-  labs(title="Le nombre d'individus enregistré par observation reparti dans le temps",
+  labs(title="6b. Le nombre d'individus enregistré par observation reparti dans le temps",
       subtitle = paste(GN),
        y="Nombre d’individus")
 ```
@@ -337,7 +342,7 @@ Total%>%
   geom_bar(position = "fill") +
   labs(
     x = "Période",
-    title = "Répartition des differentes espèces observés depuis 1980",
+    title = "7a. Répartition des differentes espèces observés depuis 1980",
     y = "Proportion",
     subtitle = paste(VN),
     fill = "Espèce"
@@ -358,7 +363,7 @@ Total%>%
   geom_bar(position = "fill") +
   labs(
     x = "Période",
-    title = "Répartition des differentes espèces observés depuis 1980",
+    title = "7b. Répartition des differentes espèces observés depuis 1980",
     y = "Proportion",
     subtitle = paste(GN),
     fill = "Espèce"
@@ -383,7 +388,7 @@ Total%>%
   ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
   geom_bar(position = "fill") +
   labs(
-    title = "Répartition des differentes espèces observés depuis 2010",
+    title = "7c. Répartition des differentes espèces observés depuis 2010",
     x = "Période",
     subtitle = paste(VN),
     y = "Proportion",
@@ -409,7 +414,7 @@ Total%>%
   ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
   geom_bar(position = "fill") +
   labs(
-    title = "Répartition des differentes espèces observés depuis 2010",
+    title = "7d. Répartition des differentes espèces observés depuis 2010",
     subtitle = paste(GN),
     x = "Période",
     y = "Proportion",
@@ -438,7 +443,7 @@ Nous n'observons pas quelque chose de similaire chez VisioNature.
 Total%>%
   ggplot(aes(as.factor(wday(date, 
                             week_start = getOption("lubridate.week.start", 1)))))+
-  labs(title="Barplot des observation selon le jour de la semaine",
+  labs(title="8. Barplot des observation selon le jour de la semaine",
        y="Nombre d'observations",
        x="Jour de la semaine")+ 
   theme_bw()+
@@ -456,7 +461,7 @@ Total %>%
   filter(date > params$date_min)%>%
   mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)%>%
   ggplot(aes(jour_annee)) +
-  labs(title="Frequence des observations selon le jour de l'année",
+  labs(title="9. Frequence des observations selon le jour de l'année",
        y="Proportion",
        x="Jour de l'année")+
   geom_density()
@@ -465,7 +470,7 @@ Total %>%
 Total%>%
     filter(date > params$date_min)%>%
     ggplot(aes(factor(month(date))))+
-    labs(title="Barplot des observation selon le mois",
+    labs(title="10. Barplot des observation selon le mois",
          y="Nombre d'observations",
          x="Mois")+ 
     theme_bw()+
