@@ -54,4 +54,12 @@ transforme_carte <- function(carte){
   return(carte)
 }
 
-
+ajoute_clust_a_Total <- function(){
+  wd <- set_wd()
+  Observateurs <-  read.csv(paste0(wd$data, "Observateurs.csv"))
+  
+  Total <- Total %>%
+    left_join(Observateurs %>% select(observateurs, clust), by = "observateurs")
+  
+  return(Total)
+} 

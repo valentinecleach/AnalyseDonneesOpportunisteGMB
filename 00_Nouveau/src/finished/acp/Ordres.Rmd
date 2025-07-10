@@ -10,7 +10,6 @@ library(sf)
 library(rsample)
 library(patchwork)
 library(scales)
-library(viridis)
 library(lubridate)
 library(purrr)
 library(forcats)
@@ -31,7 +30,6 @@ set.seed(12345)
 source(paste0(wd$src,"/functions/analysedonnees.R"))
   
 Total <- st_read(paste0(wd$data,"Total.shp"))
-
 Total <- transform_Total()
 ```
 
@@ -39,37 +37,37 @@ Total <- transform_Total()
 # Ordres
 
 ```{r Creation-BDD-Observateurs}
-Total_notsf <- Total%>%
+Total_notsf <- Total %>%
   st_drop_geometry
 
 nb_observations <- Total_notsf %>%
   group_by(observateurs) %>%
   summarise(total_obs = n(), .groups = "drop")
 
-max_technique <- Total_notsf%>%
+max_technique <- Total_notsf %>%
   group_by(observateurs) %>%
   summarise(tech_obs_max = collapse::fmode(technique_observation))
 
-max_etat_bio <- Total_notsf%>%
+max_etat_bio <- Total_notsf %>%
   group_by(observateurs) %>%
   summarise(etat_bio_max = collapse::fmode(etat_biologique))
 
-max_bdd <- Total_notsf%>%
+max_bdd <- Total_notsf %>%
   group_by(observateurs) %>%
   summarise(bdd_max = collapse::fmode(bdd_originale))
 
 
 Observateurs <- nb_observations %>%
-  left_join(max_technique, by = "observateurs")%>%
-  left_join(max_etat_bio, by = "observateurs")%>%
-  left_join(max_bdd, by = "observateurs")%>%
+  left_join(max_technique, by = "observateurs") %>%
+  left_join(max_etat_bio, by = "observateurs") %>%
+  left_join(max_bdd, by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Lagomorpha"), by = "observateurs") %>%
   left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")
 
-Observateurs <- Observateurs%>%
+Observateurs <- Observateurs %>%
   select(observateurs, total_obs, tech_obs_max, etat_bio_max, bdd_max,
          nb_carnivora, nb_cetartiodactyla, 
          nb_eulipotyphla, nb_lagomorpha, nb_rodentia)
@@ -85,44 +83,50 @@ Observateurs <- Observateurs %>%
          nb_rodentia = ifelse(is.na(nb_rodentia), 0, nb_rodentia)
   )
 
-Observateurs <- Observateurs%>%
+Observateurs <- Observateurs %>%
   mutate(prop_carnivora = nb_carnivora / total_obs,
          prop_cetartiodactyla = nb_cetartiodactyla / total_obs,
          prop_eulipotyphla = nb_eulipotyphla / total_obs,
          prop_lagomorpha = nb_lagomorpha / total_obs,
          prop_rodentia = nb_rodentia / total_obs,
-         tech_obs_max = paste("Tech d'obs: ", tech_obs_max, sep=""),
-         etat_bio_max = paste("Etat bio: ", etat_bio_max, sep="")
+         tech_obs_max = paste("Tech d'obs: ", tech_obs_max, sep = ""),
+         etat_bio_max = paste("Etat bio: ", etat_bio_max, sep = "")
          )
 
 
 ```
 
 ```{r}
-Observateurs$shannon <- vegan::diversity(Observateurs[,5:10])
+Observateurs$shannon <- vegan::diversity(Observateurs[,7:11])
 
-Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,5:10]))
+Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,7:11]))
 Observateurs <- Observateurs %>%
-  mutate(Pielou = ifelse(shannon==0, 0, Pielou))
+  mutate(Pielou = ifelse(shannon == 0, 0, Pielou))
 
 ```
 
-On se demande a quoi ressemble la répartition des Indice de Pielou
+On se demande a quoi ressemble la repartition des Indice de Pielou
 
 ```{r Indices-Equitabilite}
 boxplot(Observateurs$Pielou, 
-        main="Répartition des Indice de Pielou",
-        ylab="Indice de Pielou")
+        main = "Repartition des Indice de Pielou",
+        ylab = "Indice de Pielou")
 
 summary(Observateurs$Pielou)
 ```
 
 ```{r}
-res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(2,3,4,5),quanti.sup=c(1,6,7,8,9,10),graph=FALSE)
-plot.PCA(res.PCA,choix='var') # Corrélation negative entre Pielou, 
-#                               une proportion de rongeurs elevé, et 
-#                               une proportion de carnviores élevés
-plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali'))
+res.PCA <- PCA(Observateurs[,-c(1)],
+             quali.sup = c(2,3,4,5),
+             quanti.sup = c(1,6,7,8,9,10),
+             graph = FALSE)
+plot.PCA(res.PCA,
+         choix = 'var') # Correlation negative entre Pielou, 
+#                               une proportion de rongeurs eleve, et 
+#                               une proportion de carnviores eleves
+plot.PCA(res.PCA,
+         invisible = c('ind','ind.sup'),
+         label = c('quali'))
 summary(res.PCA)
 
 ```
@@ -133,9 +137,15 @@ Dim 3: Prop Eulipotyphles (+ rongeurs, carnivores)
 Dim 4: ?
 
 ```{r}
-res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(2,3,4,5),quanti.sup=c(11,13,14,15,12),graph=FALSE)
-plot.PCA(res.PCA,choix='var') # Corrélation positive entre les variables
-plot.PCA(res.PCA,invisible=c('ind','ind.sup'),label =c('quali'))
+res.PCA <- PCA(Observateurs[,-c(1)],
+               quali.sup = c(2,3,4,5),
+               quanti.sup = c(11,13,14,15,12),
+               graph = FALSE)
+plot.PCA(res.PCA,
+         choix = 'var') # Correlation positive entre les variables
+plot.PCA(res.PCA,
+         invisible = c('ind','ind.sup'),
+         label = c('quali'))
 summary(res.PCA)
 ```
 
@@ -143,28 +153,34 @@ summary(res.PCA)
  Dim 2: Shannon et pielou (positif)
 
 ```{r}
-
-res.HCPC<-HCPC(res.PCA,nb.clust=3,consol=FALSE,graph=FALSE)
-plot.HCPC(res.HCPC,choice='tree',title='Hierarchical tree')
-plot.HCPC(res.HCPC,choice='map',draw.tree=FALSE,title='Factor map')
+res.HCPC <- HCPC(res.PCA,
+                 nb.clust = 3,
+                 consol = FALSE,
+                 graph = FALSE)
+plot.HCPC(res.HCPC,
+          choice = 'tree',
+          title = 'Hierarchical tree')
+plot.HCPC(res.HCPC,
+          choice = 'map',
+          draw.tree = FALSE,
+          title = 'Factor map')
 summary(res.HCPC)
-
 ```
 
 On a 3 clusters
-Le 1er : peu de diversité et peu d'observations (surtout visioNature)
-2e : forte diversité (surtout geonature)
-3e : peu de diversité et de nombreuses observations (pas plus visionature ni geonature)
+Le 1er : peu de diversite et peu d'observations (surtout visioNature)
+2e : forte diversite (surtout geonature)
+3e : peu de diversite et de nombreuses observations (pas plus visionature ni geonature)
 
-# Espèces
+# Especes
 
 ```{r}
-# On a la même chose avec (48%) 1er axe et 3e de l'ACP des espèces. 
+# On a la meme chose avec (48%) 1er axe et 3e de l'ACP des especes. 
 Observateurs_espece <- Observateurs[,1:5]
 
 liste_cd_noms <- Total %>%
-  group_by(cd_nom)%>%
-  distinct(cd_nom)%>%
+  group_by(cd_nom) %>%
+  distinct(cd_nom) %>%
   select(cd_nom)
 
 for (i in 1:nrow(liste_cd_noms)) {
@@ -194,7 +210,7 @@ Observateurs_espece$Shannon <- vegan::diversity(Observateurs_espece[,6:28])
 
 Observateurs_espece$Pielou <- Observateurs_espece$Shannon / log(vegan::specnumber(Observateurs_espece[,6:28]))
 Observateurs_espece <- Observateurs_espece %>%
-  mutate(Pielou = ifelse(Shannon==0, 0, Pielou))
+  mutate(Pielou = ifelse(Shannon == 0, 0, Pielou))
 
 colonne <- as.numeric(Observateurs_espece[[2]])
 diviseur <- as.data.frame(matrix(rep(colonne, 23), 
@@ -202,14 +218,24 @@ diviseur <- as.data.frame(matrix(rep(colonne, 23),
                                  nrow = nrow(Observateurs_espece), 
                                  byrow = FALSE))
 
-Observateurs_espece[paste(names(Observateurs_espece)[6:28], "_prop", sep="")] <- Observateurs_espece[6:28] / diviseur
+Observateurs_espece[paste0(names(Observateurs_espece)[6:28], 
+                          "_prop")] <- Observateurs_espece[6:28] / diviseur
 ```
 
 ```{r}
-res.PCA<-PCA(Observateurs[,-c(1)],quali.sup=c(2,3,4),quanti.sup=c(12,13,14,15,16),graph=FALSE)
-res.HCPC<-HCPC(res.PCA,nb.clust=3,consol=FALSE,graph=FALSE)
-Observateurs_clust <- res.HCPC$data.clust%>%
+res.PCA <- PCA(Observateurs[,-c(1)],
+               quali.sup = c(2,3,4),
+               quanti.sup = c(12,13,14,15,16),
+               graph = FALSE)
+
+res.HCPC <- HCPC(res.PCA,
+                 nb.clust = 3,
+                 consol = FALSE,
+                 graph = FALSE)
+
+Observateurs_clust <- res.HCPC$data.clust %>%
   mutate(observateurs = Observateurs$observateurs)
+
 
 Total_clust <- Total %>%
   mutate(clust = case_when(

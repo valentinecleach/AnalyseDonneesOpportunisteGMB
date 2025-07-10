@@ -1,6 +1,6 @@
 Avant_2018 <- Total %>%
-  st_drop_geometry()%>%
-  filter(date<as.Date("2018-01-01"))
+  st_drop_geometry() %>%
+  filter(date < as.Date("2018-01-01"))
 
 Après_2018 <- Total %>%
   st_drop_geometry() %>%
@@ -14,16 +14,16 @@ Après_2018$paysage_ID
 x <- as.numeric(liste_cd_nom[[1]][17])
 
 
-Avant_2018%>%
-  filter(cd_nom == x)%>%
-  group_by(paysage_ID)%>%
-  distinct(paysage_ID)%>%
+Avant_2018 %>%
+  filter(cd_nom == x) %>%
+  group_by(paysage_ID) %>%
+  distinct(paysage_ID) %>%
   n_distinct()
 
-Après_2018%>%
-  filter(cd_nom == x)%>%
-  group_by(paysage_ID)%>%
-  distinct(paysage_ID)%>%
+Après_2018 %>%
+  filter(cd_nom == x) %>%
+  group_by(paysage_ID) %>%
+  distinct(paysage_ID) %>%
   n_distinct()
 
 x
@@ -64,22 +64,21 @@ db <- as.data.frame(seq(NA,))
 for (i in 1:23){
   cd_nom_i = as.numeric(liste_cd_nom[[1]][i])
   
-  avant <- Avant_2018%>%
-    filter(cd_nom == cd_nom_i)%>%
-    group_by(paysage_ID)%>%
-    distinct(paysage_ID)%>%
+  avant <- Avant_2018 %>%
+    filter(cd_nom == cd_nom_i) %>%
+    group_by(paysage_ID) %>%
+    distinct(paysage_ID) %>%
     n_distinct()
   
-  apres <- Après_2018%>%
-    filter(cd_nom == cd_nom_i)%>%
-    group_by(paysage_ID)%>%
-    distinct(paysage_ID)%>%
+  apres <- Après_2018 %>%
+    filter(cd_nom == cd_nom_i) %>%
+    group_by(paysage_ID) %>%
+    distinct(paysage_ID) %>%
     n_distinct()
   
-  if (avant != apres){
-    
-    nom <- Total%>%
-      filter(cd_nom == cd_nom_i)%>%
+  if (avant != apres) {
+    nom <- Total %>%
+      filter(cd_nom == cd_nom_i) %>%
       distinct(nom_vernaculaire)
     
     nom <- as.character(nom[[1]][1]) 
@@ -87,8 +86,8 @@ for (i in 1:23){
   }
 }
 
-nom <- Total%>%
-  filter(cd_nom == 60577)%>%
+nom <- Total %>%
+  filter(cd_nom == 60577) %>%
   distinct(nom_vernaculaire)
 as.character(nom)
 as.character(nom[[1]][1])

@@ -58,7 +58,9 @@ Total <- st_read(paste0(wd$data,"Total.shp"))
 
 ```{r modif-total}
 Total <- transform_Total()
+Total <- ajoute_clust_a_Total()
 Total <- ajout_famille_paysage()
+ 
 
 Total <- creer_maille(bdd = Total, taille_en_km = 2)
 Total <- creer_maille(bdd = Total, taille_en_km = 5)
@@ -148,6 +150,13 @@ On a bien fait d'ajouter l'interaction entre l'annee et la famille de paysage.
 On ne remarque pas de structure tres tres forte des residus, mais plus que la regression precedente.
 L'individu 2 a un tres fort effet levier ainsi que quelques autres individus.
 
+```{r}
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year + clust)
+summary(reg)
+autoplot(reg)
+```
+
 #### [Year en variable qualitative:]{.underline}
 
 ```{r}
@@ -184,6 +193,7 @@ autoplot(reg2)
 ```
 
 On ne dirait pas qu'il y a qqe chose de différent entre ces deux modèles.
+
 
 #### 0 Inflated Model?
 

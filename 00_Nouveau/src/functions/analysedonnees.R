@@ -13,7 +13,7 @@ nb_ordre <- function(nom_ordre){
     group_by(observateurs) %>%
     summarise(nbr = n(), .groups = "drop")
   
-  nom = paste("nb_",tolower(nom_ordre), sep="")
+  nom = paste("nb_",tolower(nom_ordre), sep = "")
   nb_o <- nb_o %>% 
     rename_at("nbr",~nom)
   
@@ -29,10 +29,10 @@ repartition_espece_cluster <- function(bdd = Total, cluster){
     geom_col() +
     coord_flip() +
     labs(
-      title = paste0("Répartition des espaces du cluster ", cluster),
+      title = paste0("Repartition des espaces du cluster ", cluster),
       x = "Nom vernaculaire"
     ) +
     scale_x_discrete(labels = label_wrap(40)) +
     theme_bw() +
-    theme(axis.text=element_text(size=8))
+    theme(axis.text = element_text(size = 8))
 }
