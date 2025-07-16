@@ -1,5 +1,5 @@
 ---
-title: "Nettoyage des données opportunistes du GMB"
+title: "Nettoyage des donnes opportunistes du GMB"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   bookdown::html_document2:
@@ -46,26 +46,26 @@ GeoN <- GeoN %>%
     cd_nom = ifelse(cd_nom==194481, 60658, cd_nom),
     # Rat
     nom_vernaculaire = ifelse(cd_nom==61585, 
-                              "Rat surmulot, Surmulot, Rat d’égout", 
+                              "Rat surmulot, Surmulot, Rat d’gout", 
                               nom_vernaculaire))%>%
-  filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Corée
+  filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Core
          !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
          !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
         !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
-# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
+# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal dor, Putois domestique
   mutate(nombre = ifelse(nombre_max != nombre_min, 
                          median(c(nombre_max,nombre_min)),
                          nombre_min)
   )%>%
   mutate(technique_observation = ifelse(
     technique_observation %in% c("Fèces/Guano/Epreintes", 
-                                 "Empreintes", "Coulée",
+                                 "Empreintes", "Coule",
                                  "Galerie/terrier", 
-                                 "Hutte (Castor, Rat musqué)", "Nid/Gîte",
-                                 "Indices de présence divers",
+                                 "Hutte (Castor, Rat musqu)", "Nid/Gîte",
+                                 "Indices de prsence divers",
                                  "Restes de repas",
                                  "Empreintes et fèces",
-                                 "Restes dans pelote de réjection"
+                                 "Restes dans pelote de rjection"
     ),
     "Indices",
     ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
@@ -73,10 +73,10 @@ GeoN <- GeoN %>%
            technique_observation)),
     technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
   mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
-                                  "Non renseigné", etat_biologique))%>%
+                                  "Non renseign", etat_biologique))%>%
   filter(!jdd_nom %in% c(490,53))%>% 
   # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
-  # 53:  Données faunebretagne.org
+  # 53:  Donnes faunebretagne.org
   mutate(technique_observation = ifelse(technique_observation == "Inconnu", 
                                         "Vu", technique_observation),
          champs_additionnels = NA)%>%
@@ -121,7 +121,7 @@ VisioN_FB <- rbind(donnees_VisioNature_FB, VN_Rodentia)
 
 VisioN_FB <- VisioN_FB %>%
   filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
-  filter(technique_observation != "Restes dans pelote de réjection")%>%
+  filter(technique_observation != "Restes dans pelote de rjection")%>%
   mutate(technique_observation = ifelse(
     !is.na(comment_occurrence) & technique_observation == "Inconnu",
     ifelse(any(grepl("TAUPINIERE", toupper(gsub("[[:punct:]]", 
@@ -146,19 +146,19 @@ VisioN_FB <- VisioN_FB %>%
                                         "Entendu/Ultrasons",
                                         technique_observation),
          technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
-  filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Corée
+  filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Core
          !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
          !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
         !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
-# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
+# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal dor, Putois domestique
   mutate(technique_observation = ifelse(technique_observation == "Inconnu", "Vu", technique_observation))%>%
   mutate(etat_biologique = ifelse(champs_additionnels %in% c("{'death_cause': 'ROAD_VEHICLE'}",
                                                              "{'death_cause': 'OTHER_TRANSPORT'}",
                                                              "{'death_cause': 'UNKNOWN_TRANSPORT'}"),
-                                  "Trouvé mort : impact routier",
+                                  "Trouv mort : impact routier",
                                   etat_biologique),
-         etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "Trouvé mort") & grepl("ROUT", toupper(comment_occurrence))), 
-                                  "Trouvé mort : impact routier",
+         etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "Trouv mort") & grepl("ROUT", toupper(comment_occurrence))), 
+                                  "Trouv mort : impact routier",
                                   etat_biologique)
          )%>%
   mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
@@ -207,9 +207,9 @@ Total <- Total %>%
 any(duplicated(Total))
 ```
 
-Maintenant on nettoie selon les coordonnées géographiques:
-- suppréssion des rongeurs en Loire Atlantique
-- suppréssion des îles 
+Maintenant on nettoie selon les coordonnes gographiques:
+- supprssion des rongeurs en Loire Atlantique
+- supprssion des îles 
 
 ```{r nettoyage-cartographique}
 Total_sf <- st_as_sf(Total,
@@ -231,7 +231,7 @@ carte_44 <- st_read(paste0(wd$data,
                            "masques/Masque_44/Masque44.shp"))
 carte_44 <- st_transform(carte_44, 2154)
 carte_44 <- st_buffer(carte_44, dist = 200) 
-# Il nous manquera peut être qqes données entre le 44 et le 35 mais j'espère pas trop grave?
+# Il nous manquera peut être qqes donnes entre le 44 et le 35 mais j'espère pas trop grave?
 carte_44 <- st_transform(carte_44, st_crs(CRS))
 
 

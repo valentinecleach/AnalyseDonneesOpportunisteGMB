@@ -22,7 +22,7 @@ pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][3])) # Sanglier -> nsp 10/20?
 pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][4])) 
 pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][5]))
 pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][6])) # Lapin de garenne
-pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][7])) # Fouine -> Problème
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][7])) # Fouine -> Probleme
 pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][8]))
 ######
 pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][9]))
@@ -60,7 +60,7 @@ train <- jdd[train_index, ]
 test <- jdd[test_index, ]
 
 library("class") # fonction knn
-library("e1071") # librairie nécessaire pour la fonction tune.knn
+library("e1071") # librairie necessaire pour la fonction tune.knn
 
 train <- train%>%
   st_drop_geometry()

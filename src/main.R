@@ -23,7 +23,7 @@ rmarkdown::render(paste0(wd$src, "finished/stats_desc/Observateurs.Rmd"),
                   output_file = paste0(wd$output, "stats_desc/Observateurs.html"))
 
 
-library(formatR)
+
 ?tidy.source()
 
 
@@ -32,8 +32,8 @@ library(formatR)
 rmarkdown::render(paste0(wd$src, "finished/acp/Ordres.Rmd"), 
                   output_file = paste0(wd$output, "acp/Ordres.html"))
 
-
-
+library(renv)
+renv::init()
 #### Regression ####
 
 

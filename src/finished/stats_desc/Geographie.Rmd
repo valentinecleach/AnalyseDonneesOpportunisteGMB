@@ -1,10 +1,10 @@
-## 3. Répresentation cartographique des données
+## 3. Representation cartographique des donnees
 
 ```{r, include=FALSE}
 source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
 wd <- set_wd()
 
-# Graine aléatoire
+# Graine aleatoire
 set.seed(12345)
 # Importations
 Total <- st_read(paste0(wd$data,"Total.shp"))
@@ -28,7 +28,7 @@ grid_sf$density <- lengths(st_intersects(grid_sf, GN_sf))
 grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne",
+  labs(title = "Densite des observations en bretagne",
        subtitle = GN) +
   geom_sf(data = grid_sf, aes(fill = density)) +
   scale_fill_gradient(low="gray97", high="gray15") +
@@ -45,17 +45,17 @@ grid_sf$density <- lengths(st_intersects(grid_sf, VN_sf))
 grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne",
+  labs(title = "Densite des observations en bretagne",
        subtitle = VN) +
   geom_sf(data = grid_sf, aes(fill = density)) +
   scale_fill_gradient(low="grey97", high="gray15") +
   theme_bw()
 ```
 
-Il semble y avoir un lieu avec une forte densité proche de Sizun dans la BDD GeoNature.
+Il semble y avoir un lieu avec une forte densite proche de Sizun dans la BDD GeoNature.
 On remarque aussi que les observations ont lieu surtout au nord-ouest de la Bretagne et au sud entre le Morbihan et l'Ille-et-Vilaine.\
 
-Dans VisioNature, on a deux points avec une très forte densité sont probablement dues à nos deux principaux contributeurs (voir la partie 4), nous décidons de les supprimer pour vérifier.
+Dans VisioNature, on a deux points avec une tres forte densite sont probablement dues a nos deux principaux contributeurs (voir la partie 4), nous decidons de les supprimer pour verifier.
 
 ```{r}
 VN_sf_modif <- VN_sf%>%
@@ -68,7 +68,7 @@ grid_sf$density <- lengths(st_intersects(grid_sf, VN_sf_modif))
 grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne",
+  labs(title = "Densite des observations en bretagne",
        subtitle = "VisioNature, sans les deux principaux observateurs") +
   geom_sf(data = grid_sf, aes(fill = density)) +
   scale_fill_gradient(low="grey97", high="gray15") +
@@ -77,7 +77,7 @@ ggplot() +
 ```
 
 ```{r, fig.width=10, fig.height=7}
-# Données geographique
+# Donnees geographique
 
 GN_sf <- Total%>% 
   dplyr::filter(bdd_originale == GN)%>%
@@ -106,7 +106,7 @@ grid_sf <- bind_rows(grid_list)
 grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne selon les ordres",
+  labs(title = "Densite des observations en bretagne selon les ordres",
        subtitle = VN) +
   geom_sf(data = grid_sf, aes(fill = density), color = NA) +
   scale_fill_gradient(low="gray90", high="gray15") +
@@ -125,7 +125,7 @@ grid_sf <- bind_rows(grid_list)
 grid_sf <- st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
-  labs(title = "Densité des observations en bretagne selon les ordres",
+  labs(title = "Densite des observations en bretagne selon les ordres",
        subtitle = "GeoNature") +
   geom_sf(data = grid_sf, aes(fill = density), color = NA) +
   scale_fill_gradient(low="gray90", high="gray15") +
@@ -134,12 +134,12 @@ ggplot() +
 
 ```
 
-On ne voit pas grand chose sur la carte de VisioNature à part les 2 principaux observateurs..
-Concernant la base de données GeoNature, on dirait que les espèces ont un peu près la même répartition en Bretagne (nord Finistere et Côte d'Armor et sud Ille-et-Vilaine et Morbihan)
+On ne voit pas grand chose sur la carte de VisioNature a part les 2 principaux observateurs..
+Concernant la base de donnees GeoNature, on dirait que les especes ont un peu pres la meme repartition en Bretagne (nord Finistere et Cote d'Armor et sud Ille-et-Vilaine et Morbihan)
 
-Nous prenons la base de données avec toutes les données et je selectionne 40 000 ou 50 000 données avec les proportions.\
+Nous prenons la base de donnees avec toutes les donnees et je selectionne 40 000 ou 50 000 donnees avec les proportions.\
 
-Pour info, la graine aléatoire est figée a 12345.
+Pour info, la graine aleatoire est figee a 12345.
 
 ```{r graphiques-date-et-ordre}
 graph_ordre_tranche_annee("Carnivora")
@@ -149,5 +149,5 @@ graph_ordre_tranche_annee("Lagomorpha")
 graph_ordre_tranche_annee("Rodentia")
 ```
 
-  On dirait que plus on avance dans les années, plus on retrouve d'individus aux sud de la Bretagne.
-Ceci peut être car nous avons plus de données de VisioNature au fil du temps qui provient d'ornithologues et les ornithologues sont souvent proches des littoraux.\
+On dirait que plus on avance dans les annees, plus on retrouve d'individus aux sud de la Bretagne.
+Ceci peut etre car nous avons plus de donnees de VisioNature au fil du temps qui provient d'ornithologues et les ornithologues sont souvent proches des littoraux.\

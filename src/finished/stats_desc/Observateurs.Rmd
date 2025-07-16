@@ -1,27 +1,6 @@
-## 3. Répresentation cartographique des données
+## 3. Representation cartographique des donnees
 
 ```{r, include=FALSE}
-# Packages
-library(readr)
-library(ggplot2)
-library(dplyr)
-library(stringi)
-library(stringr)
-library(sf)
-library(rsample)
-library(patchwork)
-library(scales)
-library(viridis)
-library(lubridate)
-library(purrr)
-library(forcats)
-library(targets)
-library(tarchetypes)
-library(ggpubr)
-library(collapse)
-library(vegan)
-library(permute)
-
 source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
 
 wd <- set_wd()
@@ -37,16 +16,16 @@ Total <- transform_Total()
 carte_bretagne <- transforme_carte(carte_bretagne)
 ```
 
-## 4. Étude des observateurs
+## 4. Etude des observateurs
 
-### Étude des principaux observateurs
+### Etude des principaux observateurs
 
-Étudier les principaux observateurs peut être important parce qu'ils participent grandement au recueil des données donc un changement de leur comportement implique également un changement du comportement de la base de données.
+Etudier les principaux observateurs peut etre important parce qu'ils participent grandement au recueil des donnees donc un changement de leur comportement implique egalement un changement du comportement de la base de donnees.
 
 Ils pourraient introduire des biais:\
-- pour un endroit du territoire, s'ils enregistent toujours des observations au même endroit\
-- pour une espece, s'ils sont intéressé par une espèce\
-- en enregistrant pendant une durée précise dans le temps\
+- pour un endroit du territoire, s'ils enregistent toujours des observations au meme endroit\
+- pour une espece, s'ils sont interesse par une espece\
+- en enregistrant pendant une duree precise dans le temps\
 
 ```{r nombre-total-observateurs}
 Total %>%
@@ -58,15 +37,15 @@ Total %>%
   summarize(nb_observateurs = n_distinct(observateurs))
 ```
 
-Pour GeoNature, il y a en tout 2778 observateurs qui peuvent être une ou 2 personnes.
-Certains observateurs sont anonymes et sont attribués un code.\
+Pour GeoNature, il y a en tout 2778 observateurs qui peuvent etre une ou 2 personnes.
+Certains observateurs sont anonymes et sont attribues un code.\
 
 Pour VisioNature, il y a 3662 observateurs.
-1813 des observations n'ont pas d'observateur attribué.\
+1813 des observations n'ont pas d'observateur attribue.\
 
-On transforme tous les noms en majuscule pour éviter des problèmes.\
+On transforme tous les noms en majuscule pour eviter des problcmes.\
 
-Nous cherchons les observateurs qui ont le plus contribué aux deux bases de données.\
+Nous cherchons les observateurs qui ont le plus contribue aux deux bases de donnees.\
 
 ```{r lollipop-plot-observateurs}
 Total_summary_GN <- Total %>%
@@ -114,11 +93,11 @@ Total_summary_VN%>%
   theme(axis.text=element_text(size=6))
 ```
 
-Nous remarquons que nous avons des observateurs avec un très grand nombre d'observations comme attendu.
+Nous remarquons que nous avons des observateurs avec un tres grand nombre d'observations comme attendu.
 Nous ne savons pas si deleted deleted est un observateur.
-Nous pouvons imaginer que c'est les observations de tous les membres qui ont supprimés leurs comptes.
+Nous pouvons imaginer que c'est les observations de tous les membres qui ont supprimes leurs comptes.
 
-Pour étudier facilement leur données, nous créons une fonction qui donne rapidement quelques graphiques.
+Pour etudier facilement leur donnees, nous creons une fonction qui donne rapidement quelques graphiques.
 
 ```{r stats-observateur, fig.width=10, fig.height=7}
 stats_observateur(nom_obs="Bellier_Daniel", 
@@ -143,5 +122,5 @@ stats_observateur(nom_obs="Le_Campion_Thomas",
 
 Nous remarquons que:\
 - BELLIER DANIEL observe beaucoup de rongeurs autour de Rennes.\
-- CHAPUIS MARTINE observe uniquement a un endroit précis.\
-- DELETED DELETED, semble être surtout dans le finistère ce qui est étonnant si ce sont plusieurs personnes.
+- CHAPUIS MARTINE observe uniquement a un endroit precis.\
+- DELETED DELETED, semble etre surtout dans le finistere ce qui est etonnant si ce sont plusieurs personnes.

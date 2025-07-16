@@ -2,13 +2,13 @@ Avant_2018 <- Total %>%
   st_drop_geometry() %>%
   filter(date < as.Date("2018-01-01"))
 
-Après_2018 <- Total %>%
+Apres_2018 <- Total %>%
   st_drop_geometry() %>%
   filter(date >= as.Date("2018-01-01"))
 
 median(Total$date)
 mean(Total$date)
-Après_2018$paysage_ID
+Apres_2018$paysage_ID
 
 
 x <- as.numeric(liste_cd_nom[[1]][17])
@@ -20,7 +20,7 @@ Avant_2018 %>%
   distinct(paysage_ID) %>%
   n_distinct()
 
-Après_2018 %>%
+Apres_2018 %>%
   filter(cd_nom == x) %>%
   group_by(paysage_ID) %>%
   distinct(paysage_ID) %>%
@@ -32,28 +32,28 @@ Total%>%
   distinct(nom_vernaculaire)
 
 # different pour 60674 : Fouine
-# Avant: 39, Après: 36
+# Avant: 39, Apres: 36
 
-# different pour 60015 : Hérisson d'Europe
-# Avant: 37, Après: 38
+# different pour 60015 : Herisson d'Europe
+# Avant: 37, Apres: 38
 
-# different pour 61000 : Cerf élaphe
-# Avant: 21, Après: 23
+# different pour 61000 : Cerf elaphe
+# Avant: 21, Apres: 23
 
 # different pour 61153 : Ecureuil roux
-# Avant: 39, Après: 38
+# Avant: 39, Apres: 38
 
 # different pour 60630 : Loutre
-# Avant: 33, Après: 34
+# Avant: 33, Apres: 34
 
 # different pour 60746 : Vison
-# Avant: 31, Après: 27
+# Avant: 31, Apres: 27
 
 # different pour 60686 : Hermine
-# Avant: 31, Après: 21
+# Avant: 31, Apres: 21
 
 # different pour 61028 : Daim
-# Avant: 4, Après: 7
+# Avant: 4, Apres: 7
 
 Total%>%
   distinct(60577)
@@ -70,7 +70,7 @@ for (i in 1:23){
     distinct(paysage_ID) %>%
     n_distinct()
   
-  apres <- Après_2018 %>%
+  apres <- Apres_2018 %>%
     filter(cd_nom == cd_nom_i) %>%
     group_by(paysage_ID) %>%
     distinct(paysage_ID) %>%

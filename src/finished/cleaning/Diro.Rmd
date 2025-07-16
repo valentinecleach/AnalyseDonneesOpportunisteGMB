@@ -1,5 +1,5 @@
 ---
-title: "Nettoyage des données opportunistes du GMB"
+title: "Nettoyage des donnees opportunistes du GMB"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   bookdown::html_document2:
@@ -7,8 +7,8 @@ output:
     toc_float: true
 ---
 
-## Nettoyage de la base de donnée DIRO:
-#Geométrie
+## Nettoyage de la base de donnee DIRO:
+#Geometrie
 ```{r}
 
 collision_faune_diro <- read_csv(paste0(wd$data, "raw/collision_faune_diro.csv"))
@@ -60,7 +60,7 @@ diro_sf <- anti_join(total_bretagne_44,
 #   geom_sf(data = diro_sf)
 ```
 
-#Données
+#Donnees
 ```{r}
 diro_sf <- diro_sf %>%
   mutate(espece = as.character(espece)) %>%
@@ -74,7 +74,7 @@ diro_sf <- diro_sf %>%
                          "Putois d'Europe, Putois, Furet", espece))%>%
   mutate(bdd_originale = "DIRO",
          technique_observation = "Vu",
-         etat_biologique = "Trouvé mort : impact routier")%>%
+         etat_biologique = "Trouve mort : impact routier")%>%
   select(-date_maj, -annee, -mois, -commentaire, -grp_espece)%>%
   mutate_at(c("route", "concessionpr", "cote", "district", "cei", "cigt", 
               "espece", "commune"), 
