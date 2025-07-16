@@ -1,0 +1,165 @@
+---
+title: "Mailles dans le temps"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+params:
+  date_min: '2010-01-01'
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r packages-imports}
+# Packages
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringi)
+library(stringr)
+library(sf)
+library(rsample)
+library(patchwork)
+library(scales)
+library(lubridate)
+library(purrr)
+library(forcats)
+library(targets)
+library(tarchetypes)
+library(ggpubr)
+library(collapse)
+library(vegan)
+library(permute)
+
+source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
+
+wd <- set_wd()
+source(paste0(wd$src,"functions/cartographie.R"), encoding="utf-8")
+source(paste0(wd$src,"functions/comparaison_dans_mailles.R"), encoding="utf-8")
+
+
+# Graine aleatoire
+set.seed(12345)
+
+# Importations
+Total <- st_read(paste0(wd$data,"Total.shp"))
+Total <- transform_Total()
+
+
+#' Applique une fonction qui plot qqe chose a tous les ordres
+#'
+#' @param bdd La base de donnee sur laquelle faire la 
+#' @param taille_en_km La longueur des cotes des mailles
+#'
+#' @return La base de donnee, avec la colonne en +
+#' @export
+#'
+#' @examples
+#' 
+creer_maille <- function(bdd, taille_en_km){
+  bdd <- transforme_carte(bdd)
+  bdd <- st_transform(bdd, 2154)
+  
+  grid_spacing <- 1000 * taille_en_km
+  
+  Grid <- st_make_grid(bdd, 
+                       cellsize = c(grid_spacing, grid_spacing), 
+                       square = TRUE)
+  Grid <- st_sf(ID = seq_along(Grid), geometry = Grid)
+  Grid <- st_transform(Grid, 2154)
+  
+  Grid <- st_make_valid(Grid)
+  bdd <- st_make_valid(bdd)
+  
+  nom_colonne <- paste0("Grid", taille_en_km,"km")
+  names(Grid)[1] <- nom_colonne
+  bdd <- st_join(bdd, Grid, left=TRUE)
+
+  return(bdd)
+}
+
+histogramme_maillage_pos <- function(colonne, espece, taille){
+  nbr_maille_par_date <- Total%>%
+    filter(cd_nom == espece,
+           date>as.Date("1980-01-01"))%>%
+    group_by(year(date), {{colonne}})%>%
+    summarise(n())
+  nb_mailles_par_date <- st_drop_geometry(nbr_maille_par_date)
+  names(nb_mailles_par_date)[1] <- "Annee"
+  p <- nb_mailles_par_date %>%
+    ggplot()+
+    geom_bar(aes(x= Annee))+
+    theme_bw()+
+    labs(title = paste0("Maillage de ", taille , "km"),
+         y="Nombre de mailles")
+  return(p)
+}
+
+
+#' Fait l'histogramme pour le 4 possibilites de maillage
+#'
+#' @param espece Le cd_nom choisi
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+#' 
+pour_chaque_maillage <- function(espece){
+  p1 <- histogramme_maillage_pos(Grid2km, taille = 2, espece)
+  p2 <- histogramme_maillage_pos(Grid5km, taille = 5, espece)
+  p3 <- histogramme_maillage_pos(Grid10km, taille = 10, espece)
+  p4 <- histogramme_maillage_pos(Grid20km, taille = 20, espece)
+  
+  p <- ggarrange(p1, p2, p3, p4) 
+  
+  nom_espece <- Total%>%
+    filter(cd_nom == espece)%>%
+    st_drop_geometry()%>%
+    select(nom_vernaculaire)%>%
+    head(1)
+  nom_espece <- as.character(nom_espece[[1]])
+  
+  annotate_figure(p, top = text_grob( nom_espece, 
+                                      color = "forestgreen", face = "bold", size = 14))
+}
+
+
+
+Total <- creer_maille(bdd = Total, taille_en_km = 2)
+Total <- creer_maille(bdd = Total, taille_en_km = 5)
+Total <- creer_maille(bdd = Total, taille_en_km = 10)
+Total <- creer_maille(bdd = Total, taille_en_km = 20)
+
+liste_cd_nom <- Total%>%
+  st_drop_geometry()%>%
+  distinct(cd_nom)
+
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][1]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][2]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][3]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][4]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][5]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][6]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][7]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][8]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][9]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][10]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][11]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][12]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][13]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][14]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][15]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][16]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][17]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][18]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][19]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][20]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][21]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][22]))
+pour_chaque_maillage(as.numeric(liste_cd_nom[[1]][23]))
+
+```
+

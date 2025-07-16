@@ -1,0 +1,126 @@
+## 3. Representation cartographique des donnees
+
+```{r, include=FALSE}
+source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
+
+wd <- set_wd()
+  
+set.seed(12345)
+
+source(paste0(wd$src,"/functions/stats_desc.R"))
+  
+Total <- st_read(paste0(wd$data,"Total.shp"))
+carte_bretagne <- st_read(paste0(wd$data,"masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
+  
+Total <- transform_Total()
+carte_bretagne <- transforme_carte(carte_bretagne)
+```
+
+## 4. Etude des observateurs
+
+### Etude des principaux observateurs
+
+Etudier les principaux observateurs peut etre important parce qu'ils participent grandement au recueil des donnees donc un changement de leur comportement implique egalement un changement du comportement de la base de donnees.
+
+Ils pourraient introduire des biais:\
+- pour un endroit du territoire, s'ils enregistent toujours des observations au meme endroit\
+- pour une espece, s'ils sont interesse par une espece\
+- en enregistrant pendant une duree precise dans le temps\
+
+```{r nombre-total-observateurs}
+Total %>%
+  filter(bdd_originale == "GeoNature")%>%
+  summarize(nb_observateurs = n_distinct(observateurs))
+
+Total %>% 
+  filter(bdd_originale == "VisioNature")%>%
+  summarize(nb_observateurs = n_distinct(observateurs))
+```
+
+Pour GeoNature, il y a en tout 2778 observateurs qui peuvent etre une ou 2 personnes.
+Certains observateurs sont anonymes et sont attribues un code.\
+
+Pour VisioNature, il y a 3662 observateurs.
+1813 des observations n'ont pas d'observateur attribue.\
+
+On transforme tous les noms en majuscule pour eviter des problcmes.\
+
+Nous cherchons les observateurs qui ont le plus contribue aux deux bases de donnees.\
+
+```{r lollipop-plot-observateurs}
+Total_summary_GN <- Total %>%
+  filter(bdd_originale == "GeoNature")%>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 500) %>%
+  arrange(nbr_obs_obr)
+
+Total_summary_GN$observateurs<- factor(Total_summary_GN$observateurs,
+                                       levels = Total_summary_GN$observateurs)
+
+Total_summary_VN <- Total %>%
+  filter(bdd_originale == "VisioNature")%>%
+  group_by(observateurs) %>%
+  summarize(nbr_obs_obr = n()) %>%
+  filter(nbr_obs_obr > 500) %>%
+  arrange(nbr_obs_obr)
+
+Total_summary_VN$observateurs <- factor(Total_summary_VN$observateurs,
+                                      levels = Total_summary_VN$observateurs)
+
+Total_summary_GN%>%
+  filter(!is.na(observateurs))%>%
+  ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()+
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="GeoNature")+
+  theme_bw()+
+  theme(axis.text=element_text(size=6))
+
+Total_summary_VN%>%
+  filter(!is.na(observateurs))%>%
+  ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
+  geom_point() + 
+  geom_segment( aes(x=observateurs, xend=observateurs, 
+                    y=0, yend=nbr_obs_obr))+
+  coord_flip()+
+  labs(title="Lollipop plot des principaux observateurs",
+       subtitle="VisioNature")+
+  theme_bw()+
+  theme(axis.text=element_text(size=6))
+```
+
+Nous remarquons que nous avons des observateurs avec un tres grand nombre d'observations comme attendu.
+Nous ne savons pas si deleted deleted est un observateur.
+Nous pouvons imaginer que c'est les observations de tous les membres qui ont supprimes leurs comptes.
+
+Pour etudier facilement leur donnees, nous creons une fonction qui donne rapidement quelques graphiques.
+
+```{r stats-observateur, fig.width=10, fig.height=7}
+stats_observateur(nom_obs="Bellier_Daniel", 
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Chapuis_Martine", 
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Seite_Francois",
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Deleted_Deleted",
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Simonnet_Franck", 
+                  carte=carte_bretagne)
+
+stats_observateur(nom_obs="Le_Campion_Thomas",
+                  carte=carte_bretagne)
+
+```
+
+Nous remarquons que:\
+- BELLIER DANIEL observe beaucoup de rongeurs autour de Rennes.\
+- CHAPUIS MARTINE observe uniquement a un endroit precis.\
+- DELETED DELETED, semble etre surtout dans le finistere ce qui est etonnant si ce sont plusieurs personnes.

@@ -6,5 +6,6 @@
 .dbf
 .rda
 
-*dbf
+*.dbf
 *.csv
+*.csv.gz

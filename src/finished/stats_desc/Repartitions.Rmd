@@ -1,0 +1,468 @@
+---
+title: "Analyse descriptive des donnees opportunistes du GMB"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+params:
+  date_min: '2010-01-01'
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+
+# Statistiques descriptives
+
+```{r packages-imports, include = FALSE}
+
+source("~/work/AnalyseDonneesOpportunisteGMB/src/functions/divers.R")
+wd <- set_wd()
+source("~/work/AnalyseDonneesOpportunisteGMB/src/functions/stats_desc.R")
+
+# Graine aleatoire
+set.seed(12345)
+
+# Importations
+Total <- st_read(paste0(wd$data,"Total.shp"))
+
+```
+
+
+```{r, inlcude = FALSE} 
+Total <- Total %>%
+  mutate_at(c("bdd_rgn", 
+              "ett_blg", "tchnq_b", 
+              "communs", "obsrvtr", 
+              "famille", "ordre", 
+              "nm_vrnc", "nom_vld"), 
+            .funs = as.factor)%>%
+  rename(bdd_originale = bdd_rgn,
+         etat_biologique = ett_blg,
+         technique_observation = tchnq_b,
+         nom_vernaculaire = nm_vrnc,
+         nom_valide = nom_vld,
+         observateurs = obsrvtr)
+```
+
+```{r}
+couleur  <- c("Carnivora" = "orangered3",
+              "Cetartiodactyla" = "#225d00", 
+              "Eulipotyphla" = "bisque4", 
+              "Lagomorpha" = "#CC8C3C", 
+              "Rodentia" = "darkorange")
+
+VN <- "VisioNature"
+GN <- "GeoNature"
+```
+
+Toutes nos donnees concernent uniquement la Bretagne continentale, hors Loire-Atlantique.
+
+## 1. Differentes repartitions
+
+```{r repartition-etat-bio-techniques, warning = FALSE, echo=FALSE, out.width="50%"}
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == VN)%>%
+  ggplot(aes(technique_observation, fill=etat_biologique))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "1a. Repartition de l'etat biologique selon les techniques d'observations",
+       subtitle = paste(VN))
+
+Total%>%
+  filter(bdd_originale == GN,
+         date > params$date_min)%>%
+  ggplot(aes(technique_observation, 
+             fill=etat_biologique))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8, 
+                  na.value = "red")+
+  labs(title = "1b. Repartition de l'etat biologique selon les techniques d'observations",
+       subtitle = paste(GN))
+```
+
+Nous remarquons toujours beaucoup de donnees de VisioNature dont la technique d'observation est inconnue.
+
+```{r repartition-etat-bio-ordes, warning = FALSE, echo=FALSE, out.width="50%"}
+Total%>%
+  filter(bdd_originale == VN,
+         date > params$date_min)%>%
+  ggplot(aes(technique_observation, fill=ordre))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  labs(title = "2a. Repartition de l'etat biologique selon les ordres",
+       subtitle = paste(VN))+
+  scale_fill_manual(values = couleur, name = "Ordre")
+
+Total%>%
+  filter(bdd_originale == GN,
+         date > params$date_min)%>%
+  ggplot(aes(technique_observation, 
+             fill=ordre))+
+  geom_bar(position="dodge")+
+  theme_bw()+
+  labs(title = "2b. Repartition de l'etat biologique selon les ordres",    
+       subtitle = paste(GN))+
+  scale_fill_manual(values = couleur, name = "Ordre")
+```
+
+GeoNature observe principalement des indices de rodents et de carnivores.
+Les lagomorphes sont peu remarques avec les indices, compares aux autres dans VisioNature et GeoNature.
+
+```{r}
+application_tous_ordres(repartition_espece, 
+                        repartition = etat_biologique)
+
+application_tous_ordres(repartition_espece, 
+                        repartition = technique_observation)
+```
+
+### Repartition des ordres
+
+Dans la BDD GeoNature, principalement des carnivores, puis relativement uniformement les 4 autres ordres.
+C'est peut-etre du au fort interet de GMB pour la loutre, mais ce n'est pas tant le cas que ca (voir figure de la repartition des ordres sans le loutres)
+
+```{r repartition-des-ordes, echo=FALSE, out.width="50%"}
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == VN)%>%
+  ggplot(aes(ordre, fill=ordre, color = ordre))+
+  geom_bar()+
+  labs(title="3a. Repartition des differents ordres",
+       subtitle = paste(VN))+
+  theme_bw()+
+  scale_fill_manual(values = couleur)+
+  scale_color_manual(values = couleur)
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == GN)%>%
+  ggplot(aes(ordre,fill=ordre, color = ordre))+
+  geom_bar()+
+  labs(title="3b. Repartition des differents ordres",
+       subtitle = paste(GN))+
+  theme_bw()+
+  scale_fill_manual(values = couleur)+
+  scale_color_manual(values = couleur)
+
+
+Total%>%
+  filter(date > params$date_min)%>%
+  ggplot(aes(ordre, fill=ordre, color = ordre))+
+  geom_bar()+
+  labs(title="3c. Repartition des differents ordres",
+       subtitle="Bretagne Entiere")+
+  theme_bw()+
+  scale_fill_manual(values = couleur)+
+  scale_color_manual(values = couleur)
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == GN,
+         cd_nom != 60630)%>%
+  ggplot(aes(ordre, fill=ordre, color = ordre))+
+  geom_bar()+
+  labs(title="3d. Repartition des differents ordres",
+       subtitle = paste(GN, "sans la loutre"))+
+  theme_bw()+
+  scale_fill_manual(values = couleur)+
+  scale_color_manual(values = couleur)
+```
+
+Nous nous sommes demandes a quoi ressemblerait la repartition des ordres sans la loutre car elle est une espece dont le GMB se preoccupe beaucoup.
+Ca ne change pas drastiquement la distribution.
+
+```{r repartition-especes, fig.width=10, fig.height=7}
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == "GeoNature")%>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), 
+             y = n, fill = ordre, color = ordre)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "4a. Répartition des espèces",
+        subtitle = paste("GeoNature"),
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw()+
+  theme(axis.text=element_text(size=8))+
+  scale_colour_manual(values=couleur)+
+  scale_fill_manual(values = couleur)
+
+
+Total%>%
+  filter(date > params$date_min)%>%
+  count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot(aes(x = reorder(nom_vernaculaire, n), 
+             y = n, fill = ordre, color = ordre)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ ordre, scales = "free_y") +
+  labs(
+    title = "4b. Répartition des espèces",
+        subtitle = paste(GN),
+    y = "Nombre d'observations", x = "Nom vernaculaire"
+  ) +
+  scale_x_discrete(labels = label_wrap(40)) +
+  theme_bw()+
+  theme(axis.text=element_text(size=8))+
+  scale_colour_manual(values=couleur)+
+  scale_fill_manual(values = couleur)
+```
+
+Nous remarquons une inversion entre les lapins et les lievres entre les deux bases de donnees.
+Peut-etre lie a la periode pendant laquelle les BDD sont remplies.
+
+## 2. Description temporelle des bases de donnees
+
+```{r}
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == VN)%>%
+  ggplot(aes(date, color = ordre))+
+  labs(title=paste("5a. Fréquence des observations dans le temps depuis", params$date_min),
+       subtitle = paste(VN))+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")+
+  scale_colour_manual(values=couleur)
+
+Total%>%
+  filter(date > params$date_min)%>%
+  ggplot(aes(date, color = ordre))+
+  labs(title=paste("5b. Frequence des observations dans le temps depuis", params$date_min),
+       subtitle = "Les bases de donnee GeoNature et VisioNature reunis")+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")+
+  scale_colour_manual(values=couleur)
+  
+  
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == GN)%>%
+  ggplot(aes(date, color = ordre))+
+  labs(title=paste("5c. Frequence des observations dans le temps depuis", params$date_min),
+       subtitle = paste(GN))+ 
+  facet_grid(ordre ~ .)+
+  theme_bw()+
+  geom_line(stat="density")+
+  scale_colour_manual(values=couleur)
+```
+
+VisioNature a tres peu de donnees avant 2010 et GeoNature avant 1990.\
+
+J'aurais focalise l'etude sur la periode [2010 - maintenant] pour les series temporelles, car avant il y a peu de donnees.\
+
+GeoNature a surtout des donnees entre 2010 et 2015, et VisioNature apres 2015.\
+
+Peut-etre que ca pourrait etre interessant de regarder par rapport au nombre d'observateurs?
+Si il y a plus d'observateurs, alors peut-etre qu'il y aura plus d'observations.
+Peut-etre qu'on pourra ponderer la dessus?
+
+```{r nmbre-donnees, warning = FALSE, echo=FALSE, out.width="50%"}
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == VN)%>%
+  ggplot(aes(date, nombre))+
+  geom_point()+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8) + 
+  labs(title="6a. Le nombre d'individus enregistre par observation reparti dans le temps",
+       subtitle = paste(VN),
+       y="Nombre d'individus")
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == GN)%>%
+  ggplot(aes(date, nombre))+
+  geom_point()+
+  theme_bw()+
+  scale_fill_grey(start = 0.2,
+                  end = 0.8) + 
+  labs(title="6b. Le nombre d'individus enregistre par observation reparti dans le temps",
+      subtitle = paste(GN),
+       y="Nombre d'individus")
+```
+
+La plupart des observations ne contiennent qu'un animal mais certains en contiennent plusieurs.\
+
+Il faudrait peut-etre les prendre en compte, mais les donnees avec beaucoup d'animaux observes (ex: 400 obs d'un coup) risquent de causer des problemes pour creer un modele.\
+
+Ensuite, on a essayer d'observer les proportions d'especes dans le temps.
+Dans "other" il y a toutes les especes qui representent moins de 3% des observations de la periode.\
+
+```{r, echo=FALSE, out.width="50%"}
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == VN)%>%
+  mutate(
+    year = as.numeric(format(date, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Periode",
+    title = "7a. Repartition des differentes especes observes depuis 1980",
+    y = "Proportion",
+    subtitle = paste(VN),
+    fill = "Espece"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d(labels = label_wrap(40))+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+
+  Total%>%
+  filter(date > params$date_min,
+         bdd_originale == GN)%>%
+  mutate(
+    year = as.numeric(format(date, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Periode",
+    title = "7b. Repartition des differentes especes observes depuis 1980",
+    y = "Proportion",
+    subtitle = paste(GN),
+    fill = "Espece"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d(labels = label_wrap(40))+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+  
+```
+
+```{r}
+# Depuis 2010
+
+Total%>%
+  filter(date > params$date_min,
+         bdd_originale == VN)%>%
+  mutate(
+    year = as.numeric(format(date, "%Y")),
+    year_group = cut(year, breaks = seq(1980, max(year), by = 2), right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "7c. Repartition des differentes especes observes depuis 2010",
+    x = "Periode",
+    subtitle = paste(VN),
+    y = "Proportion",
+    fill = "Espece"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d(labels = label_wrap(40))+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+```
+
+```{r}
+Total%>%
+  filter(date > params$date_min)%>%
+  filter(bdd_originale == GN,
+         date > as.Date("2010-01-01")) %>%
+  mutate(
+    year = as.numeric(format(date, "%Y")),
+    year_group = cut(year, 
+                     breaks = seq(1980, max(year), by = 2), 
+                     right = FALSE),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "7d. Repartition des differentes especes observes depuis 2010",
+    subtitle = paste(GN),
+    x = "Periode",
+    y = "Proportion",
+    fill = "Espece"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d(labels = label_wrap(40))+
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+  
+```
+
+\
+
+Nous remarquons que depuis les annees 1980, il semble avoir de moins en moins de "other" donc d'especes peu presentes.
+Les principales especes sont peut etre de plus en plus dominantes.
+
+Nous remarquons aussi que GeoNature a des donnees assez differentes pour [2000-2005) que pour les autres periodes avec beaucoup de rats bruns.
+Nous n'observons pas quelque chose de similaire chez VisioNature.
+
+
+
+### Habitudes des observateurs?
+
+```{r}
+
+Total%>%
+  ggplot(aes(as.factor(wday(date, 
+                            week_start = getOption("lubridate.week.start", 1)))))+
+  labs(title="8. Barplot des observation selon le jour de la semaine",
+       y="Nombre d'observations",
+       x="Jour de la semaine")+ 
+  theme_bw()+
+  geom_bar()+
+  scale_x_discrete(labels=c("1" = "Lundi", 
+                            "2" = "Mardi",
+                            "3" = "Mercredi",
+                            "4" = "Jeudi",
+                            "5" = "Vendredi",
+                            "6" = "Samedi",
+                            "7" = "Dimanche"))
+
+
+Total %>%
+  filter(date > params$date_min)%>%
+  mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)%>%
+  ggplot(aes(jour_annee)) +
+  labs(title="9. Frequence des observations selon le jour de l'annee",
+       y="Proportion",
+       x="Jour de l'annee")+
+  geom_density()
+
+
+Total%>%
+    filter(date > params$date_min)%>%
+    ggplot(aes(factor(month(date))))+
+    labs(title="10. Barplot des observation selon le mois",
+         y="Nombre d'observations",
+         x="Mois")+ 
+    theme_bw()+
+    geom_bar()+
+    scale_x_discrete(labels=c("1" = "Janvier", 
+                              "2" = "Fevrier",
+                              "3" = "Mars",
+                              "4" = "Avril",
+                              "5" = "Mai",
+                              "6" = "Juin",
+                              "7" = "Juillet",
+                              "8" = "Aout",
+                              "9" = "Septembre",
+                              "10" = "Octobre",
+                              "11" = "Novembre",
+                              "12" = "Decembre"))
+
+```
