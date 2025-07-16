@@ -1,6 +1,3 @@
-# -*- coding: UTF-8 -*-
-
-
 graph_ordre_tranche_annee <- function(ordre_voulu){
   # Creation de la BDD
   ordre_data <- Total_sf %>% filter(ordre == ordre_voulu)
