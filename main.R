@@ -8,6 +8,8 @@ set.seed(12345)
 Total <- st_read(paste0(wd$data,"derived/Total.shp"))
 Total <- transform_Total()
 
+rm(list=setdiff(ls(), "Total"))
+
 #### Nettoyage de donnees ####
 # Total:
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Total.Rmd"), 

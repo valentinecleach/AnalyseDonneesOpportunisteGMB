@@ -1,13 +1,13 @@
 source("renv/activate.R")
 
-# Auto-load common packages
+
 packages <- c("dplyr", "stringr", "ggplot2", "readr", 
               "sf", "stringi", "janitor", "rsample",
               "patchwork", "scales", "lubridate",
-              "purrr", "forcasts","forecast", "targets", "tarchetypes",
+              "purrr", "forcats","forecast", "targets", "tarchetypes",
               "ggpubr", "collapse", "vegan", "tidyverse", "ggspatial",
               "tigris", "permute", "viridis", "FactoMineR",
-              "scales")  # Add your own here
+              "scales", )  
 
 for (pkg in packages) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
@@ -17,7 +17,7 @@ for (pkg in packages) {
   }
 }
 
-# Optional: message to confirm
+
 message("Packages auto-loaded: ", paste(packages, collapse = ", "))
 
 

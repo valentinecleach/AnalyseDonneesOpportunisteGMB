@@ -1,0 +1,55 @@
+#' Crée une maille d'une taille donnée
+#'
+#' @param bdd La base de donnee sur laquelle faire la 
+#' @param taille_en_km La longueur des cotes des mailles
+#'
+#' @return La base de donnee, avec la colonne en +
+#' @export
+#'
+#' @examples
+#' 
+creer_maille <- function(bdd, taille_en_km){
+  bdd <- transforme_carte(bdd)
+  bdd <- sf::st_transform(bdd, 2154)
+  
+  grid_spacing <- 1000 * taille_en_km
+  
+  Grid <- sf::st_make_grid(bdd, 
+                           cellsize = c(grid_spacing, grid_spacing), 
+                           square = TRUE)
+  Grid <- sf::st_sf(ID = seq_along(Grid), geometry = Grid)
+  Grid <- sf::st_transform(Grid, 2154)
+  
+  Grid <- sf::st_make_valid(Grid)
+  bdd <- sf::st_make_valid(bdd)
+  
+  nom_colonne <- paste0("Grid", taille_en_km,"km")
+  names(Grid)[1] <- nom_colonne
+  bdd <- sf::st_join(bdd, Grid, left=TRUE)
+  
+  return(bdd)
+}
+
+ajout_10x10_predetermine <- function(bdd = Total){
+  grille_10x10 <- sf::st_read(
+    paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
+  )
+  RegionBretagneConti <- sf::st_read(
+    paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
+  )
+  
+  bdd <- bdd %>%
+    transforme_carte()
+  grille_10x10 <- grille_10x10%>%
+    transforme_carte()
+  RegionBretagneConti <- RegionBretagneConti%>%
+    transforme_carte()
+  
+  grille_10x10 <- sf::st_intersection(grille_10x10, RegionBretagneConti)
+  
+  bdd <- grille_10x10 %>%
+    dplyr::select(CODE_10KM)%>%
+    sf::st_join(bdd, left = TRUE)
+  
+  return(bdd)
+}
