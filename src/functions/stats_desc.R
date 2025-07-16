@@ -16,21 +16,21 @@ repartition_espece <- function(bdd = Total, nom_ordre, repartition, date_min = p
   pour_titre2 = deparse(substitute(nom_ordre))
   
   bdd_filtre <- bdd %>%
-    filter(ordre == nom_ordre,
+    dplyr::filter(ordre == nom_ordre,
            date > params$date_min)
   
   grps <- fct_lump(bdd_filtre$nom_vernaculaire, prop = 0.03)
   
   if (length(unique(grps)) > 5) {
     bdd_filtre <- bdd_filtre %>%
-      mutate(nom_vernaculaire_grp = grps)
+      dplyr::mutate(nom_vernaculaire_grp = grps)
   } else {
     bdd_filtre <- bdd_filtre %>%
-      mutate(nom_vernaculaire_grp = nom_vernaculaire)
+      dplyr::mutate(nom_vernaculaire_grp = nom_vernaculaire)
   }
   
   p <- bdd_filtre %>%
-    mutate(nom_vernaculaire_grp = fct_infreq(nom_vernaculaire_grp)) %>% 
+    dplyr::mutate(nom_vernaculaire_grp = fct_infreq(nom_vernaculaire_grp)) %>% 
     ggplot(aes(x = {{ repartition }}, fill = nom_vernaculaire_grp)) +
     geom_bar(position = "dodge") +
     coord_flip()+
@@ -71,7 +71,7 @@ stats_observateur <- function(nom_obs, carte){
   
   # Date
   p1 <- Total %>%
-    filter(observateurs == toupper(nom_obs),
+    dplyr::filter(observateurs == toupper(nom_obs),
            date > params$date_min) %>%
     ggplot(aes(date)) +
     labs(title = "Repartition des dates",
@@ -88,7 +88,7 @@ stats_observateur <- function(nom_obs, carte){
   # Ordres
   p2 <- 
     Total %>%
-    filter(date > params$date_min,
+    dplyr::filter(date > params$date_min,
            observateurs == toupper(nom_obs)) %>%
     ggplot(aes(ordre,fill=ordre, color = ordre)) +
     geom_bar() +
@@ -103,8 +103,8 @@ stats_observateur <- function(nom_obs, carte){
   
   # Carte
   geo_obsteur <- Total %>% 
-    filter(date > params$date_min) %>%
-    filter(observateurs == toupper(nom_obs)) %>%
+    dplyr::filter(date > params$date_min) %>%
+    dplyr::filter(observateurs == toupper(nom_obs)) %>%
     dplyr::select(ordre,
                   date)
   p3 <- ggplot() +

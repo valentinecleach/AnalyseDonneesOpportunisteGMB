@@ -1,16 +1,12 @@
 ## 3. Representation cartographique des donnees
 
 ```{r, include=FALSE}
-source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
-
-wd <- set_wd()
-  
 set.seed(12345)
 
-source(paste0(wd$src,"/functions/stats_desc.R"))
-  
-Total <- st_read(paste0(wd$data,"Total.shp"))
-carte_bretagne <- st_read(paste0(wd$data,"masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
+Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
+
+carte_bretagne <- sf::st_read(paste0(wd$data,
+                                     "masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
   
 Total <- transform_Total()
 carte_bretagne <- transforme_carte(carte_bretagne)
@@ -29,12 +25,12 @@ Ils pourraient introduire des biais:\
 
 ```{r nombre-total-observateurs}
 Total %>%
-  filter(bdd_originale == "GeoNature")%>%
+  dplyr::filter(bdd_originale == "GeoNature")%>%
   summarize(nb_observateurs = n_distinct(observateurs))
 
 Total %>% 
-  filter(bdd_originale == "VisioNature")%>%
-  summarize(nb_observateurs = n_distinct(observateurs))
+  dplyr::filter(bdd_originale == "VisioNature")%>%
+  dplyr::summarize(nb_observateurs = n_distinct(observateurs))
 ```
 
 Pour GeoNature, il y a en tout 2778 observateurs qui peuvent etre une ou 2 personnes.
@@ -49,28 +45,28 @@ Nous cherchons les observateurs qui ont le plus contribue aux deux bases de donn
 
 ```{r lollipop-plot-observateurs}
 Total_summary_GN <- Total %>%
-  filter(bdd_originale == "GeoNature")%>%
-  group_by(observateurs) %>%
-  summarize(nbr_obs_obr = n()) %>%
-  filter(nbr_obs_obr > 500) %>%
-  arrange(nbr_obs_obr)
+  dplyr::filter(bdd_originale == "GeoNature")%>%
+  dplyr::group_by(observateurs) %>%
+  dplyr::summarize(nbr_obs_obr = n()) %>%
+  dplyr::filter(nbr_obs_obr > 500) %>%
+  dplyr::arrange(nbr_obs_obr)
 
 Total_summary_GN$observateurs<- factor(Total_summary_GN$observateurs,
                                        levels = Total_summary_GN$observateurs)
 
 Total_summary_VN <- Total %>%
-  filter(bdd_originale == "VisioNature")%>%
-  group_by(observateurs) %>%
-  summarize(nbr_obs_obr = n()) %>%
-  filter(nbr_obs_obr > 500) %>%
-  arrange(nbr_obs_obr)
+  dplyr::filter(bdd_originale == "VisioNature")%>%
+  dplyr::group_by(observateurs) %>%
+  dplyr::summarize(nbr_obs_obr = n()) %>%
+  dplyr::filter(nbr_obs_obr > 500) %>%
+  dplyr::arrange(nbr_obs_obr)
 
 Total_summary_VN$observateurs <- factor(Total_summary_VN$observateurs,
                                       levels = Total_summary_VN$observateurs)
 
 Total_summary_GN%>%
-  filter(!is.na(observateurs))%>%
-  ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
+  dplyr::filter(!is.na(observateurs))%>%
+  ggplot2::ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
   geom_point() + 
   geom_segment( aes(x=observateurs, xend=observateurs, 
                     y=0, yend=nbr_obs_obr))+
@@ -81,8 +77,8 @@ Total_summary_GN%>%
   theme(axis.text=element_text(size=6))
 
 Total_summary_VN%>%
-  filter(!is.na(observateurs))%>%
-  ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
+  dplyr::filter(!is.na(observateurs))%>%
+  ggplot2::ggplot(aes(x=observateurs, y=nbr_obs_obr)) +
   geom_point() + 
   geom_segment( aes(x=observateurs, xend=observateurs, 
                     y=0, yend=nbr_obs_obr))+
