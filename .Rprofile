@@ -6,7 +6,7 @@ packages <- c("dplyr", "stringr", "ggplot2", "readr",
               "patchwork", "scales", "lubridate",
               "purrr", "forcasts","forecast", "targets", "tarchetypes",
               "ggpubr", "collapse", "vegan", "tidyverse", "ggspatial",
-              "tigris", "permute")  # Add your own here
+              "tigris", "permute", "viridis")  # Add your own here
 
 for (pkg in packages) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
@@ -25,3 +25,6 @@ source("src/functions/analysedonnees.R")
 source("src/functions/cartographie.R")
 source("src/functions/GLM.R")
 source("src/functions/stats_desc.R")
+
+VN <- "VisioNature"
+GN <- "GeoNature"

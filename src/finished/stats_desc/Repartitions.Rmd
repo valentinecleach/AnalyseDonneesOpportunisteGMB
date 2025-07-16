@@ -12,33 +12,27 @@ editor_options:
     wrap: sentence
 ---
 
-
 # Statistiques descriptives
 
 ```{r packages-imports, include = FALSE}
-
-source("~/work/AnalyseDonneesOpportunisteGMB/src/functions/divers.R")
-wd <- set_wd()
-source("~/work/AnalyseDonneesOpportunisteGMB/src/functions/stats_desc.R")
-
 # Graine aleatoire
 set.seed(12345)
 
 # Importations
-Total <- st_read(paste0(wd$data,"Total.shp"))
+Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
 
 ```
 
 
 ```{r, inlcude = FALSE} 
 Total <- Total %>%
-  mutate_at(c("bdd_rgn", 
+  dplyr::mutate_at(c("bdd_rgn", 
               "ett_blg", "tchnq_b", 
               "communs", "obsrvtr", 
               "famille", "ordre", 
               "nm_vrnc", "nom_vld"), 
             .funs = as.factor)%>%
-  rename(bdd_originale = bdd_rgn,
+  dplyr::rename(bdd_originale = bdd_rgn,
          etat_biologique = ett_blg,
          technique_observation = tchnq_b,
          nom_vernaculaire = nm_vrnc,
@@ -52,9 +46,6 @@ couleur  <- c("Carnivora" = "orangered3",
               "Eulipotyphla" = "bisque4", 
               "Lagomorpha" = "#CC8C3C", 
               "Rodentia" = "darkorange")
-
-VN <- "VisioNature"
-GN <- "GeoNature"
 ```
 
 Toutes nos donnees concernent uniquement la Bretagne continentale, hors Loire-Atlantique.
@@ -63,9 +54,9 @@ Toutes nos donnees concernent uniquement la Bretagne continentale, hors Loire-At
 
 ```{r repartition-etat-bio-techniques, warning = FALSE, echo=FALSE, out.width="50%"}
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == VN)%>%
-  ggplot(aes(technique_observation, fill=etat_biologique))+
+  ggplot2::ggplot(aes(technique_observation, fill=etat_biologique))+
   geom_bar(position="dodge")+
   theme_bw()+
   scale_fill_grey(start = 0.2,
@@ -75,9 +66,9 @@ Total%>%
        subtitle = paste(VN))
 
 Total%>%
-  filter(bdd_originale == GN,
+  dplyr::filter(bdd_originale == GN,
          date > params$date_min)%>%
-  ggplot(aes(technique_observation, 
+  ggplot2::ggplot(aes(technique_observation, 
              fill=etat_biologique))+
   geom_bar(position="dodge")+
   theme_bw()+
@@ -92,9 +83,9 @@ Nous remarquons toujours beaucoup de donnees de VisioNature dont la technique d'
 
 ```{r repartition-etat-bio-ordes, warning = FALSE, echo=FALSE, out.width="50%"}
 Total%>%
-  filter(bdd_originale == VN,
+  dplyr::filter(bdd_originale == VN,
          date > params$date_min)%>%
-  ggplot(aes(technique_observation, fill=ordre))+
+  ggplot2::ggplot(aes(technique_observation, fill=ordre))+
   geom_bar(position="dodge")+
   theme_bw()+
   labs(title = "2a. Repartition de l'etat biologique selon les ordres",
@@ -102,9 +93,9 @@ Total%>%
   scale_fill_manual(values = couleur, name = "Ordre")
 
 Total%>%
-  filter(bdd_originale == GN,
+  dplyr::filter(bdd_originale == GN,
          date > params$date_min)%>%
-  ggplot(aes(technique_observation, 
+  ggplot2::ggplot(aes(technique_observation, 
              fill=ordre))+
   geom_bar(position="dodge")+
   theme_bw()+
@@ -131,9 +122,9 @@ C'est peut-etre du au fort interet de GMB pour la loutre, mais ce n'est pas tant
 
 ```{r repartition-des-ordes, echo=FALSE, out.width="50%"}
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == VN)%>%
-  ggplot(aes(ordre, fill=ordre, color = ordre))+
+  ggplot2::ggplot(aes(ordre, fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3a. Repartition des differents ordres",
        subtitle = paste(VN))+
@@ -142,9 +133,9 @@ Total%>%
   scale_color_manual(values = couleur)
 
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == GN)%>%
-  ggplot(aes(ordre,fill=ordre, color = ordre))+
+  ggplot2::ggplot(aes(ordre,fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3b. Repartition des differents ordres",
        subtitle = paste(GN))+
@@ -154,8 +145,8 @@ Total%>%
 
 
 Total%>%
-  filter(date > params$date_min)%>%
-  ggplot(aes(ordre, fill=ordre, color = ordre))+
+  dplyr::filter(date > params$date_min)%>%
+  ggplot2::ggplot(aes(ordre, fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3c. Repartition des differents ordres",
        subtitle="Bretagne Entiere")+
@@ -164,10 +155,10 @@ Total%>%
   scale_color_manual(values = couleur)
 
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == GN,
          cd_nom != 60630)%>%
-  ggplot(aes(ordre, fill=ordre, color = ordre))+
+  ggplot2::ggplot(aes(ordre, fill=ordre, color = ordre))+
   geom_bar()+
   labs(title="3d. Repartition des differents ordres",
        subtitle = paste(GN, "sans la loutre"))+
@@ -182,10 +173,10 @@ Ca ne change pas drastiquement la distribution.
 ```{r repartition-especes, fig.width=10, fig.height=7}
 
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == "GeoNature")%>%
   count(nom_vernaculaire, ordre, sort = TRUE) %>%
-  ggplot(aes(x = reorder(nom_vernaculaire, n), 
+  ggplot2::ggplot(aes(x = reorder(nom_vernaculaire, n), 
              y = n, fill = ordre, color = ordre)) +
   geom_col() +
   coord_flip() +
@@ -203,9 +194,9 @@ Total%>%
 
 
 Total%>%
-  filter(date > params$date_min)%>%
-  count(nom_vernaculaire, ordre, sort = TRUE) %>%
-  ggplot(aes(x = reorder(nom_vernaculaire, n), 
+  dplyr::filter(date > params$date_min)%>%
+  dplyr::count(nom_vernaculaire, ordre, sort = TRUE) %>%
+  ggplot2::ggplot(aes(x = reorder(nom_vernaculaire, n), 
              y = n, fill = ordre, color = ordre)) +
   geom_col() +
   coord_flip() +
@@ -229,9 +220,9 @@ Peut-etre lie a la periode pendant laquelle les BDD sont remplies.
 
 ```{r}
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == VN)%>%
-  ggplot(aes(date, color = ordre))+
+  ggplot2::ggplot(aes(date, color = ordre))+
   labs(title=paste("5a. Fréquence des observations dans le temps depuis", params$date_min),
        subtitle = paste(VN))+ 
   facet_grid(ordre ~ .)+
@@ -240,8 +231,8 @@ Total%>%
   scale_colour_manual(values=couleur)
 
 Total%>%
-  filter(date > params$date_min)%>%
-  ggplot(aes(date, color = ordre))+
+  dplyr::filter(date > params$date_min)%>%
+  ggplot2::ggplot(aes(date, color = ordre))+
   labs(title=paste("5b. Frequence des observations dans le temps depuis", params$date_min),
        subtitle = "Les bases de donnee GeoNature et VisioNature reunis")+ 
   facet_grid(ordre ~ .)+
@@ -251,9 +242,9 @@ Total%>%
   
   
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == GN)%>%
-  ggplot(aes(date, color = ordre))+
+  ggplot2::ggplot(aes(date, color = ordre))+
   labs(title=paste("5c. Frequence des observations dans le temps depuis", params$date_min),
        subtitle = paste(GN))+ 
   facet_grid(ordre ~ .)+
@@ -274,9 +265,9 @@ Peut-etre qu'on pourra ponderer la dessus?
 
 ```{r nmbre-donnees, warning = FALSE, echo=FALSE, out.width="50%"}
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == VN)%>%
-  ggplot(aes(date, nombre))+
+  ggplot2::ggplot(aes(date, nombre))+
   geom_point()+
   theme_bw()+
   scale_fill_grey(start = 0.2,
@@ -286,9 +277,9 @@ Total%>%
        y="Nombre d'individus")
 
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == GN)%>%
-  ggplot(aes(date, nombre))+
+  ggplot2::ggplot(aes(date, nombre))+
   geom_point()+
   theme_bw()+
   scale_fill_grey(start = 0.2,
@@ -308,14 +299,14 @@ Dans "other" il y a toutes les especes qui representent moins de 3% des observat
 ```{r, echo=FALSE, out.width="50%"}
 
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == VN)%>%
-  mutate(
+  dplyr::mutate(
     year = as.numeric(format(date, "%Y")),
     year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
     nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
   ) %>%
-  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  ggplot2::ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
   geom_bar(position = "fill") +
   labs(
     x = "Periode",
@@ -328,15 +319,15 @@ Total%>%
   scale_fill_viridis_d(labels = label_wrap(40))+
   theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
 
-  Total%>%
-  filter(date > params$date_min,
+Total%>%
+  dplyr::filter(date > params$date_min,
          bdd_originale == GN)%>%
-  mutate(
+  dplyr::mutate(
     year = as.numeric(format(date, "%Y")),
     year_group = cut(year, breaks = seq(1980, max(year), by = 5), right = FALSE),
     nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
   ) %>%
-  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  ggplot2::ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
   geom_bar(position = "fill") +
   labs(
     x = "Periode",
@@ -355,14 +346,14 @@ Total%>%
 # Depuis 2010
 
 Total%>%
-  filter(date > params$date_min,
+  dplyr::filter(date > params$date_min,
          bdd_originale == VN)%>%
-  mutate(
+  dplyr::mutate(
     year = as.numeric(format(date, "%Y")),
     year_group = cut(year, breaks = seq(1980, max(year), by = 2), right = FALSE),
     nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
   ) %>%
-  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  ggplot2::ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
   geom_bar(position = "fill") +
   labs(
     title = "7c. Repartition des differentes especes observes depuis 2010",
@@ -378,17 +369,17 @@ Total%>%
 
 ```{r}
 Total%>%
-  filter(date > params$date_min)%>%
-  filter(bdd_originale == GN,
+  dplyr::filter(date > params$date_min)%>%
+  dplyr::filter(bdd_originale == GN,
          date > as.Date("2010-01-01")) %>%
-  mutate(
+  dplyr::mutate(
     year = as.numeric(format(date, "%Y")),
     year_group = cut(year, 
                      breaks = seq(1980, max(year), by = 2), 
                      right = FALSE),
     nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
   ) %>%
-  ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
+  ggplot2::ggplot(aes(year_group, fill = nom_vernaculaire_grp)) +
   geom_bar(position = "fill") +
   labs(
     title = "7d. Repartition des differentes especes observes depuis 2010",
@@ -418,7 +409,7 @@ Nous n'observons pas quelque chose de similaire chez VisioNature.
 ```{r}
 
 Total%>%
-  ggplot(aes(as.factor(wday(date, 
+  ggplot2::ggplot(aes(as.factor(wday(date, 
                             week_start = getOption("lubridate.week.start", 1)))))+
   labs(title="8. Barplot des observation selon le jour de la semaine",
        y="Nombre d'observations",
@@ -435,9 +426,9 @@ Total%>%
 
 
 Total %>%
-  filter(date > params$date_min)%>%
-  mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)%>%
-  ggplot(aes(jour_annee)) +
+  dplyr::filter(date > params$date_min)%>%
+  dplyr::mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)%>%
+  ggplot2::ggplot(aes(jour_annee)) +
   labs(title="9. Frequence des observations selon le jour de l'annee",
        y="Proportion",
        x="Jour de l'annee")+
@@ -445,8 +436,8 @@ Total %>%
 
 
 Total%>%
-    filter(date > params$date_min)%>%
-    ggplot(aes(factor(month(date))))+
+    dplyr::filter(date > params$date_min)%>%
+    ggplot2::ggplot(aes(factor(month(date))))+
     labs(title="10. Barplot des observation selon le mois",
          y="Nombre d'observations",
          x="Mois")+ 
