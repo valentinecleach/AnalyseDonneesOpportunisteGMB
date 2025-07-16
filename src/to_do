@@ -2,19 +2,14 @@ To do:
 
 Priorité
 
+- LIRE DOCUMENTATION
+
+- corriger, j'ai des endroits en trop dans ma carte de bretagne.
+- famille de paysage, c'est vrmt moche sans les accents.
+
 - discuter du reste des unkown avec Franck
 
-- Ajouter le code de l'autre jour
-
-- finir corriger code
- 
 - faire les GLM comme sur la feuille.
- 
-
-- faire fonctions pour proportion par rapport a x dans le temps 
-calc_prop <- function(parrapportaquoi, unitedetemps){
-
-}
 
 Relire cours de GLM : préparer fiche étape quoi regarder, différents modèles, etc...
 
@@ -28,8 +23,6 @@ Relire cours de GLM : préparer fiche étape quoi regarder, différents modèles, et
  common birds in Denmark
 
 - faire une fonction qui adapte un code couleur (dÃ©gradÃ© de la couleur de l'ordre)
-
-- corriger le problÃ¨me avec le package
 
 - code couleur partout
 - numÃ©roter les figures

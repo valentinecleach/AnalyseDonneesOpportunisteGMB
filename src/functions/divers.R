@@ -20,8 +20,8 @@ set_wd <- function(){
 #'
 #' @examples
 #' 
-transform_Total <- function(){
-  Total <- Total %>%
+transform_Total <- function(bdd = Total){
+  bdd <- bdd %>%
     mutate_at(c("bdd_rgn", 
                 "ett_blg", "tchnq_b", 
                 "communs", "obsrvtr", 
@@ -34,7 +34,25 @@ transform_Total <- function(){
            nom_vernaculaire = nm_vrnc,
            nom_valide = nom_vld,
            observateurs = obsrvtr)
-  return(Total)
+  bdd <- bdd %>%
+    mutate_at(c(if('Grid2km' %in% names(.)) 'Grid2km',
+                if('Grid5km' %in% names(.)) 'Grid5km',
+                if('Grd10km' %in% names(.)) 'Grd10km',
+                if('Grd20km' %in% names(.)) 'Grd20km',
+                if('pysg_nm' %in% names(.)) 'pysg_nm',
+                if('pysg_ID' %in% names(.)) 'pysg_ID',
+                if('fmll_py' %in% names(.)) 'fmll_py'),
+              as.factor) %>%
+    rename_with(
+      ~ case_when(
+        . == "Grd10km" ~ "Grid10km",
+        . == "Grd20km" ~ "Grid20km",
+        . == "pysg_ID" ~ "paysage_ID",
+        . == "pysg_nm" ~ "paysage_nom",
+        . == "fmll_py" ~ "famille_paysage",
+        TRUE ~ .))
+  
+  return(bdd)
 }
 
 #' Change les CRS de la carte pour ce qu'on veuilles

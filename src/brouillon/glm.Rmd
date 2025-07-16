@@ -1,0 +1,343 @@
+---
+title: "Debuts GLM"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+params:
+  date_min: '2010-01-01'
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r packages, include = FALSE}
+#' Packages
+library(corrplot)
+library(targets)
+library(tarchetypes)
+library(ggpubr)   
+library(tigris)
+library(permute)
+library(ggfortify)
+library(car)
+```
+
+#### [Mise en place]{.underline}
+
+
+```{r, include = FALSE}
+# Importations
+Total <- st_read(paste0(wd$data,"Total2.shp"))
+```
+
+```{r modif-total}
+Total <- transform_Total(bdd = Total)
+```
+
+```{r}
+Total%>%
+  filter(date > params$date_min)%>%
+  mutate(
+    year = as.numeric(format(date, "%Y")),
+    nom_vernaculaire_grp = fct_lump(nom_vernaculaire, prop = 0.03)
+  ) %>%
+  ggplot(aes(year, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Période",
+    title = "7a. Répartition des differentes espèces observés depuis 1980",
+    y = "Proportion",
+    fill = "Espèce"
+  ) +
+  theme_minimal()+
+  scale_fill_viridis_d(labels = label_wrap(40))+
+  coord_flip()
+```
+
+#### [Regression proportion de lapin vs chevreuil par 10km\^2.]{.underline}
+
+```{r}
+bdd_reg <- tab_glm(bdd = Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057,
+                   taillegrid = "Grid10km")
+bdd_reg = suppression_prop01(bdd_reg) # Ici on supprime les sites ou le chevreuil ou le lapin n'est pas vu.
+
+```
+
+Ici on cherche la tendance du Lapin de garenne en prenant le Chevreuil comme espece de reference.
+Les sites choisis ici sont des mailles de 10km, dans lequel on calcule la proportion de lapin par rapport au chevreuil au fil des annees.
+
+```{r, include = FALSE}
+Total %>%
+  filter(cd_nom == 61714) %>%
+  select(nom_vernaculaire) %>%
+  st_drop_geometry() %>%
+  head(1)
+```
+
+```{r}
+bdd_reg %>%
+  ggplot() +
+  geom_histogram(aes(proportion_interet)) +
+  labs(title = "Repartition des proportions lapins par rapport au chevreuil",
+       y = "Proportion") + theme_bw()
+
+```
+
+On remarque qu'il y a une grande partie de zero -\> On pourra vouloir utiliser des modeles a inflation 0.
+
+
+
+```{r}
+plot(x = bdd_reg$year, 
+     y = bdd_reg$proportion_interet)
+
+
+# Interactions entre Variables quantitatives
+col <- colorRampPalette(c("#990000","#990000", "#eeeeee","#05600b","#05600b"))
+corrplot(cor(bdd_reg[,-c(3:4)], bdd_reg[,-c(3:4)]), 
+         method="color", col=col(200),  
+         type="upper", order="hclust", 
+         addCoef.col = "black", # Ajout du coefficient de correlation
+         tl.col="black", tl.srt=45, #Rotation des etiquettes de textes
+         # Combiner avec le niveau de significativite
+          sig.level = 0.01, insig = "blank", 
+         # Cacher les coefficients de correlation sur la diagonale
+         diag=FALSE 
+         )
+
+alias(lm(data = bdd_reg, 
+           proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+Grid10km))
+vif(lm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km+famille_paysage_max+Grid10km))
+
+# Interactions entre Variables qualitatives
+interaction.plot(bdd_reg$famille_paysage_max,
+                 as.factor(bdd_reg$Grid10km),
+                 bdd_reg$proportion_interet,
+                 main = "Interaction entre la grille et la famille de paysage")
+# Beaucoup d'interactions ce qui est logique.
+
+interaction.plot(bdd_reg$famille_paysage_max,
+                 as.factor(bdd_reg$clust_max),
+                 bdd_reg$proportion_interet,
+                 main = "Interaction entre les clusters et la famille de paysage")
+# Un peu d'interaction entre les clusters et les familles de paysage.
+
+```
+
+On a VIF de famille_paysage_max > 5, donc on doit retirer cette variable.
+
+
+Il y a pas mal d'interaction entre les facteurs (logique) montre par le fait que les courbes sont pas parraleles.
+
+#### [Year en variable quantitative discrete:]{.underline}
+
+
+```{r}
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year*Grid10km+Y_10km+X_10km+famille_paysage_max+Grid10km)
+summary(reg)
+autoplot(reg)
+```
+
+```{r}
+summary(glm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km+Grid10km))
+```
+
+
+Ici, l'annee est significative.
+Les residus ne sont pas tres aleatoire -\> Encore des choses a expliquer.
+On a un QQ-plot pas top.
+Les residus ne sont pas du bruit blanc gaussien.
+
+Pas de donnees qui sont leviers.
+
+```{r}
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+famille_paysage_max)
+summary(reg)
+autoplot(reg)
+```
+
+La famille de paysage n'est pas significatif, mais AIC plus faible, donc ca reste interessant d'ajouter la famille de paysage dans l'analyse.
+
+Meilleur QQ-plot, et residus.
+
+Certains individus sont atypiques, ils ont un effet levier important.
+Cependant, ils ont une distance de Cook assez faible/normal, donc on n'a pas a s'inquieter.
+Ils concernent des sites de Paysage associe a la presence d'eau.
+
+
+```{r}
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year*famille_paysage_max)
+summary(reg)
+autoplot(reg)
+```
+
+Ici tout est significatif, et on a un AIC plus faible.
+On a bien fait d'ajouter l'interaction entre l'annee et la famille de paysage.
+
+On ne remarque pas de structure tres tres forte des residus, mais plus que la regression precedente.
+L'individu 2 a un tres fort effet levier ainsi que quelques autres individus.
+
+```{r}
+bdd_reg$clust_max <- as.factor(bdd_reg$clust_max)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year + clust_max)
+summary(reg)
+autoplot(reg)
+```
+
+Le cluster 3 n'est pas significative et ne semble rien ajouter. 
+Cependant les cluster 1 et 2 le sont, mais n'ajoutent pas tant de choses.
+
+Essayer sans le 3 dans clust_max et 3 dans la bdd Total.
+```{r}
+bdd_reg <- bdd_reg %>%
+  filter(clust_max != 3) %>%
+  mutate(clust_max = as.factor(clust_max))
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year + clust_max)
+summary(reg)
+autoplot(reg)
+BIC(reg)
+```
+On gagne bcp deja a enlever les valeurs dont le cluster 3 est celui le plus present. On enleve peut etre trop de valeurs.
+
+
+```{r}
+bdd_reg <- tab_glm(bdd = (Total %>% filter(clust != 3)), 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057,
+                   taillegrid = "Grid10km")
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year + clust_max)
+
+summary(reg)
+BIC(reg)
+```
+Tout est significatif. Les mailles qui sont principalement observe par des personnes du cluster 2 ont moins d'observation de lapin que ceux du cluster 1 en moyenne.
+
+```{r}
+bdd_reg <- tab_glm(bdd = (Total %>% filter(clust != 3)), 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057,
+                   taillegrid = "Grid10km")
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year)
+
+summary(reg)
+```
+C'est plus interessant d'inclure le cluster.
+
+```{r}
+bdd_reg <- tab_glm(bdd = (Total %>% filter(clust != 3)), 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057,
+                   taillegrid = "Grid10km")
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year*clust_max)
+
+summary(reg)
+```
+On remarque qu'il y a bien plus de proportion de lapin dans le cluster 2 si l'on retire l'effet de ce cluster et de l'annee.. Etonnant.
+
+
+```{r}
+bdd_reg <- tab_glm(bdd = (Total %>% filter(clust != 3)), 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057,
+                   taillegrid = "Grid10km")
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year*famille_paysage_max+clust_max)
+
+summary(reg)
+autoplot(reg)
+```
+Parmi seul le cluster 2:
+```{r}
+bdd_reg <- tab_glm(bdd = (Total %>% filter(clust == 2)), 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057,
+                   taillegrid = "Grid10km")
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+famille_paysage_max)
+
+summary(reg)
+autoplot(reg)
+```
+Globalement, peu importe ce qu'on essaye c'est pas super.
+
+
+##### Retours a tous les clusters
+
+```{r}
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year*clust_max)
+summary(reg)
+autoplot(reg)
+```
+
+#### [Year en variable qualitative:]{.underline}
+
+```{r}
+bdd_reg_yearquali <- bdd_reg %>%
+  mutate(year = as.factor(year))
+
+reg <- glm(data = bdd_reg_yearquali, 
+           proportion_interet ~ year)
+summary(reg)
+autoplot(reg)
+
+reg <- glm(data = bdd_reg_yearquali, 
+           proportion_interet ~ year+famille_paysage_max)
+summary(reg)
+autoplot(reg)
+
+```
+
+A continuer: year\^2, clusters
+
+```{r}
+reg1 <- glm(data = bdd_reg, 
+           proportion_interet ~ year + famille_paysage_max:year)
+reg2 <- glm(data = bdd_reg, 
+           proportion_interet ~ I(year^2) + year + famille_paysage_max:year)
+
+AIC(reg1); AIC(reg2)
+BIC(reg1); BIC(reg2)
+# Niveau AIC/BIC y'a pas une grosse difference. BIC prefere moins de var. et AIC l'inverse donc logique, mais pas de preference majeure. 
+
+autoplot(reg1)
+autoplot(reg2)
+
+```
+
+On ne dirait pas qu'il y a qqe chose de different entre ces deux modeles.
+
+
+On voit surtout une decroissance significative dans les dernieres annees.
+
+
+
+
+```{r}
+# #library(glmmTMB)
+# glmmTMB(data = bdd_reg,
+#         proportion_interest ~ year, 
+#         family = "nbinom2"
+#         )
+
+```

@@ -8,6 +8,13 @@ set.seed(12345)
 Total <- st_read(paste0(wd$data,"derived/Total.shp"))
 Total <- transform_Total()
 
+diro <- st_read(paste0(wd$data,"derived/diro.shp"))
+
+# Total : 160991
+# DIR Ouest : 26129
+
+26129/160991
+
 rm(list=setdiff(ls(), "Total"))
 
 #### Nettoyage de donnees ####
@@ -40,7 +47,13 @@ rmarkdown::render(paste0(wd$src,
 
 #### Regression ####
 
+rmarkdown::render(paste0(wd$src, 
+                         "finished/models/glm.Rmd"), 
+                  output_file = paste0(wd$output, 
+                                       "models/glm/debuts.html"))
 
+
+rmarkdown::render(paste0(wd$src, "finished/models/glm.Rmd"))
 
 
 
