@@ -4,13 +4,12 @@ Priorité
 
 - discuter du reste des unkown avec Franck
 
-Taille des mailles : 
-- classif supervisé sur les mailles (cluster) selon la géométrie?
-  -> peut etre mettre coordonnées x et y séparément ducoup
-- courbe ROC? 
-  en comparant les différentes courbes ROC pour 2km, 5km, 10km, 20km...
-  ---> ca va pas marcher je crois?
+- Ajouter le code de l'autre jour
 
+- finir corriger code
+ 
+- faire les GLM comme sur la feuille.
+ 
 
 - faire fonctions pour proportion par rapport a x dans le temps 
 calc_prop <- function(parrapportaquoi, unitedetemps){

@@ -3,7 +3,8 @@ source("src/functions/divers.R")
 
 
 # Auto-load common packages
-packages <- c("dplyr", "stringr", "ggplot2", "readr", "sf")  # Add your own here
+packages <- c("dplyr", "stringr", "ggplot2", "readr", 
+              "sf", "stringi")  # Add your own here
 
 for (pkg in packages) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
