@@ -238,8 +238,11 @@ res.HCPC <- FactoMineR::HCPC(res.PCA,
 Observateurs_clust <- res.HCPC$data.clust %>%
   dplyr::mutate(observateurs = Observateurs$observateurs)
 
+View(Observateurs_clust)
+
 Total <- Total %>%
   left_join(Observateurs_clust, by = "observateurs")
+
 ```
 
 ```{r}

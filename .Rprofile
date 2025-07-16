@@ -6,7 +6,8 @@ packages <- c("dplyr", "stringr", "ggplot2", "readr",
               "patchwork", "scales", "lubridate",
               "purrr", "forcasts","forecast", "targets", "tarchetypes",
               "ggpubr", "collapse", "vegan", "tidyverse", "ggspatial",
-              "tigris", "permute", "viridis", "FactoMineR")  # Add your own here
+              "tigris", "permute", "viridis", "FactoMineR",
+              "scales")  # Add your own here
 
 for (pkg in packages) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
