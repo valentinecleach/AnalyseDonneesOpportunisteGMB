@@ -2,20 +2,20 @@
 ```{r, include=FALSE}
 set.seed(12345)
 
-Total <- st_read(paste0(wd$data,"derived/Total.shp"))
+Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
 Total <- transform_Total()
+Total_notsf <- Total %>%
+  sf::st_drop_geometry()
 ```
 
 
 # Ordres
 
 ```{r Creation-BDD-Observateurs}
-Total_notsf <- Total %>%
-  sf::st_drop_geometry
-
 nb_observations <- Total_notsf %>%
   dplyr::group_by(observateurs) %>%
-  dplyr::summarise(total_obs = n(), .groups = "drop")
+  dplyr::summarise(total_obs = n(), 
+                   .groups = "drop")
 
 max_technique <- Total_notsf %>%
   dplyr::group_by(observateurs) %>%
@@ -29,19 +29,33 @@ max_bdd <- Total_notsf %>%
   dplyr::group_by(observateurs) %>%
   dplyr::summarise(bdd_max = collapse::fmode(bdd_originale))
 
+```
 
+```{r}
 Observateurs <- nb_observations %>%
-  dplyr::left_join(max_technique, by = "observateurs") %>%
-  dplyr::left_join(max_etat_bio, by = "observateurs") %>%
-  dplyr::left_join(max_bdd, by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Carnivora"), by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Eulipotyphla"), by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Lagomorpha"), by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Rodentia"), by = "observateurs")
+  dplyr::left_join(max_technique, 
+                   by = "observateurs") %>%
+  dplyr::left_join(max_etat_bio, 
+                   by = "observateurs") %>%
+  dplyr::left_join(max_bdd, 
+                   by = "observateurs") %>%
+  dplyr::left_join(nb_ordre(nom_ordre = "Carnivora"), 
+                   by = "observateurs") %>%
+  dplyr::left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), 
+                   by = "observateurs") %>%
+  dplyr::left_join(nb_ordre(nom_ordre = "Eulipotyphla"), 
+                   by = "observateurs") %>%
+  dplyr::left_join(nb_ordre(nom_ordre = "Lagomorpha"), 
+                   by = "observateurs") %>%
+  dplyr::left_join(nb_ordre(nom_ordre = "Rodentia"), 
+                   by = "observateurs")
+```
 
+```{r}
 Observateurs <- Observateurs %>%
-  dplyr::select(observateurs, total_obs, tech_obs_max, etat_bio_max, bdd_max,
+  dplyr::select(observateurs, 
+                total_obs, tech_obs_max, 
+                etat_bio_max, bdd_max,
          nb_carnivora, nb_cetartiodactyla, 
          nb_eulipotyphla, nb_lagomorpha, nb_rodentia)
 ```
@@ -165,33 +179,47 @@ for (i in 1:nrow(liste_cd_noms)) {
     dplyr::summarise(nbr = n(), .groups = "drop") %>%
     dplyr::mutate(nbr = ifelse(is.na(nbr), 0, nbr))
   
-  nom_espece <- Total %>%
-    dplyr::filter(cd_nom == cd_nom_value) %>%
-    dplyr::summarise(nom = first(nom_vernaculaire))
-  nom <- nom_espece$nom
-  nom <- paste0("nb_", gsub(" ", "", nom))
+    nom_espece <- Total %>%
+      dplyr::filter(cd_nom == cd_nom_value) %>%
+      dplyr::summarise(nom = first(nom_vernaculaire))
   
-  nb_o <- nb_o %>% dplyr::rename({{nom}} := nbr)
+    nom <- nom_espece$nom
+    nom <- paste0("nb_", gsub(" ", "", nom))
   
-  Observateurs_espece <- Observateurs_espece %>%
-    dplyr::left_join(nb_o, by = "observateurs")
+    nb_o <- nb_o %>% 
+      dplyr::rename({{nom}} := nbr)
+  
+    Observateurs_espece <- Observateurs_espece %>%
+      dplyr::left_join(nb_o, by = "observateurs")
 }
 
+```
+
+```{r}
+Observateurs_espece <- Observateurs_espece%>%
+  dplyr::select(!starts_with("geometry"))
+
 Observateurs_espece[,6:28] <- Observateurs_espece[,6:28] %>% 
-  dplyr::replace(is.na(.), 0)
+  replace(is.na(.), 0)
 
 Observateurs_espece$Shannon <- vegan::diversity(Observateurs_espece[,6:28])
+```
 
+```{r}
 Observateurs_espece$Pielou <- Observateurs_espece$Shannon / log(vegan::specnumber(Observateurs_espece[,6:28]))
 Observateurs_espece <- Observateurs_espece %>%
-  mutate(Pielou = ifelse(Shannon == 0, 0, Pielou))
+  dplyr::mutate(Pielou = ifelse(Shannon == 0, 0, Pielou))
+```
 
+```{r}
 colonne <- as.numeric(Observateurs_espece[[2]])
 diviseur <- as.data.frame(matrix(rep(colonne, 23), 
                                  ncol = 23, 
                                  nrow = nrow(Observateurs_espece), 
                                  byrow = FALSE))
+```
 
+```{r}
 Observateurs_espece[paste0(names(Observateurs_espece)[6:28], 
                           "_prop")] <- Observateurs_espece[6:28] / diviseur
 ```
@@ -210,14 +238,8 @@ res.HCPC <- FactoMineR::HCPC(res.PCA,
 Observateurs_clust <- res.HCPC$data.clust %>%
   dplyr::mutate(observateurs = Observateurs$observateurs)
 
-
-Total_clust <- Total %>%
-  dplyr::mutate(clust = case_when(
-    Observateurs_clust$clust == 1 ~ 1,
-    Observateurs_clust$clust == 2 ~ 2,
-    Observateurs_clust$clust == 3 ~ 3,
-    .default = NA
-  ))
+Total <- Total %>%
+  left_join(Observateurs_clust, by = "observateurs")
 ```
 
 ```{r}

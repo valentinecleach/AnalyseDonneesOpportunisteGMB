@@ -31,7 +31,9 @@ rmarkdown::render(paste0(wd$src, "finished/stats_desc/Observateurs.Rmd"),
 #### Classification ####
 
 rmarkdown::render(paste0(wd$src, "finished/acp/Ordres.Rmd"), 
-                  output_file = paste0(wd$output, "acp/Ordres.html"))
+                  output_file = paste0(wd$output, 
+                                       "acp/Ordres.html")
+)
 
 
 

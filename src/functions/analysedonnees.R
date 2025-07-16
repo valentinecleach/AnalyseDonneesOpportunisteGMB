@@ -9,22 +9,25 @@
 #' 
 nb_ordre <- function(nom_ordre){
   nb_o <- Total %>%
-    filter(ordre == nom_ordre) %>%
-    group_by(observateurs) %>%
-    summarise(nbr = n(), .groups = "drop")
+    dplyr::filter(ordre == nom_ordre) %>%
+    dplyr::group_by(observateurs) %>%
+    dplyr::summarise(nbr = n(), 
+                     .groups = "drop")
   
-  nom = paste("nb_",tolower(nom_ordre), sep = "")
+  nom = paste("nb_", 
+              tolower(nom_ordre), 
+              sep = "")
   nb_o <- nb_o %>% 
-    rename_at("nbr",~nom)
+    dplyr::rename_at("nbr", ~nom)
   
   return(nb_o)
 }
 
 repartition_espece_cluster <- function(bdd = Total, cluster){
   bdd %>%
-    filter(clust == cluster) %>%
-    count(nom_vernaculaire, sort = TRUE) %>%
-    ggplot(aes(x = reorder(nom_vernaculaire, n), 
+    dplyr::filter(clust == cluster) %>%
+    dplyr::count(nom_vernaculaire, sort = TRUE) %>%
+    ggplot2::ggplot(aes(x = reorder(nom_vernaculaire, n), 
                y = n)) +
     geom_col() +
     coord_flip() +
@@ -36,3 +39,4 @@ repartition_espece_cluster <- function(bdd = Total, cluster){
     theme_bw() +
     theme(axis.text = element_text(size = 8))
 }
+
