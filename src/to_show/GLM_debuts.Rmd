@@ -43,7 +43,7 @@ library(ggfortify)
 #### [Mise en place]{.underline}
 
 ```{r mise-en-place}
-source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
+source("~/work/AnalyseDonneesOpportunisteGMB/src/functions/divers.R")
 wd <- set_wd()
 source(paste0(wd$src, "functions/cartographie.R"))
 source(paste0(wd$src, "functions/comparaison_dans_mailles.R"))
@@ -76,8 +76,8 @@ bdd_reg <- tab_glm(espece_interet = 61714,
               taillegrid = "Grid10km")
 ```
 
-Ici on cherche la tendance du Lapin de garenne en prenant le Chevreuil comme espèce de référence.
-Les sites choisis ici sont des mailles de 10km, dans lequel on calcule la proportion de lapin par rapport au chevreuil au fil des années.
+Ici on cherche la tendance du Lapin de garenne en prenant le Chevreuil comme espece de reference.
+Les sites choisis ici sont des mailles de 10km, dans lequel on calcule la proportion de lapin par rapport au chevreuil au fil des annees.
 
 ```{r, include = FALSE}
 Total %>%
@@ -96,9 +96,9 @@ bdd_reg %>%
 
 ```
 
-On remarque qu'il y a une grande partie de zero -\> On pourra vouloir utiliser des modèles a inflation 0.
+On remarque qu'il y a une grande partie de zero -\> On pourra vouloir utiliser des modeles a inflation 0.
 
-Regarder aussi si les 0 sont sur le même site sur toutes les années -\> On pourrait penser les retirer?
+Regarder aussi si les 0 sont sur le meme site sur toutes les annees -\> On pourrait penser les retirer?
 Ca risque de nous diminuer la tendance potentielle.
 Une legere inflation en 1 egalement.
 
@@ -115,12 +115,12 @@ plot(reg)
 autoplot(reg)
 ```
 
-Ici, l'année est significative.
-Les résidus ne sont pas très aléatoire -\> Encore des choses a expliquer.
+Ici, l'annee est significative.
+Les residus ne sont pas tres aleatoire -\> Encore des choses a expliquer.
 On a un QQ-plot pas top.
-Les résidus ne sont pas du bruit blanc gaussien.
+Les residus ne sont pas du bruit blanc gaussien.
 
-Pas de données qui sont leviers.
+Pas de donnees qui sont leviers.
 
 ```{r}
 reg <- glm(data = bdd_reg, 
@@ -129,12 +129,12 @@ summary(reg)
 autoplot(reg)
 ```
 
-La famille de paysage n'est pas significatif, mais AIC plus faible, donc ca reste intéressant d'ajouter la famille de paysage dans l'analyse.
+La famille de paysage n'est pas significatif, mais AIC plus faible, donc ca reste interessant d'ajouter la famille de paysage dans l'analyse.
 
 Meilleur QQ-plot, et residus.
 
 Certains individus sont atypiques, ils ont un effet levier important.
-Cependant, ils ont une distance de Cook assez faible/normal, donc on n'a pas a s'inquiéter.
+Cependant, ils ont une distance de Cook assez faible/normal, donc on n'a pas a s'inquieter.
 Ils concernent des sites de Paysage associe a la presence d'eau.
 
 ```{r}
@@ -192,7 +192,7 @@ autoplot(reg2)
 
 ```
 
-On ne dirait pas qu'il y a qqe chose de différent entre ces deux modèles.
+On ne dirait pas qu'il y a qqe chose de different entre ces deux modeles.
 
 
 #### 0 Inflated Model?

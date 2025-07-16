@@ -6,7 +6,7 @@ t1 <- Total%>%
 
 t2 <- Total%>%
   filter(bdd_originale == "VisioNature",
-         etat_biologique == "Trouvé mort : impact routier")%>%
+         etat_biologique == "Trouvee mort : impact routier")%>%
   ggplot(aes(nom_vernaculaire))+
   geom_bar()+coord_flip()+labs(title = "Impacte routier")
 
@@ -29,7 +29,7 @@ Total%>%
   geom_bar()+coord_flip()+labs(title = "Death_cause : UNKNOWN")
 
 # Un des grands contribueurs au death_cause: unkown est daniel bellier
-# Comme on l'enlève c'est plus simple
+# Comme on l'enleve c'est plus simple
 
 
 t1 <- Total%>%
@@ -41,7 +41,7 @@ t1 <- Total%>%
 
 t2 <- Total%>%
   filter(bdd_originale == "VisioNature",
-         etat_biologique == "Trouvé mort : impact routier",
+         etat_biologique == "Trouvee mort : impact routier",
          observateurs != "BELLIER_DANIEL")%>%
   ggplot(aes(nom_vernaculaire))+
   geom_bar()+coord_flip()+labs(title = "Impacte routier")

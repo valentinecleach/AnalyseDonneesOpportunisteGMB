@@ -16,7 +16,7 @@ histogramme_maillage_pos <- function(colonne, espece, taille){
 }
 
 
-#' Fait l'histogramme pour le 4 possibilités de maillage
+#' Fait l'histogramme pour le 4 possibilites de maillage
 #'
 #' @param espece Le cd_nom choisi
 #'

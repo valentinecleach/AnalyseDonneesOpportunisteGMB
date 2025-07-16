@@ -40,7 +40,7 @@ source(paste0(wd$src,"functions/cartographie.R"), encoding="utf-8")
 source(paste0(wd$src,"functions/comparaison_dans_mailles.R"), encoding="utf-8")
 
 
-# Graine al√©atoire
+# Graine aleatoire
 set.seed(12345)
 
 # Importations
@@ -50,10 +50,10 @@ Total <- transform_Total()
 
 #' Applique une fonction qui plot qqe chose a tous les ordres
 #'
-#' @param bdd La base de donnÈe sur laquelle faire la 
-#' @param taille_en_km La longueur des cotÈs des mailles
+#' @param bdd La base de donnee sur laquelle faire la 
+#' @param taille_en_km La longueur des cotes des mailles
 #'
-#' @return La base de donnÈe, avec la colonne en +
+#' @return La base de donnee, avec la colonne en +
 #' @export
 #'
 #' @examples
@@ -98,7 +98,7 @@ histogramme_maillage_pos <- function(colonne, espece, taille){
 }
 
 
-#' Fait l'histogramme pour le 4 possibilitÈs de maillage
+#' Fait l'histogramme pour le 4 possibilites de maillage
 #'
 #' @param espece Le cd_nom choisi
 #'

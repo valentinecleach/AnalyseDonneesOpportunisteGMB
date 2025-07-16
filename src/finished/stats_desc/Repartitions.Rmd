@@ -17,17 +17,16 @@ editor_options:
 
 ```{r packages-imports, include = FALSE}
 
-source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
-source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/stats_desc.R")
-
-
+source("~/work/AnalyseDonneesOpportunisteGMB/src/functions/divers.R")
 wd <- set_wd()
+source("~/work/AnalyseDonneesOpportunisteGMB/src/functions/stats_desc.R")
 
 # Graine aleatoire
 set.seed(12345)
 
 # Importations
 Total <- st_read(paste0(wd$data,"Total.shp"))
+
 ```
 
 
@@ -192,7 +191,7 @@ Total%>%
   coord_flip() +
   facet_wrap(~ ordre, scales = "free_y") +
   labs(
-    title = "4a. Répartition des espèces",
+    title = "4a. RÃ©partition des espÃ¨ces",
         subtitle = paste("GeoNature"),
     y = "Nombre d'observations", x = "Nom vernaculaire"
   ) +
@@ -204,8 +203,7 @@ Total%>%
 
 
 Total%>%
-  filter(date > params$date_min,
-         bdd_originale == )%>%
+  filter(date > params$date_min)%>%
   count(nom_vernaculaire, ordre, sort = TRUE) %>%
   ggplot(aes(x = reorder(nom_vernaculaire, n), 
              y = n, fill = ordre, color = ordre)) +
@@ -213,7 +211,7 @@ Total%>%
   coord_flip() +
   facet_wrap(~ ordre, scales = "free_y") +
   labs(
-    title = "4b. Répartition des espèces",
+    title = "4b. RÃ©partition des espÃ¨ces",
         subtitle = paste(GN),
     y = "Nombre d'observations", x = "Nom vernaculaire"
   ) +
@@ -234,7 +232,7 @@ Total%>%
   filter(date > params$date_min,
          bdd_originale == VN)%>%
   ggplot(aes(date, color = ordre))+
-  labs(title=paste("5a. Fréquence des observations dans le temps depuis", params$date_min),
+  labs(title=paste("5a. FrÃ©quence des observations dans le temps depuis", params$date_min),
        subtitle = paste(VN))+ 
   facet_grid(ordre ~ .)+
   theme_bw()+

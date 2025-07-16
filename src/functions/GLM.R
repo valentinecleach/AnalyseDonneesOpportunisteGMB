@@ -15,8 +15,8 @@ Mode <- function(x) {
 
 #' Donne le tableau sur lequel on fera les modifs
 #'
-#' @param espece_interet L'espèce qui nous intéresse 
-#' @param espece_benchmark L'espèce avec laquel on compare l'espece d'intéret
+#' @param espece_interet L'espece qui nous interesse 
+#' @param espece_benchmark L'espece avec laquel on compare l'espece d'interet
 #' @param taillegrid La colonne de maille qu'on utilise 
 #'
 #' @return 

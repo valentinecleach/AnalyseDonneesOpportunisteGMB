@@ -1,5 +1,5 @@
 ---
-title: "Nettoyage des donnes opportunistes du GMB"
+title: "Nettoyage des donnees opportunistes du GMB"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   bookdown::html_document2:
@@ -36,7 +36,7 @@ GeoN <- GeoN %>%
     cd_nom = ifelse(cd_nom==194944, 60704, cd_nom),
     # Ecureuil
     nom_vernaculaire = ifelse(cd_nom==197486, 
-                              "Écureuil roux", 
+                              "Ãcureuil roux", 
                               nom_vernaculaire),
     cd_nom = ifelse(cd_nom==197486, 61153, cd_nom),
     # Martre
@@ -46,7 +46,7 @@ GeoN <- GeoN %>%
     cd_nom = ifelse(cd_nom==194481, 60658, cd_nom),
     # Rat
     nom_vernaculaire = ifelse(cd_nom==61585, 
-                              "Rat surmulot, Surmulot, Rat d’gout", 
+                              "Rat surmulot, Surmulot, Rat d'Ã©gout", 
                               nom_vernaculaire))%>%
   filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Core
          !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
@@ -58,14 +58,14 @@ GeoN <- GeoN %>%
                          nombre_min)
   )%>%
   mutate(technique_observation = ifelse(
-    technique_observation %in% c("Fèces/Guano/Epreintes", 
-                                 "Empreintes", "Coule",
+    technique_observation %in% c("FÃ¨ces/Guano/Epreintes", 
+                                 "Empreintes", "CoulÃ©",
                                  "Galerie/terrier", 
-                                 "Hutte (Castor, Rat musqu)", "Nid/Gîte",
+                                 "Hutte (Castor, Rat musquÃ©)", "Nid/GÃ®te",
                                  "Indices de prsence divers",
                                  "Restes de repas",
-                                 "Empreintes et fèces",
-                                 "Restes dans pelote de rjection"
+                                 "Empreintes et fÃ¨ces",
+                                 "Restes dans pelote de rÃ©jection"
     ),
     "Indices",
     ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
@@ -73,7 +73,7 @@ GeoN <- GeoN %>%
            technique_observation)),
     technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
   mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
-                                  "Non renseign", etat_biologique))%>%
+                                  "Non renseignÃ©", etat_biologique))%>%
   filter(!jdd_nom %in% c(490,53))%>% 
   # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
   # 53:  Donnes faunebretagne.org
@@ -155,10 +155,10 @@ VisioN_FB <- VisioN_FB %>%
   mutate(etat_biologique = ifelse(champs_additionnels %in% c("{'death_cause': 'ROAD_VEHICLE'}",
                                                              "{'death_cause': 'OTHER_TRANSPORT'}",
                                                              "{'death_cause': 'UNKNOWN_TRANSPORT'}"),
-                                  "Trouv mort : impact routier",
+                                  "TrouvÃ© mort : impact routier",
                                   etat_biologique),
-         etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "Trouv mort") & grepl("ROUT", toupper(comment_occurrence))), 
-                                  "Trouv mort : impact routier",
+         etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "TrouvÃ© mort") & grepl("ROUT", toupper(comment_occurrence))), 
+                                  "TrouvÃ© mort : impact routier",
                                   etat_biologique)
          )%>%
   mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
@@ -207,9 +207,9 @@ Total <- Total %>%
 any(duplicated(Total))
 ```
 
-Maintenant on nettoie selon les coordonnes gographiques:
-- supprssion des rongeurs en Loire Atlantique
-- supprssion des îles 
+Maintenant on nettoie selon les coordonnees geographiques:
+- suppression des rongeurs en Loire Atlantique
+- suppression des iles 
 
 ```{r nettoyage-cartographique}
 Total_sf <- st_as_sf(Total,
@@ -231,7 +231,7 @@ carte_44 <- st_read(paste0(wd$data,
                            "masques/Masque_44/Masque44.shp"))
 carte_44 <- st_transform(carte_44, 2154)
 carte_44 <- st_buffer(carte_44, dist = 200) 
-# Il nous manquera peut être qqes donnes entre le 44 et le 35 mais j'espère pas trop grave?
+# Il nous manquera peut etre qqes donnes entre le 44 et le 35 mais j'espere pas trop grave?
 carte_44 <- st_transform(carte_44, st_crs(CRS))
 
 
@@ -242,7 +242,9 @@ total_44_id_synthese <- total_44 %>%
   st_drop_geometry() %>%
   select(id_synthese)
 
-que_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
+que_bretagne <- anti_join(total_bretagne_44, 
+                          total_44_id_synthese, 
+                          by = "id_synthese")
 
 # Verifications
 # ggplot() +

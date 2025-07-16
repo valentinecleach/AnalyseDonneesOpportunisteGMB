@@ -1,8 +1,8 @@
-#' Fait un barplot selon les espèces. Les espèces sont rangés sur le plot
+#' Fait un barplot selon les especes. Les especes sont ranges sur le plot
 #'
-#' @param bdd La base de donnée
+#' @param bdd La base de donnee
 #' @param nom_ordre Le nom de l'ordre parmi lesquels ont veut...
-#' @param repartition ce qu'on veut étudier
+#' @param repartition ce qu'on veut etudier
 #' @param date_min  la date minimum
 #'
 #' @return Une liste de plots
@@ -74,8 +74,8 @@ stats_observateur <- function(nom_obs, carte){
     filter(observateurs == toupper(nom_obs),
            date > params$date_min) %>%
     ggplot(aes(date)) +
-    labs(title = "RÃ©partition des dates",
-         subtitle = paste("DonnÃ©es de ", nom_obs)) + 
+    labs(title = "Repartition des dates",
+         subtitle = paste("Donnees de ", nom_obs)) + 
     theme_bw() +
     geom_line(stat = "density") +
     scale_x_date(
@@ -92,8 +92,8 @@ stats_observateur <- function(nom_obs, carte){
            observateurs == toupper(nom_obs)) %>%
     ggplot(aes(ordre,fill=ordre, color = ordre)) +
     geom_bar() +
-    labs(title = " RÃ©partition des differents ordres",
-         subtitle = paste("DonnÃ©es de ", nom_obs)) +
+    labs(title = " Repartition des differents ordres",
+         subtitle = paste("Donnees de ", nom_obs)) +
     theme_bw() +
     scale_fill_manual(values = couleur) +
     scale_color_manual(values = couleur) +
@@ -110,7 +110,7 @@ stats_observateur <- function(nom_obs, carte){
   p3 <- ggplot() +
     geom_sf(data = carte) + 
     labs(title = "Carte des observations",
-         subtitle = paste("DonnÃ©es de ", nom_obs)) +
+         subtitle = paste("Donnees de ", nom_obs)) +
     geom_sf(data = geo_obsteur, size=0.01) +
     theme_bw()
   

@@ -47,7 +47,7 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
     filter(date > as.Date("2010-01-01")) %>%
     sample_frac(1)
   
-  # Transformation pour des données de la carte
+  # Transformation pour des donnees de la carte
   carte_ordre <- ordre_graph %>%
     select(grp_date, ordre, date) %>%
     filter(ordre == ordre_voulu)
@@ -70,10 +70,10 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
 
 #' Applique une fonction qui plot qqe chose a tous les ordres
 #'
-#' @param bdd La base de donnée sur laquelle faire la 
-#' @param taille_en_km La longueur des cotés des mailles
+#' @param bdd La base de donnee sur laquelle faire la 
+#' @param taille_en_km La longueur des cotes des mailles
 #'
-#' @return La base de donnée, avec la colonne en +
+#' @return La base de donnee, avec la colonne en +
 #' @export
 #'
 #' @examples
@@ -104,7 +104,7 @@ creer_maille <- function(bdd, taille_en_km){
 #'
 #' @param 
 #'
-#' @return La base de donnée, avec les colonne en +
+#' @return La base de donnee, avec les colonne en +
 #' @export
 #'
 #' @examples

@@ -1,10 +1,15 @@
+source("~/work/AnalyseDonneesOpportunisteGMB/src/functions/divers.R")
+
 wd <- set_wd()
 
-source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/functions/divers.R")
-Total <- st_read(paste0(wd$data,"Total.shp"))
+library(renv)
+renv::restore()
+renv::install("")
+
+Total <- st_read(paste0(wd$data,"derived/Total.shp"))
 Total <- transform_Total()
 
-#### Nettoyage de données ####
+#### Nettoyage de donnees ####
 # Total:
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Total.Rmd"), 
                   output_file = paste0(wd$output, "cleaning/Total.html"))
@@ -32,8 +37,8 @@ rmarkdown::render(paste0(wd$src, "finished/stats_desc/Observateurs.Rmd"),
 rmarkdown::render(paste0(wd$src, "finished/acp/Ordres.Rmd"), 
                   output_file = paste0(wd$output, "acp/Ordres.html"))
 
-library(renv)
-renv::init()
+
+
 #### Regression ####
 
 

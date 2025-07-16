@@ -3,9 +3,9 @@ set_wd <- function(){
   wd <- list()
   # commonly used paths in my working directory
   
-  wd$data  <- "~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/data/"
-  wd$output <- "~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/output/"
-  wd$src <- "~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/"
+  wd$data  <- "~/work/AnalyseDonneesOpportunisteGMB/data/"
+  wd$output <- "~/work/AnalyseDonneesOpportunisteGMB/output/"
+  wd$src <- "~/work/AnalyseDonneesOpportunisteGMB/src/"
   
   return(wd)
 }
