@@ -25,6 +25,9 @@ rmarkdown::render(paste0(wd$src, "finished/cleaning/Total.Rmd"),
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Diro.Rmd"), 
                   output_file = paste0(wd$output, "cleaning/Diro.html"))
 
+rmarkdown::render(paste0(wd$src, "finished/cleaning/Total_sites.Rmd"), 
+                  output_file = paste0(wd$output, "cleaning/Total_sites.html"))
+
 #### Stats Desc ####
 rmarkdown::render(paste0(wd$src, "finished/stats_desc/Repartitions.Rmd"), 
                   output_file = paste0(wd$output, "stats_desc/Repartitions.html"))
@@ -53,7 +56,8 @@ rmarkdown::render(paste0(wd$src,
                                        "models/glm/debuts.html"))
 
 
-rmarkdown::render(paste0(wd$src, "finished/models/glm.Rmd"))
+rmarkdown::render(paste0(wd$src, "brouillon/glm.Rmd"))
+rmarkdown::render(paste0(wd$src, "brouillon/glm.Rmd"))
 
 
 

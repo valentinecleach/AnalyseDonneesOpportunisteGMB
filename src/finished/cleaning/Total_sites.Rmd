@@ -1,5 +1,5 @@
 ---
-title: "Création/Ajout de sites et clusters dans la BDD Total"
+title: "Creation/Ajout de sites et clusters dans la BDD Total"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   bookdown::html_document2:

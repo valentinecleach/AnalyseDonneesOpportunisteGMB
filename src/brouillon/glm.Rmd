@@ -46,10 +46,10 @@ Total%>%
   ggplot(aes(year, fill = nom_vernaculaire_grp)) +
   geom_bar(position = "fill") +
   labs(
-    x = "Période",
-    title = "7a. Répartition des differentes espèces observés depuis 1980",
+    x = "Periode",
+    title = "7a. Repartition des differentes especes observes depuis 1980",
     y = "Proportion",
-    fill = "Espèce"
+    fill = "Espece"
   ) +
   theme_minimal()+
   scale_fill_viridis_d(labels = label_wrap(40))+
