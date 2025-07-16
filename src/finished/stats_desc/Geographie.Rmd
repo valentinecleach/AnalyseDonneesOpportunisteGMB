@@ -1,14 +1,12 @@
 ## 3. Representation cartographique des donnees
 
 ```{r, include=FALSE}
-source("~/work/AnalyseDonneesOpportunisteGMB/00_Nouveau/src/functions/divers.R")
-wd <- set_wd()
-
 # Graine aleatoire
 set.seed(12345)
 # Importations
-Total <- st_read(paste0(wd$data,"Total.shp"))
-carte_bretagne <- st_read(paste0(wd$data,"masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
+Total <- sf::st_read(paste0(wd$data,"Total.shp"))
+carte_bretagne <- sf::st_read(paste0(wd$data,
+                                     "masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
 
 Total <- transform_Total()
 carte_bretagne <- transforme_carte(carte_bretagne)
@@ -19,14 +17,14 @@ carte_bretagne <- transforme_carte(carte_bretagne)
 # GeoNature
 
 GN_sf <- Total %>%
-  filter(bdd_originale == GN)
+  dplyr::filter(bdd_originale == GN)
 
-grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+grid_sf <- sf::st_sf(geometry = st_make_grid(carte_bretagne, 
                                          cellsize = c(0.12, 0.09))
               )
 grid_sf$density <- lengths(st_intersects(grid_sf, GN_sf))
 grid_sf <- st_intersection(grid_sf, carte_bretagne)
-ggplot() +
+ggplot2::ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densite des observations en bretagne",
        subtitle = GN) +
@@ -37,13 +35,13 @@ ggplot() +
 # VisioNature
 
 VN_sf <- Total %>%
-  filter(bdd_originale == VN)
+  dplyr::filter(bdd_originale == VN)
 
-grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+grid_sf <- sf::st_sf(geometry = st_make_grid(carte_bretagne, 
                                          cellsize = c(0.12, 0.09)))
 grid_sf$density <- lengths(st_intersects(grid_sf, VN_sf))
-grid_sf <- st_intersection(grid_sf, carte_bretagne)
-ggplot() +
+grid_sf <- sf::st_intersection(grid_sf, carte_bretagne)
+ggplot2::ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densite des observations en bretagne",
        subtitle = VN) +
@@ -59,14 +57,14 @@ Dans VisioNature, on a deux points avec une tres forte densite sont probablement
 
 ```{r}
 VN_sf_modif <- VN_sf%>%
-  filter(!observateurs %in% c("BELLIER DANIEL", "CHAPUIS MARTINE"))
+  dplyr::filter(!observateurs %in% c("BELLIER DANIEL", "CHAPUIS MARTINE"))
 
-grid_sf <- st_sf(geometry = st_make_grid(carte_bretagne, 
+grid_sf <- sf::st_sf(geometry = st_make_grid(carte_bretagne, 
                                          cellsize = c(0.12, 0.09))
 )
 grid_sf$density <- lengths(st_intersects(grid_sf, VN_sf_modif))
-grid_sf <- st_intersection(grid_sf, carte_bretagne)
-ggplot() +
+grid_sf <- sf::st_intersection(grid_sf, carte_bretagne)
+ggplot2::ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densite des observations en bretagne",
        subtitle = "VisioNature, sans les deux principaux observateurs") +
@@ -89,10 +87,10 @@ VN_sf <- Total%>%
 
 ordres <- unique(VN_sf$ordre)
 
-grid <- st_make_grid(carte_bretagne, 
+grid <- sf::st_make_grid(carte_bretagne, 
                      cellsize = c(0.12, 0.09)) %>%
-  st_sf() %>%
-  st_set_crs(4326)
+  sf::st_sf() %>%
+  sf::st_set_crs(4326)
 
 # VisioNature
 grid_list <- map(ordres, function(o) {

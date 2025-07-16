@@ -1,25 +1,4 @@
 # -*- coding: UTF-8 -*-
-library(readr)
-library(ggplot2)
-library(dplyr)
-library(stringi)
-library(stringr)
-library(sf)
-library(rsample)
-library(patchwork)
-library(scales)
-library(lubridate)
-library(purrr)
-library(forcats)
-library(targets)
-library(tarchetypes)
-library(ggpubr)
-library(collapse)
-library(vegan)
-library(tidyverse)   
-library(ggspatial)   
-library(tigris)
-library(permute)
 
 
 graph_ordre_tranche_annee <- function(ordre_voulu){
@@ -148,3 +127,11 @@ ajout_famille_paysage <- function(){
   
   return(Total)
 }
+
+grid_list <- map(ordres, function(o) {
+  vis_ord <- VN_sf %>% filter(ordre == o)
+  grid_tmp <- grid
+  grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
+  grid_tmp$ordre <- o
+  grid_tmp
+})

@@ -4,7 +4,11 @@ source("src/functions/divers.R")
 
 # Auto-load common packages
 packages <- c("dplyr", "stringr", "ggplot2", "readr", 
-              "sf", "stringi", "janitor")  # Add your own here
+              "sf", "stringi", "janitor", "rsample",
+              "patchwork", "scales", "lubridate",
+              "purrr", "forcasts", "targets", "tarchetypes",
+              "ggpubr", "collapse", "vegan", "tidyverse", "ggspatial",
+              "tigris", "permute")  # Add your own here
 
 for (pkg in packages) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
