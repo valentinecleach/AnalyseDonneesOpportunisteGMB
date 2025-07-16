@@ -5,7 +5,7 @@ renv::install("Factoshiny")
 wd <- set_wd()
 set.seed(12345)
 
-Total <- st_read(paste0(wd$data,"derived/Total.shp"))
+Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
 Total <- transform_Total()
 
 diro <- st_read(paste0(wd$data,"derived/diro.shp"))

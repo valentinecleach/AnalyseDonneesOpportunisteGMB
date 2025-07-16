@@ -20,11 +20,13 @@ for (pkg in packages) {
 
 message("Packages auto-loaded: ", paste(packages, collapse = ", "))
 
-
-source("src/functions/divers.R")
 source("src/functions/analysedonnees.R")
 source("src/functions/cartographie.R")
+source("src/functions/comparaison_dans_mailles.R")
+source("src/functions/divers.R")
 source("src/functions/GLM.R")
+source("src/functions/site_maille.R")
+source("src/functions/site_psg.R")
 source("src/functions/stats_desc.R")
 
 VN <- "VisioNature"

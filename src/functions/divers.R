@@ -22,20 +22,20 @@ set_wd <- function(){
 #' 
 transform_Total <- function(bdd = Total){
   bdd <- bdd %>%
-    mutate_at(c("bdd_rgn", 
+    dplyr::mutate_at(c("bdd_rgn", 
                 "ett_blg", "tchnq_b", 
                 "communs", "obsrvtr", 
                 "famille", "ordre", 
                 "nm_vrnc", "nom_vld"), 
               .funs = as.factor) %>%
-    rename(bdd_originale = bdd_rgn,
+    dplyr::rename(bdd_originale = bdd_rgn,
            etat_biologique = ett_blg,
            technique_observation = tchnq_b,
            nom_vernaculaire = nm_vrnc,
            nom_valide = nom_vld,
            observateurs = obsrvtr)
   bdd <- bdd %>%
-    mutate_at(c(if('Grid2km' %in% names(.)) 'Grid2km',
+    dplyr::mutate_at(c(if('Grid2km' %in% names(.)) 'Grid2km',
                 if('Grid5km' %in% names(.)) 'Grid5km',
                 if('Grd10km' %in% names(.)) 'Grd10km',
                 if('Grd20km' %in% names(.)) 'Grd20km',
@@ -43,7 +43,7 @@ transform_Total <- function(bdd = Total){
                 if('pysg_ID' %in% names(.)) 'pysg_ID',
                 if('fmll_py' %in% names(.)) 'fmll_py'),
               as.factor) %>%
-    rename_with(
+    dplyr::rename_with(
       ~ case_when(
         . == "Grd10km" ~ "Grid10km",
         . == "Grd20km" ~ "Grid20km",
@@ -66,9 +66,9 @@ transform_Total <- function(bdd = Total){
 #' 
 transforme_carte <- function(carte){
   if (is.na(st_crs(carte)$epsg)) {
-    carte <- st_set_crs(carte, 2154)
+    carte <- sf::st_set_crs(carte, 2154)
   }
-  carte <- st_transform(carte, 4326)
+  carte <- sf::st_transform(carte, 4326)
   return(carte)
 }
 
@@ -77,7 +77,7 @@ ajoute_clust_a_Total <- function(){
   Observateurs <-  read.csv(paste0(wd$data, "Observateurs.csv"))
   
   Total <- Total %>%
-    left_join(Observateurs %>% select(observateurs, clust), by = "observateurs")
+    dplyr::left_join(Observateurs %>% select(observateurs, clust), by = "observateurs")
   
   return(Total)
 } 
