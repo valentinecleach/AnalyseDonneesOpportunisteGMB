@@ -1,0 +1,254 @@
+---
+title: "Nettoyage des données opportunistes du GMB"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+---
+
+```{r nettoyage-contenue}
+data_original_22_29 <- read_delim(paste0(wd$data, "raw/GeoN_22-29.csv"), 
+                                  delim = ";", 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)
+
+data_original_35_56 <- read_delim(paste0(wd$data, "raw/GeoN_35-56.csv"), 
+                                  delim = ";", 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)
+
+data_original_GeoRodents <- read_delim(paste0(wd$data, "raw/VN_Rodentia.csv"), 
+                                       delim = ";", 
+                                       escape_double = FALSE, trim_ws = TRUE)
+
+GeoN <- rbind(data_original_22_29, 
+              data_original_35_56, 
+              data_original_GeoRodents)
+
+GeoN <- GeoN %>%
+  filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
+  mutate(
+    # Vison
+    nom_vernaculaire = ifelse(cd_nom==194944, 
+                              "Vison d'Europe, Vison, Petite loutre, Putois d'eau",
+                              nom_vernaculaire),
+    cd_nom = ifelse(cd_nom==194944, 60704, cd_nom),
+    # Ecureuil
+    nom_vernaculaire = ifelse(cd_nom==197486, 
+                              "Écureuil roux", 
+                              nom_vernaculaire),
+    cd_nom = ifelse(cd_nom==197486, 61153, cd_nom),
+    # Martre
+    nom_vernaculaire = ifelse(cd_nom==194481, 
+                              "Martre des pins, Martre", 
+                              nom_vernaculaire),
+    cd_nom = ifelse(cd_nom==194481, 60658, cd_nom),
+    # Rat
+    nom_vernaculaire = ifelse(cd_nom==61585, 
+                              "Rat surmulot, Surmulot, Rat d’égout", 
+                              nom_vernaculaire))%>%
+  filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Corée
+         !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
+         !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
+        !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
+# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
+  mutate(nombre = ifelse(nombre_max != nombre_min, 
+                         median(c(nombre_max,nombre_min)),
+                         nombre_min)
+  )%>%
+  mutate(technique_observation = ifelse(
+    technique_observation %in% c("Fèces/Guano/Epreintes", 
+                                 "Empreintes", "Coulée",
+                                 "Galerie/terrier", 
+                                 "Hutte (Castor, Rat musqué)", "Nid/Gîte",
+                                 "Indices de présence divers",
+                                 "Restes de repas",
+                                 "Empreintes et fèces",
+                                 "Restes dans pelote de réjection"
+    ),
+    "Indices",
+    ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
+           "Entendu/Ultrasons",
+           technique_observation)),
+    technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
+  mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
+                                  "Non renseigné", etat_biologique))%>%
+  filter(!jdd_nom %in% c(490,53))%>% 
+  # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
+  # 53:  Données faunebretagne.org
+  mutate(technique_observation = ifelse(technique_observation == "Inconnu", 
+                                        "Vu", technique_observation),
+         champs_additionnels = NA)%>%
+  mutate(date = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom),
+         nom_valide = as.factor(nom_valide),
+         nom_vernaculaire = as.factor(nom_vernaculaire),
+         technique_observation = as.factor(technique_observation),
+         bdd_originale = as.factor("GeoNature"),
+         observateurs = toupper(observateurs)
+         )%>%
+  select("id_synthese",
+         "date",
+         "cd_nom",
+         "nom_valide",	"nom_vernaculaire",
+         "ordre",
+         "famille",	"rang_taxo",
+         "nombre",
+         "observateurs",
+         "communes",	
+         "geometrie_wkt_4326",	
+         "x_centroid_4326",
+         "y_centroid_4326",
+         "comment_occurrence",
+         "technique_observation",
+         "etat_biologique", "bdd_originale", "champs_additionnels")
+
+donnees_VisioNature_FB <- read_delim(paste0(wd$data, "raw/VisioN_FB.csv"),
+                                     delim = ";", 
+                                     escape_double = FALSE,
+                                     trim_ws = TRUE)
+VN_Rodentia <- read_delim(paste0(wd$data, "raw/GN_Rodentia.csv"),
+                          delim = ";", 
+                          escape_double = FALSE, 
+                          trim_ws = TRUE)
+
+VisioN_FB <- rbind(donnees_VisioNature_FB, VN_Rodentia)
+
+VisioN_FB <- VisioN_FB %>%
+  filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
+  filter(technique_observation != "Restes dans pelote de réjection")%>%
+  mutate(technique_observation = ifelse(
+    !is.na(comment_occurrence) & technique_observation == "Inconnu",
+    ifelse(any(grepl("TAUPINIERE", toupper(gsub("[[:punct:]]", 
+                                                "", 
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  "Latin-ASCII")))),
+               grepl("EMPREINTES", toupper(gsub(":punct:]]",
+                                                "",
+                                                stri_trans_general(
+                                                  comment_occurrence, 
+                                                  "Latin-ASCII")))),
+               grepl("TRACE", toupper(gsub(":punct:]]",
+                                           "",
+                                           stri_trans_general(
+                                             comment_occurrence, 
+                                             "Latin-ASCII"))))),
+           "Indices",
+           technique_observation),
+    technique_observation))%>%
+  mutate(technique_observation = ifelse(technique_observation=="Entendu",
+                                        "Entendu/Ultrasons",
+                                        technique_observation),
+         technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
+  filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Corée
+         !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
+         !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
+        !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
+# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
+  mutate(technique_observation = ifelse(technique_observation == "Inconnu", "Vu", technique_observation))%>%
+  mutate(etat_biologique = ifelse(champs_additionnels %in% c("{'death_cause': 'ROAD_VEHICLE'}",
+                                                             "{'death_cause': 'OTHER_TRANSPORT'}",
+                                                             "{'death_cause': 'UNKNOWN_TRANSPORT'}"),
+                                  "Trouvé mort : impact routier",
+                                  etat_biologique),
+         etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "Trouvé mort") & grepl("ROUT", toupper(comment_occurrence))), 
+                                  "Trouvé mort : impact routier",
+                                  etat_biologique)
+         )%>%
+  mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
+         date = as.Date(date_debut),
+         cd_nom = as.factor(cd_nom),
+         ordre = as.factor(ordre),
+         famille = as.factor(famille),
+         etat_biologique=as.factor(etat_biologique),
+         jdd_nom = as.factor(jdd_nom),
+         nom_valide = as.factor(nom_valide),
+         nom_vernaculaire = as.factor(nom_vernaculaire),
+         technique_observation = as.factor(technique_observation),
+         bdd_originale = as.factor("VisioNature"),
+         observateurs = toupper(observateurs))%>%
+  mutate(observateurs = ifelse(!is.na(observateurs), 
+                               toupper(observateurs), NA))%>%
+  select("id_synthese",
+         "date",
+         "cd_nom",
+         "nom_valide", "nom_vernaculaire",
+         "ordre",
+         "famille",	"rang_taxo",
+         "nombre",
+         "observateurs",
+         "communes",	
+         "geometrie_wkt_4326",	
+         "x_centroid_4326",
+         "y_centroid_4326",
+         "comment_occurrence",
+         "technique_observation",
+         "etat_biologique", "bdd_originale", "champs_additionnels")
+
+Total <- rbind(VisioN_FB, GeoN)
+
+Total <- Total %>%
+  mutate(observateurs = gsub("-", " ", observateurs), # enlever tirets
+         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
+         observateurs = toupper(observateurs),
+         observateurs = ifelse(observateurs == "NA", NA, observateurs)#majuscule
+  )%>%
+  mutate(observateurs = as.factor(replace(
+    as.character(observateurs),
+    which(is.na(observateurs)),
+    paste("NA_", seq_len(sum(is.na(observateurs))), sep="")))) # donner le nom : NA_1, NA_2, ...
+
+any(duplicated(Total))
+```
+
+Maintenant on nettoie selon les coordonnées géographiques:
+- suppréssion des rongeurs en Loire Atlantique
+- suppréssion des îles 
+
+```{r nettoyage-cartographique}
+Total_sf <- st_as_sf(Total,
+                     coords = c("x_centroid_4326", "y_centroid_4326"), 
+                     crs = 4326)
+CRS = st_crs(Total_sf)
+
+
+#importation des cartes
+carte_bretagne_44 <- st_read(paste0(wd$data,
+                                    "masques/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp"
+                                    ))
+carte_bretagne_44 <- st_transform(carte_bretagne_44, 2154)
+carte_bretagne_44 <- st_buffer(carte_bretagne_44, dist = 200)
+carte_bretagne_44  <- st_transform(carte_bretagne_44, st_crs(CRS))
+
+
+carte_44 <- st_read(paste0(wd$data,
+                           "masques/Masque_44/Masque44.shp"))
+carte_44 <- st_transform(carte_44, 2154)
+carte_44 <- st_buffer(carte_44, dist = 200) 
+# Il nous manquera peut être qqes données entre le 44 et le 35 mais j'espère pas trop grave?
+carte_44 <- st_transform(carte_44, st_crs(CRS))
+
+
+#filtre
+total_bretagne_44 <- st_filter(Total_sf, carte_bretagne_44, .predicate = st_within)
+total_44 <- st_filter(Total_sf, carte_44, .predicate = st_within)
+total_44_id_synthese <- total_44 %>%
+  st_drop_geometry() %>%
+  select(id_synthese)
+
+que_bretagne <- anti_join(total_bretagne_44, total_44_id_synthese, by = "id_synthese")
+
+# Verifications
+# ggplot() +
+#   geom_sf(data = que_bretagne) +
+#   labs(title = "Points en Bretagne (sauf dans le 44)")
+
+
+st_write(que_bretagne, paste0(wd$data, "Total.shp"))
+```
