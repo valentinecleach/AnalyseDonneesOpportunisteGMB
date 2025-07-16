@@ -1,18 +1,19 @@
 graph_ordre_tranche_annee <- function(ordre_voulu){
   # Creation de la BDD
-  ordre_data <- Total_sf %>% filter(ordre == ordre_voulu)
+  ordre_data <- Total_sf %>% 
+    dplyr::filter(ordre == ordre_voulu)
   bdd_props <- prop.table(table(ordre_data$bdd_originale))
   n_bdd1 <- round(5000 * bdd_props[1])
   n_bdd2 <- 5000 - n_bdd1
   bdd1 <- ordre_data %>% 
-    filter(bdd_originale == "GeoNature") %>% 
+    dplyr::filter(bdd_originale == "GeoNature") %>% 
     sample_n(min(n_bdd1, n()))
   bdd2 <- ordre_data %>% 
-    filter(bdd_originale == "VisioNature") %>% 
+    dplyr::filter(bdd_originale == "VisioNature") %>% 
     sample_n(min(n_bdd2, n()))
   
   ordre_graph <- bind_rows(bdd1, bdd2) %>%
-    mutate(
+    dplyr::mutate(
       grp_date = case_when(
         date >= as.Date("2010-01-01") & date <= as.Date("2014-12-31") ~ "1. Entre 2010 et 2015",
         date >= as.Date("2015-01-01") & date <= as.Date("2019-12-31") ~ "2. Entre 2015 et 2020",
@@ -20,13 +21,13 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
         TRUE ~ NA_character_
       )
     ) %>%
-    filter(date > as.Date("2010-01-01")) %>%
+    dplyr::filter(date > as.Date("2010-01-01")) %>%
     sample_frac(1)
   
   # Transformation pour des donnees de la carte
   carte_ordre <- ordre_graph %>%
-    select(grp_date, ordre, date) %>%
-    filter(ordre == ordre_voulu)
+    dplyr::select(grp_date, ordre, date) %>%
+    dplyr::filter(ordre == ordre_voulu)
   
   # Plot
   ggplot() +
@@ -56,22 +57,22 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
 #' 
 creer_maille <- function(bdd, taille_en_km){
   bdd <- transforme_carte(bdd)
-  bdd <- st_transform(bdd, 2154)
+  bdd <- sf::st_transform(bdd, 2154)
   
   grid_spacing <- 1000 * taille_en_km
   
-  Grid <- st_make_grid(bdd, 
+  Grid <- sf::st_make_grid(bdd, 
                        cellsize = c(grid_spacing, grid_spacing), 
                        square = TRUE)
-  Grid <- st_sf(ID = seq_along(Grid), geometry = Grid)
-  Grid <- st_transform(Grid, 2154)
+  Grid <- sf::st_sf(ID = seq_along(Grid), geometry = Grid)
+  Grid <- sf::st_transform(Grid, 2154)
   
-  Grid <- st_make_valid(Grid)
-  bdd <- st_make_valid(bdd)
+  Grid <- sf::st_make_valid(Grid)
+  bdd <- sf::st_make_valid(bdd)
   
   nom_colonne <- paste0("Grid", taille_en_km,"km")
   names(Grid)[1] <- nom_colonne
-  bdd <- st_join(bdd, Grid, left=TRUE)
+  bdd <- sf::st_join(bdd, Grid, left=TRUE)
 
   return(bdd)
 }
@@ -88,7 +89,7 @@ creer_maille <- function(bdd, taille_en_km){
 ajout_famille_paysage <- function(){
   Total <- transforme_carte(Total)
   
-  famille_paysage <- st_read(
+  famille_paysage <- sf::st_read(
     paste0(wd$data, "masques/famille_paysage/famille_paysages.shp")
   )
   
@@ -101,16 +102,16 @@ ajout_famille_paysage <- function(){
   
   famille_paysage <- famille_paysage%>%
     transforme_carte()%>%
-    filter(CODE_REG != 39)%>%
-    st_buffer(famille_paysage, dist = 200)
+    dplyr::filter(CODE_REG != 39)%>%
+    sf::st_buffer(famille_paysage, dist = 200)
   
-  Total <- st_join(Total, famille_paysage, left = TRUE)
+  Total <- sf::st_join(Total, famille_paysage, left = TRUE)
   
   Total_sans_na <- Total%>%
-    filter(!is.na(Nom))
+    dplyr::filter(!is.na(Nom))
   
   Total <- Total%>%
-    mutate(Nom = ifelse(is.na(Nom), 
+    dplyr::mutate(Nom = ifelse(is.na(Nom), 
                         Total$Nom[st_nearest_feature(Total, Total_sans_na)], 
                         Nom),
            Famille = ifelse(is.na(Famille), 
@@ -118,7 +119,7 @@ ajout_famille_paysage <- function(){
                             Famille))
   
   Total <- Total %>%
-    rename("paysage_ID" = "CODE_REG",
+    dplyr::rename("paysage_ID" = "CODE_REG",
            "paysage_nom" = "Nom",
            "famille_paysage" = "Famille")
   
@@ -126,7 +127,7 @@ ajout_famille_paysage <- function(){
 }
 
 grid_list <- map(ordres, function(o) {
-  vis_ord <- VN_sf %>% filter(ordre == o)
+  vis_ord <- VN_sf %>% dplyr::filter(ordre == o)
   grid_tmp <- grid
   grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
   grid_tmp$ordre <- o

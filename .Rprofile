@@ -1,6 +1,9 @@
 source("renv/activate.R")
 source("src/functions/divers.R")
-
+source("src/functions/analysedonnees.R")
+source("src/functions/cartographie.R")
+source("src/functions/GLM.R")
+source("src/functions/stats_desc.R")
 
 # Auto-load common packages
 packages <- c("dplyr", "stringr", "ggplot2", "readr", 

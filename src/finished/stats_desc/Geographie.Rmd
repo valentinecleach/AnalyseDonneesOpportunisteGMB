@@ -1,10 +1,11 @@
 ## 3. Representation cartographique des donnees
 
 ```{r, include=FALSE}
+
 # Graine aleatoire
 set.seed(12345)
 # Importations
-Total <- sf::st_read(paste0(wd$data,"Total.shp"))
+Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
 carte_bretagne <- sf::st_read(paste0(wd$data,
                                      "masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
 
