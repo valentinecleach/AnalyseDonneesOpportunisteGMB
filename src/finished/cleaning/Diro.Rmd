@@ -80,5 +80,5 @@ diro_sf <- diro_sf %>%
               "espece", "commune"), 
             as.factor) 
 
-st_write(diro_sf, paste0(wd$data, "diro.shp"))
+st_write(diro_sf, paste0(wd$data, "derived/diro.shp"))
 ```
