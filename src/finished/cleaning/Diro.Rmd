@@ -11,20 +11,20 @@ output:
 #Geometrie
 ```{r}
 
-collision_faune_diro <- read_csv(paste0(wd$data, "raw/collision_faune_diro.csv"))
+collision_faune_diro <- readr::read_csv(paste0(wd$data, "raw/collision_faune_diro.csv"))
 
-diro <- collision_faune_diro%>%
+diro <- collision_faune_diro %>%
   mutate(
     geom_x = as.numeric(str_match(geom, "POINT \\(([^ ]+)")[,2]),
     geom_y = as.numeric(str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
   )%>%
   filter(!is.na(geom))
 
-diro_sf <- st_as_sf(diro, 
+diro_sf <- sf::st_as_sf(diro, 
                     coords = c("geom_x", "geom_y"), 
                     crs = 2154)
 
-diro_sf <- st_transform(diro_sf, 
+diro_sf <- sf::st_transform(diro_sf, 
                         st_crs(4326))
 
 
