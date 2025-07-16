@@ -1,7 +1,3 @@
-source("~/work/AnalyseDonneesOpportunisteGMB/src/functions/divers.R")
-
-wd <- set_wd()
-
 library(renv)
 renv::restore()
 renv::install("readr")

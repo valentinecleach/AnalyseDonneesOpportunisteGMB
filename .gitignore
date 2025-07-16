@@ -9,3 +9,6 @@
 *.dbf
 *.csv
 *.csv.gz
+*.prj
+*.shx
+*.shp
