@@ -93,10 +93,18 @@ grid <- sf::st_make_grid(carte_bretagne,
   sf::st_sf() %>%
   sf::st_set_crs(4326)
 
-# VisioNature
+```
 
+```{r}
+grid_list <- map(ordres, function(o) {
+  vis_ord <- VN_sf %>% dplyr::filter(ordre == o)
+  grid_tmp <- grid
+  grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
+  grid_tmp$ordre <- o
+  grid_tmp
+})
 grid_sf <- bind_rows(grid_list)
-grid_sf <- st_intersection(grid_sf, carte_bretagne)
+grid_sf <- sf::st_intersection(grid_sf, carte_bretagne)
 ggplot() +
   geom_sf(data = carte_bretagne) + 
   labs(title = "Densite des observations en bretagne selon les ordres",
@@ -105,10 +113,12 @@ ggplot() +
   scale_fill_gradient(low="gray90", high="gray15") +
   theme_bw() +
   facet_grid(. ~ ordre)
+```
 
+```{r}
 # GeoNature
 grid_list <- map(ordres, function(o) {
-  vis_ord <- GN_sf %>% filter(ordre == o)
+  vis_ord <- GN_sf %>% dplyr::filter(ordre == o)
   grid_tmp <- grid
   grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
   grid_tmp$ordre <- o

@@ -1,11 +1,14 @@
 library(renv)
 renv::restore()
-renv::install("dplyr")
+renv::install("")
 
 wd <- set_wd()
 
 Total <- st_read(paste0(wd$data,"derived/Total.shp"))
 Total <- transform_Total()
+
+GN = "GeoNature"
+VN = "VisioNature"
 
 #### Nettoyage de donnees ####
 # Total:

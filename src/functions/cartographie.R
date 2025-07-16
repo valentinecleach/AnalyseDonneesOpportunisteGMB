@@ -1,16 +1,16 @@
 graph_ordre_tranche_annee <- function(ordre_voulu){
   # Creation de la BDD
-  ordre_data <- Total_sf %>% 
+  ordre_data <- Total %>% 
     dplyr::filter(ordre == ordre_voulu)
   bdd_props <- prop.table(table(ordre_data$bdd_originale))
   n_bdd1 <- round(5000 * bdd_props[1])
   n_bdd2 <- 5000 - n_bdd1
   bdd1 <- ordre_data %>% 
     dplyr::filter(bdd_originale == "GeoNature") %>% 
-    sample_n(min(n_bdd1, n()))
+    dplyr::sample_n(min(n_bdd1, n()))
   bdd2 <- ordre_data %>% 
     dplyr::filter(bdd_originale == "VisioNature") %>% 
-    sample_n(min(n_bdd2, n()))
+    dplyr::sample_n(min(n_bdd2, n()))
   
   ordre_graph <- bind_rows(bdd1, bdd2) %>%
     dplyr::mutate(
@@ -22,7 +22,7 @@ graph_ordre_tranche_annee <- function(ordre_voulu){
       )
     ) %>%
     dplyr::filter(date > as.Date("2010-01-01")) %>%
-    sample_frac(1)
+    dplyr::sample_frac(1)
   
   # Transformation pour des donnees de la carte
   carte_ordre <- ordre_graph %>%
@@ -62,8 +62,8 @@ creer_maille <- function(bdd, taille_en_km){
   grid_spacing <- 1000 * taille_en_km
   
   Grid <- sf::st_make_grid(bdd, 
-                       cellsize = c(grid_spacing, grid_spacing), 
-                       square = TRUE)
+                           cellsize = c(grid_spacing, grid_spacing), 
+                           square = TRUE)
   Grid <- sf::st_sf(ID = seq_along(Grid), geometry = Grid)
   Grid <- sf::st_transform(Grid, 2154)
   
@@ -73,7 +73,7 @@ creer_maille <- function(bdd, taille_en_km){
   nom_colonne <- paste0("Grid", taille_en_km,"km")
   names(Grid)[1] <- nom_colonne
   bdd <- sf::st_join(bdd, Grid, left=TRUE)
-
+  
   return(bdd)
 }
 
@@ -112,24 +112,18 @@ ajout_famille_paysage <- function(){
   
   Total <- Total%>%
     dplyr::mutate(Nom = ifelse(is.na(Nom), 
-                        Total$Nom[st_nearest_feature(Total, Total_sans_na)], 
-                        Nom),
-           Famille = ifelse(is.na(Famille), 
-                            Total$Famille[st_nearest_feature(Total, Total_sans_na)], 
-                            Famille))
+                               Total$Nom[st_nearest_feature(Total, Total_sans_na)], 
+                               Nom),
+                  Famille = ifelse(is.na(Famille), 
+                                   Total$Famille[st_nearest_feature(Total, Total_sans_na)], 
+                                   Famille))
   
   Total <- Total %>%
     dplyr::rename("paysage_ID" = "CODE_REG",
-           "paysage_nom" = "Nom",
-           "famille_paysage" = "Famille")
+                  "paysage_nom" = "Nom",
+                  "famille_paysage" = "Famille")
   
   return(Total)
 }
 
-grid_list <- map(ordres, function(o) {
-  vis_ord <- VN_sf %>% dplyr::filter(ordre == o)
-  grid_tmp <- grid
-  grid_tmp$density <- lengths(st_intersects(grid_tmp, vis_ord))
-  grid_tmp$ordre <- o
-  grid_tmp
-})
+

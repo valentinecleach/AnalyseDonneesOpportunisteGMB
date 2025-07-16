@@ -1,15 +1,10 @@
 source("renv/activate.R")
-source("src/functions/divers.R")
-source("src/functions/analysedonnees.R")
-source("src/functions/cartographie.R")
-source("src/functions/GLM.R")
-source("src/functions/stats_desc.R")
 
 # Auto-load common packages
 packages <- c("dplyr", "stringr", "ggplot2", "readr", 
               "sf", "stringi", "janitor", "rsample",
               "patchwork", "scales", "lubridate",
-              "purrr", "forcasts", "targets", "tarchetypes",
+              "purrr", "forcasts","forecast", "targets", "tarchetypes",
               "ggpubr", "collapse", "vegan", "tidyverse", "ggspatial",
               "tigris", "permute")  # Add your own here
 
@@ -23,3 +18,10 @@ for (pkg in packages) {
 
 # Optional: message to confirm
 message("Packages auto-loaded: ", paste(packages, collapse = ", "))
+
+
+source("src/functions/divers.R")
+source("src/functions/analysedonnees.R")
+source("src/functions/cartographie.R")
+source("src/functions/GLM.R")
+source("src/functions/stats_desc.R")
