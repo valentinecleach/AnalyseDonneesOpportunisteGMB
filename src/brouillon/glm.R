@@ -9,7 +9,7 @@ Mode <- function(x) {
 }
 
 
-tab_glm <- function(espece_interet, espece_benchmark, taillegrid = "Grid10km"){
+tab_glm <- function(espece_interet, espece_benchmark, taillegrid = "CODE_10km"){
   
   tab <- Total %>%
     st_drop_geometry() %>%

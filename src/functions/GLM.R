@@ -36,10 +36,12 @@ tab_glm <- function(espece_interet, espece_benchmark,
     dplyr::mutate(
       famille_paysage_max = Mode(famille_paysage),
       clust_max = Mode(clust),
+      X_max = Mode(),
+      Y_max = Mode(),
       proportion_interet = sum(cd_nom == espece_interet)/n(),
       .groups = "drop") %>%
     dplyr::group_by(CODE_10) %>%
-    dplyr::mutate(prop_total = sum(proportion_interet)/n()) %>%
+    dplyr::mutate(proportion_total = sum(proportion_interet)/n()) %>%
     dplyr::ungroup()%>%
     select(year, 
            proportion_interet, proportion_total, 
@@ -48,10 +50,10 @@ tab_glm <- function(espece_interet, espece_benchmark,
   
   return(tab)  
 }
-View(bdd_reg) <- tab_glm(Total, 
+View(tab_glm(Total, 
                    espece_interet = 61714,
                    espece_benchmark = 61057,
-                   taillegrid = "CODE_10")
+                   taillegrid = "CODE_10"))
 
 
 suppression_prop01 <- function(cd_nom_interet, cd_nom_benchmark, bdd = bdd_reg){
