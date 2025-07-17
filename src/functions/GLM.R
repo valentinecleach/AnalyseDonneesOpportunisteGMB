@@ -24,47 +24,71 @@ Mode <- function(x) {
 #'
 #' @examples
 #' 
-tab_glm <- function(espece_interet, espece_benchmark, taillegrid = "Grid10km"){
-  tab <- Total %>%
-    st_drop_geometry() %>%
-    filter(cd_nom %in% c(espece_interet, espece_benchmark)) %>%
-    select(date, nom_vernaculaire, cd_nom, famille_paysage, !!sym(taillegrid)) %>%
-    filter(date > as.Date("2010-01-01")) %>%
-    group_by(year = year(date), !!sym(taillegrid)) %>%
-    summarise(
-      famille_paysage_max = Mode(famille_paysage), .groups = "drop",
-      proportion_interet = sum(cd_nom == espece_interet)/n()
-    )
+tab_glm <- function(espece_interet, espece_benchmark, 
+                        taillegrid = "CODE_10", bdd=Total){
+  tab <- bdd %>%
+    sf::st_drop_geometry() %>%
+    dplyr::filter(cd_nom %in% c(espece_interet, espece_benchmark)) %>%
+    dplyr::select(date, nom_vernaculaire, cd_nom, 
+                  famille_paysage, !!sym(taillegrid), clust) %>%
+    dplyr::filter(date > as.Date("2010-01-01")) %>%
+    dplyr::group_by(year = lubridate::year(date), !!sym(taillegrid)) %>%
+    dplyr::mutate(
+      famille_paysage_max = Mode(famille_paysage),
+      clust_max = Mode(clust),
+      proportion_interet = sum(cd_nom == espece_interet)/n(),
+      .groups = "drop") %>%
+    dplyr::group_by(CODE_10) %>%
+    dplyr::mutate(prop_total = sum(proportion_interet)/n()) %>%
+    dplyr::ungroup()%>%
+    select(year, 
+           proportion_interet, proportion_total, 
+           famille_paysage_max, clust_max,
+           CODE_10)
   
   return(tab)  
 }
+View(bdd_reg) <- tab_glm(Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057,
+                   taillegrid = "CODE_10")
 
-glm_automatique <- function(cd_nom_interet, cd_nom_benchmark, supprimer01 = FALSE, bdd = Total){
+
+suppression_prop01 <- function(cd_nom_interet, cd_nom_benchmark, bdd = bdd_reg){
+  bdd <- bdd_reg %>%
+    dplyr::filter(prop_total %in% c(0,1))
+
+  return(bdd)
+}
+
+library(corrplot)
+glm_automatique(cd_nom_interet = 61714, cd_nom_benchmark = 61057,
+                supprimer01 = TRUE)
+
+glm_automatique <- function(cd_nom_interet, cd_nom_benchmark, 
+                            supprimer01 = FALSE, bdd = Total){
   
   bdd_reg <- tab_glm(bdd, 
                      espece_interet = cd_nom_interet,
                      espece_benchmark = cd_nom_benchmark,
-                     taillegrid = "Grid10km")
+                     taillegrid = "CODE_10")
+  View(bdd_reg)
   
-  if(supprimer01){bdd_reg = suppression_prop01(bdd_reg)}
-  
-  # plot
-  plot(data = bdd_reg,
-       x = year, 
-       y = proportion_interet)
+  if(supprimer01){bdd_reg = suppression_prop01(bdd = bdd_reg)}
   
   bdd_reg %>%
     ggplot() +
     geom_histogram(aes(proportion_interet)) +
     labs(title = "Repartition des proportions de l'interet par rapport au benchmark",
-         y = "Proportion") + theme_bw()
+         y = "Proportion") + 
+    theme_bw()
   
   # Interactions entre Variables quantitatives
   col <- colorRampPalette(c("#990000","#990000", 
                             "#eeeeee",
                             "#05600b","#05600b"))
   
-  corrplot(cor(bdd_reg[,-c(3:4)], bdd_reg[,-c(3:4)]), 
+  corrplot(cor(bdd_reg[,-c(2:3)], bdd_reg[,-c(2:3)]), 
            method="color", col=col(200),  
            order="hclust", 
            addCoef.col = "black", # Ajout du coefficient de correlation
@@ -91,3 +115,17 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark, supprimer01 = FALS
              proportion_interet ~ year+X_10km+famille_paysage_max+Grid10km)
   summary(reg)
 }
+
+Total <- sf::st_read(paste0(wd$data, 
+                            "derived/TotalComplet.shp"))
+Total <- transform_Total()
+
+glm_automatique(cd_nom_interet = 61714, cd_nom_benchmark = 61057,
+                supprimer01 = TRUE)
+
+bdd_reg <- tab_glm(Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057,
+                   taillegrid = "CODE_10")
+View(bdd_reg)
+bdd_reg$year
