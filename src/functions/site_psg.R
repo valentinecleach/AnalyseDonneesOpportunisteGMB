@@ -38,10 +38,10 @@ ajout_famille_paysage <- function(bdd = Total){
   
   bdd <- bdd%>%
     dplyr::mutate(Nom = ifelse(is.na(Nom), 
-                               bdd$Nom[st_nearest_feature(bdd, bdd_sans_na)], 
+                               bdd$Nom[sf::st_nearest_feature(bdd, bdd_sans_na)], 
                                Nom),
                   Famille = ifelse(is.na(Famille), 
-                                   bdd$Famille[st_nearest_feature(bdd, bdd_sans_na)], 
+                                   bdd$Famille[sf::st_nearest_feature(bdd, bdd_sans_na)], 
                                    Famille))
   
   bdd <- bdd %>%

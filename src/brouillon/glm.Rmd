@@ -29,7 +29,7 @@ library(car)
 
 ```{r, include = FALSE}
 # Importations
-Total <- st_read(paste0(wd$data,"Total2.shp"))
+Total <- st_read(paste0(wd$data,"TotalComplet.shp"))
 ```
 
 ```{r modif-total}

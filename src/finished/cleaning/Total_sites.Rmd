@@ -12,16 +12,17 @@ output:
 library(dplyr)
 
 Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
+Observateurs <- utils::read.csv(paste0(wd$data,"derived/Observateurs.csv"), sep=";")
 
 Total <- Total %>%
   transform_Total() %>%
   ajoute_clust_a_Total() %>%
   ajout_famille_paysage() %>%
+  ajout_10x10_predetermine() %>%
   creer_maille(taille_en_km = 2) %>%
   creer_maille(taille_en_km = 5) %>%
   creer_maille(taille_en_km = 10) %>%
-  creer_maille(taille_en_km = 20) %>%
-  ajout_10x10_predetermine()
+  creer_maille(taille_en_km = 20)
 
 sf::st_write(Total, paste0(wd$data, "derived/TotalComplet.shp"))
 ```

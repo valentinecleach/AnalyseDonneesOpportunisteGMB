@@ -238,11 +238,10 @@ res.HCPC <- FactoMineR::HCPC(res.PCA,
 Observateurs_clust <- res.HCPC$data.clust %>%
   dplyr::mutate(observateurs = Observateurs$observateurs)
 
-View(Observateurs_clust)
-
 Total <- Total %>%
   left_join(Observateurs_clust, by = "observateurs")
 
+utils::write.csv(Observateurs_clust, paste0(wd$data, "derived/Observateurs.csv"))
 ```
 
 ```{r}

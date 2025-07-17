@@ -46,15 +46,12 @@ rmarkdown::render(paste0(wd$src,
                                        "acp/Ordres.html")
 )
 
-
-
 #### Regression ####
 
 rmarkdown::render(paste0(wd$src, 
                          "finished/models/glm.Rmd"), 
                   output_file = paste0(wd$output, 
                                        "models/glm/debuts.html"))
-
 
 rmarkdown::render(paste0(wd$src, "brouillon/glm.Rmd"))
 rmarkdown::render(paste0(wd$src, "brouillon/glm.Rmd"))

@@ -65,19 +65,21 @@ transform_Total <- function(bdd = Total){
 #' @examples
 #' 
 transforme_carte <- function(carte){
-  if (is.na(st_crs(carte)$epsg)) {
+  if (is.na(sf::st_crs(carte)$epsg)) {
     carte <- sf::st_set_crs(carte, 2154)
   }
   carte <- sf::st_transform(carte, 4326)
   return(carte)
 }
 
-ajoute_clust_a_Total <- function(){
+ajoute_clust_a_Total <- function(bdd = Total){
   wd <- set_wd()
-  Observateurs <-  read.csv(paste0(wd$data, "Observateurs.csv"))
+  Observateurs <-  read.csv(paste0(wd$data, "derived/Observateurs.csv"), 
+                            sep = ";")
   
-  Total <- Total %>%
-    dplyr::left_join(Observateurs %>% select(observateurs, clust), by = "observateurs")
+  bdd <- bdd %>%
+    dplyr::left_join(Observateurs %>% select(observateurs, clust), 
+                     by = "observateurs")
   
-  return(Total)
+  return(bdd)
 } 
