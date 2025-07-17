@@ -1,4 +1,3 @@
-
 #' Donne la valeur dominante d'une colonne d'une bdd
 #'
 #' @param x la colonne 
@@ -51,19 +50,31 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd=Total){
   return(tab)  
 }
 
-suppression_prop01 <- function(cd_nom_interet, cd_nom_benchmark, 
-                               bdd = bdd_reg){
-  bdd <- bdd_reg %>%
-    dplyr::filter(proportion_total %in% c(0,1))
-
-  return(bdd)
+#' Supprime les sites qui sont toujours 0 ou 1
+#'
+#' @param bdd La base de donnée.
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+#' 
+suppression_prop01 <- function(bdd = bdd_reg){
+  return(dplyr::filter(bdd_reg, proportion_total %in% c(0,1)))
 }
 
-library(corrplot)
-
-tab_glm(espece_interet = 61714, espece_benchmark = 61057)
-
-
+#' Fait automatiquement la glm (hyp et tout)
+#'
+#' @param cd_nom_interet L'espèce qu'on souhaite étudier
+#' @param cd_nom_benchmark L'espèce témoin.
+#' @param supprimer01 TRUE si on souhaite supprimer les sites avec 0 ou 1
+#' @param bdd La base de donnée qu'on utilise
+#' #'
+#' @return 
+#' @export
+#'
+#' @examples
+#' 
 glm_automatique <- function(cd_nom_interet, cd_nom_benchmark, 
                             supprimer01 = FALSE, bdd = Total){
   
@@ -110,21 +121,13 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
   # summary(reg)
 }
 
-
 glm_automatique(cd_nom_interet = 61714, cd_nom_benchmark = 61057)
 
-
-Total <- sf::st_read(paste0(wd$data, 
-                            "derived/TotalComplet.shp"))
-Total <- transform_Total()
-
-
-bdd_reg <- tab_glm(Total, 
+bdd_reg <- tab_glm(bdd = Total, 
                    espece_interet = 61714,
                    espece_benchmark = 61057)
 
-glm_automatique(cd_nom_interet = 61714, cd_nom_benchmark = 61057,
+glm_automatique(cd_nom_interet = 61714, 
+                cd_nom_benchmark = 61057,
                 supprimer01 = TRUE)
 
-View(bdd_reg)
-bdd_reg$year
