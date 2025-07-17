@@ -45,11 +45,23 @@ ajout_10x10_predetermine <- function(bdd = Total){
   RegionBretagneConti <- RegionBretagneConti%>%
     transforme_carte()
   
+  centroids <- sf::st_centroid(grille_10x10)
+  centroid_coords <- sf::st_coordinates(centroids)
+  
+  grille_10x10 <- grille_10x10 %>%
+    dplyr::mutate(
+      X_10km = centroid_coords[, "X"],
+      Y_10km = centroid_coords[, "Y"]
+    ) %>%
+    dplyr::select(geometry, CODE_10KM, CD_SIG, X_10km, Y_10km)
+  
   grille_10x10 <- sf::st_intersection(grille_10x10, RegionBretagneConti)
   
   bdd <- grille_10x10 %>%
-    dplyr::select(CODE_10KM)%>%
+    dplyr::select(CODE_10KM, X_10km, Y_10km)%>%
     sf::st_join(bdd, left = TRUE)
-  
+
   return(bdd)
 }
+
+View(bdd)
