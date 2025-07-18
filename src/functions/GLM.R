@@ -104,29 +104,31 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
    col <- colorRampPalette(c("#990000","#990000", 
                              "#eeeeee",
                              "#05600b","#05600b"))
-   
-   corrplot::corrplot(cor(bdd_reg[,-c(4,6)], bdd_reg[,-c(4,6)]), 
+   corrplot::corrplot(cor(subset(bdd_reg, select=-c(famille_paysage_max, Code_10km))),
              method="color", col=col(200),  
              order="hclust", 
              addCoef.col = "black", # Ajout du coefficient de correlation
-             tl.col="black", tl.srt=45 # Rotation des etiquettes de textes
+             tl.col="black", tl.srt=90 # Rotation des etiquettes de textes
     )
   # alias(lm(data = bdd_reg, 
   #           proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+Code_10km))
   car::vif(lm(data = bdd_reg, 
-          proportion_interet ~ year+X_10km+famille_paysage_max+Code_10km))
+          proportion_interet ~ year+famille_paysage_max+Code_10km))
+  car::vif(lm(data = bdd_reg, 
+              proportion_interet ~ year+Y_10km + X_10km + famille_paysage_max))
+
    # Interactions entre Variables qualitatives
    interaction.plot(bdd_reg$famille_paysage_max,
-                    as.factor(bdd_reg$Code_10km),
                     bdd_reg$proportion_interet,
                     main = "Interaction entre la grille et la famille de paysage")
    interaction.plot(bdd_reg$famille_paysage_max,
                     as.factor(bdd_reg$clust_max),
                     bdd_reg$proportion_interet,
                     main = "Interaction entre les clusters et la famille de paysage")
-  reg <- glm(data = bdd_reg, 
-              proportion_interet ~ year+X_10km+Y_10km+famille_paysage_max)
-  summary(reg)
+  
+   reg <- glm(data = bdd_reg, 
+              proportion_interet ~ year+X_10km+Y_10km+famille_paysage_max+clust_max)
+  return(reg)
 }
 
 
@@ -149,6 +151,95 @@ car::vif(lm(data = bdd_reg,
 # Perso, je trouves + intéressant de garder les coordonnées.
 
 library(ggplot2)
-glm_automatique(cd_nom_interet = 61714, 
+# LAPIN RAGONDIN
+reg <- glm_automatique(cd_nom_interet = 61714, 
+                cd_nom_benchmark = 61667)
+autoplot(reg)
+summary(reg)
+# LAPIN CHEVREUIL
+reg <- glm_automatique(cd_nom_interet = 61714, 
                 cd_nom_benchmark = 61057)
+autoplot(reg)
+summary(reg)
+# LAPIN BLAIREAU
+reg <- glm_automatique(cd_nom_interet = 61714, 
+                cd_nom_benchmark = 60636)
+autoplot(reg)
+summary(reg)
+# LAPIN HERISSON
+reg <- glm_automatique(cd_nom_interet = 61714, 
+                cd_nom_benchmark = 60015)
+autoplot(reg)
+summary(reg)
 
+#######
+
+# SANGLIER RAGONDIN
+reg <- glm_automatique(cd_nom_interet = 60981, 
+                       cd_nom_benchmark = 61667)
+autoplot(reg)
+summary(reg)
+# SANGLIER CHEVREUIL
+reg <- glm_automatique(cd_nom_interet = 60981, 
+                       cd_nom_benchmark = 61057)
+autoplot(reg)
+summary(reg)
+# SANGLIER BLAIREAU
+reg <- glm_automatique(cd_nom_interet = 60981, 
+                       cd_nom_benchmark = 60636)
+autoplot(reg)
+summary(reg)
+# SANGLIER HERISSON
+reg <- glm_automatique(cd_nom_interet = 60981, 
+                       cd_nom_benchmark = 60015)
+autoplot(reg)
+summary(reg)
+
+######
+
+# RENARD RAGONDIN
+reg <- glm_automatique(cd_nom_interet = 60585, 
+                       cd_nom_benchmark = 61667)
+autoplot(reg)
+summary(reg)
+# RENARD CHEVREUIL
+reg <- glm_automatique(cd_nom_interet = 60585, 
+                       cd_nom_benchmark = 61057)
+autoplot(reg)
+summary(reg)
+# RENARD BLAIREAU
+reg <- glm_automatique(cd_nom_interet = 60585, 
+                       cd_nom_benchmark = 60636)
+autoplot(reg)
+summary(reg)
+# RENARD HERISSON
+reg <- glm_automatique(cd_nom_interet = 60585, 
+                       cd_nom_benchmark = 60015)
+autoplot(reg)
+summary(reg)
+
+
+######
+
+# MARTRES RAGONDIN
+reg <- glm_automatique(cd_nom_interet = 60658, 
+                       cd_nom_benchmark = 61667)
+autoplot(reg)
+summary(reg)
+
+# MARTRES CHEVREUIL
+reg <- glm_automatique(cd_nom_interet = 60658, 
+                       cd_nom_benchmark = 61057)
+autoplot(reg)
+summary(reg)
+# MARTRES BLAIREAU
+reg <- glm_automatique(cd_nom_interet = 60658, 
+                       cd_nom_benchmark = 60636)
+autoplot(reg)+theme_bw()
+summary(reg)
+
+# MARTRES HERISSON
+reg <- glm_automatique(cd_nom_interet = 60658, 
+                       cd_nom_benchmark = 60015)
+autoplot(reg)
+summary(reg)
