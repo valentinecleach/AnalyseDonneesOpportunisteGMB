@@ -1,123 +1,159 @@
-#########
-#### Proportion
-#########
 
 
-Mode <- function(x) {
-  ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
-}
+bdd_reg <- tab_glm(bdd = Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057)
 
+alias(lm(data = bdd_reg, 
+         proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max))
+alias(lm(data = bdd_reg, 
+         proportion_interet ~ 1+year+famille_paysage_max+Code_10km))
 
-tab_glm <- function(espece_interet, espece_benchmark, taillegrid = "CODE_10km"){
-  
-  tab <- Total %>%
-    st_drop_geometry() %>%
-    filter(cd_nom %in% c(espece_interet, espece_benchmark)) %>%
-    select(date, nom_vernaculaire, cd_nom, famille_paysage, !!sym(taillegrid)) %>%
-    filter(date > as.Date("2010-01-01")) %>%
-    group_by(year = year(date), !!sym(taillegrid)) %>%
-    summarise(
-      famille_paysage_max = Mode(famille_paysage), .groups = "drop",
-      proportion_lapin = sum(cd_nom == espece_interet)/n()
-    )
-  
-  return(tab)  
-}
+car::vif(lm(data = bdd_reg, 
+            proportion_interet ~ 1+year+famille_paysage_max+Code_10km))
 
-library(dplyr)
-library(lubridate)
+car::vif(lm(data = bdd_reg, 
+            proportion_interet ~ 1+Y_10km+X_10km+year+famille_paysage_max))
 
-t2 <- tab_glm(61714, 61057)
-
-t2[["year"]] <- as.factor(t2[["year"]])
-t2$famille_paysage_max <- as.factor(t2$famille_paysage_max)
-
-str(t2)
-reg <- glm(data = t2, 
-           proportion_lapin ~ year)
-summary(reg)
-plot(reg)
-
-reg <- glm(data = t2, 
-           proportion_lapin ~ year+famille_paysage_max)
-summary(reg)
-plot(reg)
-
-  
-t4 <- t3 %>%
-  mutate(year = as.factor(year))
-reg <- glm(data = t4, 
-           proportion_lapin ~ year)
-summary(reg)
-
-
-
-reg <- glm(data = t2, 
-           proportion_lapin ~ year)
-summary(reg)
-plot(reg)
-
-reg <- glm(data = t2, 
-           proportion_lapin ~ year)
-summary(reg)
-plot(reg)
-?glm
-
-
-reg <- glm(data = t3, 
-           proportion_lapin ~ year, 
-           family = binomial)
-summary(reg)
-library(LaplacesDemon)
-reg <- glm(data = t2,
-           logit(proportion_lapin) ~ year)
-t2 <- t2 %>%
-  mutate(logit_prop = log(proportion_lapin/(1 - proportion_lapin)))
+## On devra enlever Y_10km et X_10km ou Code_10km.
+# Perso, je trouves + intéressant de garder les coordonnées.
 
 library(ggplot2)
-t2 %>%
-  ggplot() +
-  geom_histogram(aes(proportion_lapin))
-# -> Zero inflated model
-
-View(t2)
-
-plot(t3$proportion_lapin ~ t3$year)
-reg <- glm(data = t3, 
-           proportion_lapin ~ year)
+# LAPIN RAGONDIN
+bdd_reg <- tab_glm(Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km)
+autoplot(reg)
 summary(reg)
-plot(reg)
 
-
-
-
-?glm
+reg <- glm_automatique(cd_nom_interet = 61714, 
+                       cd_nom_benchmark = 61667)
+autoplot(reg)
 summary(reg)
-plot(reg)
+# LAPIN CHEVREUIL
+reg <- glm_automatique(cd_nom_interet = 61714, cd_nom_benchmark = 61057)
+autoplot(reg)
+summary(reg)
 
-plot(xb = t$year, y = t$proportion_lapin)
+bdd_reg <- tab_glm(Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km)
+autoplot(reg)
+summary(reg)
 
-t2 <- t %>%
-  mutate(grp_year = case_when(
-    (year < as.Date("2018-01-01")) ~ "Avant2018",
-    (year >= as.Date("2018-01-01")) ~ "Apres2018" ))
+# LAPIN BLAIREAU
+reg <- glm_automatique(cd_nom_interet = 61714, 
+                       cd_nom_benchmark = 60636)
+autoplot(reg)
+summary(reg)
+
+bdd_reg <- tab_glm(Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km)
+autoplot(reg)
+summary(reg)
+
+# LAPIN HERISSON
+reg <- glm_automatique(cd_nom_interet = 61714, 
+                       cd_nom_benchmark = 60015)
+autoplot(reg)
+summary(reg)
+
+#######
+
+# SANGLIER RAGONDIN
+reg <- glm_automatique(cd_nom_interet = 60981, 
+                       cd_nom_benchmark = 61667)
+autoplot(reg)
+summary(reg)
+# SANGLIER CHEVREUIL
+reg <- glm_automatique(cd_nom_interet = 60981, 
+                       cd_nom_benchmark = 61057)
+autoplot(reg)
+summary(reg)
+# SANGLIER BLAIREAU
+reg <- glm_automatique(cd_nom_interet = 60981, 
+                       cd_nom_benchmark = 60636)
+autoplot(reg)
+summary(reg)
+# SANGLIER HERISSON
+reg <- glm_automatique(cd_nom_interet = 60981, 
+                       cd_nom_benchmark = 60015)
+autoplot(reg)
+summary(reg)
+
+######
+
+# RENARD RAGONDIN
+reg <- glm_automatique(cd_nom_interet = 60585, 
+                       cd_nom_benchmark = 61667)
+autoplot(reg)
+summary(reg)
+# RENARD CHEVREUIL
+reg <- glm_automatique(cd_nom_interet = 60585, 
+                       cd_nom_benchmark = 61057)
+autoplot(reg)
+summary(reg)
+# RENARD BLAIREAU
+reg <- glm_automatique(cd_nom_interet = 60585, 
+                       cd_nom_benchmark = 60636)
+autoplot(reg)
+summary(reg)
+# RENARD HERISSON
+reg <- glm_automatique(cd_nom_interet = 60585, 
+                       cd_nom_benchmark = 60015)
+autoplot(reg)
+summary(reg)
+
+
+######
+
+# MARTRES RAGONDIN
+reg <- glm_automatique(cd_nom_interet = 60658, 
+                       cd_nom_benchmark = 61667)
+autoplot(reg)
+summary(reg)
+
+# MARTRES CHEVREUIL
+reg <- glm_automatique(cd_nom_interet = 60658, 
+                       cd_nom_benchmark = 61057)
+autoplot(reg)
+summary(reg)
+# MARTRES BLAIREAU
+reg <- glm_automatique(cd_nom_interet = 60658, 
+                       cd_nom_benchmark = 60636)
+autoplot(reg)+theme_bw()
+summary(reg)
+
+# MARTRES HERISSON
+reg <- glm_automatique(cd_nom_interet = 60658, 
+                       cd_nom_benchmark = 60015)
+autoplot(reg)
+summary(reg)
+
+######### AJOUT COLLISIONS ROUTIERES
+
+Diro <- sf::st_read(paste0(wd$data, "derived/diro.shp"))
+
+Morts_Naturalistes <- Total%>%
+  dplyr::filter(etat_biologique %in% c("Trouvé mort : impact routier", 
+                                       "TrouvÃ© mort : impact routier"))
+
+Diro%>%
+  filter(deppr == 44)
+
+View(Morts_Naturalistes)
+summary(as.factor(Diro$deppr))
+
+Morts <- rbind(Morts_Naturalistes, Diro)
+
+summary(as.factor(Total$etat_biologique))
 
 Total %>%
-  st_drop_geometry() %>%
-  filter(year(date)>as.Date("2020-01-01"))
-
-class(Total$year)
-
-summary(t2)
-t2$grp_year <- as.factor(t2$grp_year)
-t2$famille_paysage_max <- as.factor(t2$famille_paysage_max)
-reg <- lm(data = t2, proportion_lapin ~ grp_year)
-
-
-t$year <- as.factor(t$year)
-t$famille_paysage_max <- as.factor(t$famille_paysage_max)
-
-
-class(t$year)
-class(t$famille_paysage_max)
+  distinct(etat_biologique)

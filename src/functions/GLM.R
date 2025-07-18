@@ -119,127 +119,15 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
 
    # Interactions entre Variables qualitatives
    interaction.plot(bdd_reg$famille_paysage_max,
+                    as.factor(bdd_reg$Code_10km),
                     bdd_reg$proportion_interet,
                     main = "Interaction entre la grille et la famille de paysage")
    interaction.plot(bdd_reg$famille_paysage_max,
                     as.factor(bdd_reg$clust_max),
                     bdd_reg$proportion_interet,
                     main = "Interaction entre les clusters et la famille de paysage")
-  
    reg <- glm(data = bdd_reg, 
-              proportion_interet ~ year+X_10km+Y_10km+famille_paysage_max+clust_max)
-  return(reg)
+              proportion_interet ~ year+X_10km+Y_10km+clust_max)
+   
+   return(reg)
 }
-
-
-bdd_reg <- tab_glm(bdd = Total, 
-                   espece_interet = 61714,
-                   espece_benchmark = 61057)
-
-alias(lm(data = bdd_reg, 
-         proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max))
-alias(lm(data = bdd_reg, 
-         proportion_interet ~ 1+year+famille_paysage_max+Code_10km))
-
-car::vif(lm(data = bdd_reg, 
-            proportion_interet ~ 1+year+famille_paysage_max+Code_10km))
-
-car::vif(lm(data = bdd_reg, 
-            proportion_interet ~ 1+Y_10km+X_10km+year+famille_paysage_max))
-
-## On devra enlever Y_10km et X_10km ou Code_10km.
-# Perso, je trouves + intéressant de garder les coordonnées.
-
-library(ggplot2)
-# LAPIN RAGONDIN
-reg <- glm_automatique(cd_nom_interet = 61714, 
-                cd_nom_benchmark = 61667)
-autoplot(reg)
-summary(reg)
-# LAPIN CHEVREUIL
-reg <- glm_automatique(cd_nom_interet = 61714, 
-                cd_nom_benchmark = 61057)
-autoplot(reg)
-summary(reg)
-# LAPIN BLAIREAU
-reg <- glm_automatique(cd_nom_interet = 61714, 
-                cd_nom_benchmark = 60636)
-autoplot(reg)
-summary(reg)
-# LAPIN HERISSON
-reg <- glm_automatique(cd_nom_interet = 61714, 
-                cd_nom_benchmark = 60015)
-autoplot(reg)
-summary(reg)
-
-#######
-
-# SANGLIER RAGONDIN
-reg <- glm_automatique(cd_nom_interet = 60981, 
-                       cd_nom_benchmark = 61667)
-autoplot(reg)
-summary(reg)
-# SANGLIER CHEVREUIL
-reg <- glm_automatique(cd_nom_interet = 60981, 
-                       cd_nom_benchmark = 61057)
-autoplot(reg)
-summary(reg)
-# SANGLIER BLAIREAU
-reg <- glm_automatique(cd_nom_interet = 60981, 
-                       cd_nom_benchmark = 60636)
-autoplot(reg)
-summary(reg)
-# SANGLIER HERISSON
-reg <- glm_automatique(cd_nom_interet = 60981, 
-                       cd_nom_benchmark = 60015)
-autoplot(reg)
-summary(reg)
-
-######
-
-# RENARD RAGONDIN
-reg <- glm_automatique(cd_nom_interet = 60585, 
-                       cd_nom_benchmark = 61667)
-autoplot(reg)
-summary(reg)
-# RENARD CHEVREUIL
-reg <- glm_automatique(cd_nom_interet = 60585, 
-                       cd_nom_benchmark = 61057)
-autoplot(reg)
-summary(reg)
-# RENARD BLAIREAU
-reg <- glm_automatique(cd_nom_interet = 60585, 
-                       cd_nom_benchmark = 60636)
-autoplot(reg)
-summary(reg)
-# RENARD HERISSON
-reg <- glm_automatique(cd_nom_interet = 60585, 
-                       cd_nom_benchmark = 60015)
-autoplot(reg)
-summary(reg)
-
-
-######
-
-# MARTRES RAGONDIN
-reg <- glm_automatique(cd_nom_interet = 60658, 
-                       cd_nom_benchmark = 61667)
-autoplot(reg)
-summary(reg)
-
-# MARTRES CHEVREUIL
-reg <- glm_automatique(cd_nom_interet = 60658, 
-                       cd_nom_benchmark = 61057)
-autoplot(reg)
-summary(reg)
-# MARTRES BLAIREAU
-reg <- glm_automatique(cd_nom_interet = 60658, 
-                       cd_nom_benchmark = 60636)
-autoplot(reg)+theme_bw()
-summary(reg)
-
-# MARTRES HERISSON
-reg <- glm_automatique(cd_nom_interet = 60658, 
-                       cd_nom_benchmark = 60015)
-autoplot(reg)
-summary(reg)
