@@ -89,7 +89,7 @@ test <- diro_sf%>%
         espece == "loutre" ~ 60630,
         espece == "mustélidé" ~ ,
         espece == "rangondin" ~ 61667,
-        espece == "rat" ~ ,
+        espece == "rat" ~ NA,
         espece == "rat musqué" ~ 61448,
         espece == "renard" ~ 60658,
         espece == "sanglier" ~ 60658,

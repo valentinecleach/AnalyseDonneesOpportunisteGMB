@@ -1,16 +1,18 @@
 t1 <- Total%>%
   filter(bdd_originale == "VisioNature",
-         champs_additionnels == "{'death_cause': 'UNKNOWN'}")%>%
+         chmps_d == "{'death_cause': 'UNKNOWN'}")%>%
   ggplot(aes(nom_vernaculaire))+
   geom_bar()+coord_flip()+labs(title = "Death_cause : UNKNOWN")
 
+Total$chmps_d
 t2 <- Total%>%
   filter(bdd_originale == "VisioNature",
          etat_biologique == "Trouvee mort : impact routier")%>%
   ggplot(aes(nom_vernaculaire))+
   geom_bar()+coord_flip()+labs(title = "Impacte routier")
 
-ggarrange(t1, t2)
+install.packages("egg")
+egg::ggarrange(t1, t2)
 
 Total%>%
   filter(bdd_originale == "VisioNature",
