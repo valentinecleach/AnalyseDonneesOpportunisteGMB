@@ -25,30 +25,39 @@ Mode <- function(x) {
 #' 
 tab_glm <- function(espece_interet, espece_benchmark, bdd=Total){
   tab <- bdd %>%
-    sf::st_drop_geometry() %>%
-    dplyr::filter(cd_nom %in% c(espece_interet, espece_benchmark)) %>%
-    dplyr::select(date, nom_vernaculaire, cd_nom, 
-                  famille_paysage, Code_10km, clust,
-                  X_10km, Y_10km) %>%
-    dplyr::filter(date > as.Date("2010-01-01")) %>%
-    dplyr::group_by(year = lubridate::year(date), Code_10km) %>%
-    dplyr::mutate(
-      famille_paysage_max = Mode(famille_paysage),
-      clust_max = Mode(clust),
-      X_max = mean(X_10km),
-      Y_max = mean(Y_10km),
-      proportion_interet = sum(cd_nom == espece_interet)/n(),
-      .groups = "drop") %>%
-    dplyr::group_by(Code_10km) %>%
-    dplyr::mutate(proportion_total = sum(proportion_interet)/n()) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(year, 
-           proportion_interet, proportion_total, 
-           famille_paysage_max, clust_max,
-           Code_10km, X_10km, Y_10km)
+      sf::st_drop_geometry() %>%
+      dplyr::filter(cd_nom %in% c(espece_interet, espece_benchmark)) %>%
+      dplyr::select(date, 
+                    nom_vernaculaire, cd_nom, 
+                    Code_10km, X_10km, Y_10km,
+                    clust, famille_paysage) %>%
+      dplyr::filter(date > as.Date("2010-01-01")) %>%
+      dplyr::mutate(year = lubridate::year(date)) %>%
+      dplyr::group_by(year, Code_10km) %>%
+      dplyr::mutate(proportion_interet = sum(cd_nom == espece_interet)/n(),
+                    famille_paysage_max = Mode(famille_paysage),
+                    clust_max = Mode(clust)) %>%
+      dplyr::ungroup() %>%
+      dplyr::group_by(Code_10km) %>%
+      dplyr::mutate(nb_annee_site = dplyr::n_distinct(year)) %>%
+      dplyr::ungroup() %>%
+      dplyr::group_by(Code_10km, year) %>%
+      dplyr::mutate(proportion_total = sum(proportion_interet)/nb_annee_site) %>%
+      dplyr::select(year, proportion_interet, proportion_total,
+                    Code_10km, nb_annee_site, X_10km, Y_10km,
+                    famille_paysage_max, clust_max)%>%
+      dplyr::distinct(year, Code_10km, .keep_all = TRUE)
+    
   
   return(tab)  
 }
+
+tab <- tab_glm(bdd = Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057)
+head(tab%>%
+  filter(Code_10km == "E028N679"))
+
 
 #' Supprime les sites qui sont toujours 0 ou 1
 #'
@@ -85,8 +94,8 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
   if(supprimer01){bdd_reg = suppression_prop01(bdd = bdd_reg)}
    
    bdd_reg %>%
-     ggplot() +
-     geom_histogram(aes(proportion_interet)) +
+     ggplot2::ggplot() +
+     ggplot2::geom_histogram(aes(proportion_interet)) +
      labs(title = "Repartition des proportions de l'interet par rapport au benchmark",
           y = "Proportion") + 
      theme_bw()
@@ -96,15 +105,14 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
                              "#eeeeee",
                              "#05600b","#05600b"))
    
-   head(bdd_reg)
-    corrplot(cor(bdd_reg[,-c(4,6)], bdd_reg[,-c(4,6)]), 
+   corrplot::corrplot(cor(bdd_reg[,-c(4,6)], bdd_reg[,-c(4,6)]), 
              method="color", col=col(200),  
              order="hclust", 
              addCoef.col = "black", # Ajout du coefficient de correlation
              tl.col="black", tl.srt=45 # Rotation des etiquettes de textes
     )
-  alias(lm(data = bdd_reg, 
-            proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+Code_10km))
+  # alias(lm(data = bdd_reg, 
+  #           proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+Code_10km))
   car::vif(lm(data = bdd_reg, 
           proportion_interet ~ year+X_10km+famille_paysage_max+Code_10km))
    # Interactions entre Variables qualitatives
@@ -116,23 +124,31 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
                     as.factor(bdd_reg$clust_max),
                     bdd_reg$proportion_interet,
                     main = "Interaction entre les clusters et la famille de paysage")
-  # reg <- glm(data = bdd_reg, 
-  #            proportion_interet ~ year+X_10km+famille_paysage_max+Code_10km)
-  # summary(reg)
+  reg <- glm(data = bdd_reg, 
+              proportion_interet ~ year+X_10km+Y_10km+famille_paysage_max)
+  summary(reg)
 }
 
-alias(lm(data = bdd_reg, 
-         proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+Code_10km))
-
-
-glm_automatique(cd_nom_interet = 61714, cd_nom_benchmark = 61057)
 
 bdd_reg <- tab_glm(bdd = Total, 
                    espece_interet = 61714,
                    espece_benchmark = 61057)
 
+alias(lm(data = bdd_reg, 
+         proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max))
+alias(lm(data = bdd_reg, 
+         proportion_interet ~ 1+year+famille_paysage_max+Code_10km))
 
+car::vif(lm(data = bdd_reg, 
+            proportion_interet ~ 1+year+famille_paysage_max+Code_10km))
+
+car::vif(lm(data = bdd_reg, 
+            proportion_interet ~ 1+Y_10km+X_10km+year+famille_paysage_max))
+
+## On devra enlever Y_10km et X_10km ou Code_10km.
+# Perso, je trouves + intéressant de garder les coordonnées.
+
+library(ggplot2)
 glm_automatique(cd_nom_interet = 61714, 
-                cd_nom_benchmark = 61057,
-                supprimer01 = TRUE)
+                cd_nom_benchmark = 61057)
 
