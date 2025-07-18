@@ -78,7 +78,7 @@ diro_sf <- diro_sf %>%
 
 
 test <- diro_sf%>%
-  dplyr::mutate(cd_nom = dplyr::case_when(
+  dplyr::mutate(cd_nom_t = dplyr::case_when(
     espece == "blaireau" ~ 60636,
     espece == "cerf/biche" ~ 61000,
     espece == "chevreuil" ~ 61057,
@@ -87,16 +87,22 @@ test <- diro_sf%>%
         espece == "lapin" ~ 61714,
         espece == "lièvre" ~ 61678,
         espece == "loutre" ~ 60630,
-        espece == "mustélidé" ~ ,
+        espece == "mustélidé" ~ 111,
         espece == "rangondin" ~ 61667,
         espece == "rat" ~ NA,
         espece == "rat musqué" ~ 61448,
         espece == "renard" ~ 60658,
         espece == "sanglier" ~ 60658,
     .default = NA
-  ))
+  ))%>%
+  select(cd_nom_t, bdd_originale,espece, date, geom, geometry)
+
+View(test)
+summary(diro_sf$geometry)
 summary(as.factor(diro_sf$espece))
 summary(test$espece)
 sf::st_write(diro_sf, paste0(wd$data, "derived/diro.shp"))
 
+Morts_Naturalistes %>%
+  
 ```
