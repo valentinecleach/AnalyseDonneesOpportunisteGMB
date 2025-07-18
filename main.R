@@ -7,6 +7,10 @@ set.seed(12345)
 
 Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"))
 Total <- transform_Total()
+library(dplyr)
+Total %>%
+  dplyr::distinct(cd_nom)%>%
+  dplyr::select(nom_vernaculaire, cd_nom)
 
 
 diro <- st_read(paste0(wd$data,"derived/diro.shp"))

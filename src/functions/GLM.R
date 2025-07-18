@@ -28,10 +28,10 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd=Total){
     sf::st_drop_geometry() %>%
     dplyr::filter(cd_nom %in% c(espece_interet, espece_benchmark)) %>%
     dplyr::select(date, nom_vernaculaire, cd_nom, 
-                  famille_paysage, CODE_10KM, clust,
+                  famille_paysage, Code_10km, clust,
                   X_10km, Y_10km) %>%
     dplyr::filter(date > as.Date("2010-01-01")) %>%
-    dplyr::group_by(year = lubridate::year(date), CODE_10KM) %>%
+    dplyr::group_by(year = lubridate::year(date), Code_10km) %>%
     dplyr::mutate(
       famille_paysage_max = Mode(famille_paysage),
       clust_max = Mode(clust),
@@ -39,13 +39,13 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd=Total){
       Y_max = mean(Y_10km),
       proportion_interet = sum(cd_nom == espece_interet)/n(),
       .groups = "drop") %>%
-    dplyr::group_by(CODE_10KM) %>%
+    dplyr::group_by(Code_10km) %>%
     dplyr::mutate(proportion_total = sum(proportion_interet)/n()) %>%
-    dplyr::ungroup()%>%
+    dplyr::ungroup() %>%
     dplyr::select(year, 
            proportion_interet, proportion_total, 
            famille_paysage_max, clust_max,
-           CODE_10KM, X_10km, Y_10km)
+           Code_10km, X_10km, Y_10km)
   
   return(tab)  
 }
@@ -104,12 +104,12 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
              tl.col="black", tl.srt=45 # Rotation des etiquettes de textes
     )
   alias(lm(data = bdd_reg, 
-            proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+CODE_10KM))
+            proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+Code_10km))
   car::vif(lm(data = bdd_reg, 
-          proportion_interet ~ year+X_10km+famille_paysage_max+CODE_10KM))
+          proportion_interet ~ year+X_10km+famille_paysage_max+Code_10km))
    # Interactions entre Variables qualitatives
    interaction.plot(bdd_reg$famille_paysage_max,
-                    as.factor(bdd_reg$CODE_10KM),
+                    as.factor(bdd_reg$Code_10km),
                     bdd_reg$proportion_interet,
                     main = "Interaction entre la grille et la famille de paysage")
    interaction.plot(bdd_reg$famille_paysage_max,
@@ -117,15 +117,20 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
                     bdd_reg$proportion_interet,
                     main = "Interaction entre les clusters et la famille de paysage")
   # reg <- glm(data = bdd_reg, 
-  #            proportion_interet ~ year+X_10km+famille_paysage_max+CODE_10KM)
+  #            proportion_interet ~ year+X_10km+famille_paysage_max+Code_10km)
   # summary(reg)
 }
+
+alias(lm(data = bdd_reg, 
+         proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+Code_10km))
+
 
 glm_automatique(cd_nom_interet = 61714, cd_nom_benchmark = 61057)
 
 bdd_reg <- tab_glm(bdd = Total, 
                    espece_interet = 61714,
                    espece_benchmark = 61057)
+
 
 glm_automatique(cd_nom_interet = 61714, 
                 cd_nom_benchmark = 61057,

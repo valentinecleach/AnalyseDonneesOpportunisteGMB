@@ -41,7 +41,8 @@ transform_Total <- function(bdd = Total){
                 if('Grd20km' %in% names(.)) 'Grd20km',
                 if('pysg_nm' %in% names(.)) 'pysg_nm',
                 if('pysg_ID' %in% names(.)) 'pysg_ID',
-                if('fmll_py' %in% names(.)) 'fmll_py'),
+                if('fmll_py' %in% names(.)) 'fmll_py',
+                if('CODE_10' %in% names(.)) 'CODE_10'),
               as.factor) %>%
     dplyr::rename_with(
       ~ case_when(
@@ -50,6 +51,7 @@ transform_Total <- function(bdd = Total){
         . == "pysg_ID" ~ "paysage_ID",
         . == "pysg_nm" ~ "paysage_nom",
         . == "fmll_py" ~ "famille_paysage",
+        . == "CODE_10" ~ "Code_10km",
         TRUE ~ .))
   
   return(bdd)
