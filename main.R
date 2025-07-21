@@ -1,6 +1,5 @@
 library(renv)
-renv::restore()
-renv::install("Factoshiny")
+renv::repair()
 
 wd <- set_wd()
 set.seed(12345)
