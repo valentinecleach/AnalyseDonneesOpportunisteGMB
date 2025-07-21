@@ -1,48 +1,35 @@
+# Activate renv (reproducible environment)
 source("renv/activate.R")
 
-
+# Auto-load packages (safe loading)
 packages <- c("dplyr", "stringr", "ggplot2", "readr", 
               "sf", "stringi", "janitor", "rsample",
               "patchwork", "scales", "lubridate",
-              "purrr", "forcats","forecast", "targets", "tarchetypes",
+              "purrr", "forcats", "forecast", "targets", "tarchetypes",
               "ggpubr", "collapse", "vegan", "tidyverse", "ggspatial",
               "tigris", "permute", "viridis", "FactoMineR",
-              "scales", "ggfortify", "bookdown"
- )  
+              "scales", "ggfortify", "bookdown")
 
-# Install
 for (pkg in packages) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg)  # auto-install
-  }
-  library(pkg, character.only = TRUE)
-}
-
-# Load
-for (pkg in packages) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    message(sprintf("Package '%s' is not installed.", pkg))
+    message(sprintf("Missing package: %s", pkg))
   } else {
-    library(pkg, character.only = TRUE)
+    suppressPackageStartupMessages(library(pkg, character.only = TRUE))
   }
 }
 
+message("Packages loaded.")
 
-message("Packages auto-loaded: ", paste(packages, collapse = ", "))
+# Safe sourcing of functions
+safe_source <- function(file) {
+  tryCatch(source(file), error = function(e) message("Error in ", file, ": ", e$message))
+}
 
-source("src/functions/analysedonnees.R")
-message("analysededonnees.R loaded")
-source("src/functions/cartographie.R")
-message("cartographie.R loaded")
-source("src/functions/comparaison_dans_mailles.R")
-source("src/functions/divers.R")
-source("src/functions/GLM.R")
-source("src/functions/site_maille.R")
-source("src/functions/site_psg.R")
-source("src/functions/stats_desc.R")
+function_files <- list.files("src/functions", full.names = TRUE, pattern = "\\.R$")
+lapply(function_files, safe_source)
 
+# Set some constants
 VN <- "VisioNature"
 GN <- "GeoNature"
 
-message(".Rprofile finished loading.")
-
+message(".Rprofile loaded successfully.")
