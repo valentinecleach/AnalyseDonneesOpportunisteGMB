@@ -32,4 +32,5 @@ lapply(function_files, safe_source)
 VN <- "VisioNature"
 GN <- "GeoNature"
 
+rm(pkg, packages, function_files)
 message(".Rprofile loaded successfully.")
