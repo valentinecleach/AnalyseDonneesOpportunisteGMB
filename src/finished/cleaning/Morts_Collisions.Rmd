@@ -9,4 +9,96 @@ output:
 
 # Morts Naturalistes.
 
+
+```{r}
+Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"))
+Total <- transform_Total()
+
+MortsNaturalistes <- Total%>%
+  dplyr::filter(etat_biologique %in% c("TrouvÃ© mort : impact routier", 
+                                       "Trouvé mort : impact routier"), 
+                technique_observation == "Vu")%>%
+  select(id_synt, nom_vernaculaire, date, cd_nom, cd_nom, bdd_originale, clust, famille,
+         paysage_ID, paysage_nom, famille_paysage, Code_10km, X_10km, Y_10km)
+
+summary(MortsNaturalistes)
+```
+
 # Morts Toutes données comprises.
+
+```{r}
+MortsNat <- MortsNaturalistes%>%
+  dplyr::filter(date>as.Date("2010-01-01"))%>%
+  dplyr:: mutate(cd_nom = as.numeric(cd_nom),
+                 cd_nom = dplyr::if_else(cd_nom %in% c("60704", "60658", 
+                                                       "60716", "60686", "199752",
+                                                       "60674", "60731", "60746"),
+                                         111, cd_nom),
+                 cd_nom = as.factor(cd_nom))%>%
+  dplyr::rename(espece = nom_vernaculaire) %>%
+  dplyr::select(Code_10km, X_10km, Y_10km, 
+                date, cd_nom, bdd_originale,
+                paysage_ID, paysage_nom, famille_paysage)%>%
+  sf::st_drop_geometry()
+
+
+diro <- diro_sf%>%
+  dplyr::filter(date>as.Date("2010-01-01"))%>%
+  ajout_famille_paysage() %>%
+  ajout_10x10_predetermine()%>%
+  dplyr::rename(cd_nom = cd_nom_t,
+                Code_10km = CODE_10KM)%>%
+  dplyr::select(Code_10km, X_10km, Y_10km, 
+                date, cd_nom, bdd_originale,
+                paysage_ID, paysage_nom, famille_paysage)%>%
+  sf::st_drop_geometry()
+
+MortsTotal <- rbind(MortsNat, diro)
+```
+```{r}
+
+
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km)
+autoplot(reg)
+summary(reg)
+
+col <- colorRampPalette(c("#990000","#990000", 
+                             "#eeeeee",
+                             "#05600b","#05600b"))
+corrplot::corrplot(cor(subset(bdd_reg, select=-c(famille_paysage_max, Code_10km))),
+             method="color", col=col(200),  
+             order="hclust", 
+             addCoef.col = "black", # Ajout du coefficient de correlation
+             tl.col="black", tl.srt=90 # Rotation des etiquettes de textes
+    )
+alias(lm(data = bdd_reg, 
+         proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+Code_10km))
+
+
+car::vif(lm(data = bdd_reg, 
+          proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max))
+car::vif(lm(data = bdd_reg, 
+          proportion_interet ~ year+Code_10km))
+car::vif(lm(data = bdd_reg, 
+              proportion_interet ~ year+Y_10km + X_10km))
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km+Y_10km)
+summary(reg)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year)
+summary(reg)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year))
+summary(reg)
+
+# Enlever les données de 2025 comme pas une année complète? Espèces par saisons peuvent biaser les choses?
+```
+
+

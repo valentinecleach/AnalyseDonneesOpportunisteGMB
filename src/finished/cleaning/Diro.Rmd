@@ -64,45 +64,40 @@ diro_sf <- diro_sf %>%
                           "reptile", "reptiles")))%>%
   dplyr::mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")),
                 espece = dplyr::if_else(commentaire == "Furet", 
-                          "mustÃ©lidÃ©", espece, missing=espece),
-                espece = dplyr::if_else(startsWith(espece,"vison"), "mustÃ©lidÃ©", espece, missing=espece),
+                          "mustélidé", espece, missing=espece),
+                espece = dplyr::if_else(startsWith(espece,"vison"), "mustélidé", espece, missing=espece),
                 espece = dplyr::if_else(espece %in% c("martre", "belette", "fouine",
-                                                      "hermine", "putois", "autre petit mustÃ©lidÃ©"), 
-                                        "mustÃ©lidÃ©", espece, missing = espece )
+                                                      "hermine", "putois", "autre petit mustélidé"), 
+                                        "mustélidé", espece, missing = espece )
         )%>% 
   dplyr::mutate(bdd_originale = "DIRO",
          technique_observation = "Vu",
-         etat_biologique = "TrouvÃ© mort : impact routier")%>%
+         etat_biologique = "Trouvé mort : impact routier")%>%
   dplyr::mutate(espece = as.factor(espece)) %>%
   dplyr::select(-date_maj, -annee, -mois, -commentaire, -grp_espece)
 
 
-test <- diro_sf%>%
+diro_sf <- diro_sf%>%
   dplyr::mutate(cd_nom_t = dplyr::case_when(
     espece == "blaireau" ~ 60636,
     espece == "cerf/biche" ~ 61000,
     espece == "chevreuil" ~ 61057,
-    espece == "Ã©cuireuil" ~ 61153,
-    espece == "hÃ©risson" ~ 60015,
+    espece == "écureuil" ~ 61153,
+    espece == "hérisson" ~ 60015,
         espece == "lapin" ~ 61714,
-        espece == "liÃ¨vre" ~ 61678,
+        espece == "lièvre" ~ 61678,
         espece == "loutre" ~ 60630,
-        espece == "mustÃ©lidÃ©" ~ 111,
-        espece == "rangondin" ~ 61667,
+        espece == "mustélidé" ~ 111,
+        espece == "ragondin" ~ 61667,
         espece == "rat" ~ NA,
-        espece == "rat musquÃ©" ~ 61448,
+        espece == "rat musqué" ~ 61448,
         espece == "renard" ~ 60658,
-        espece == "sanglier" ~ 60658,
+        espece == "sanglier" ~ 60981,
     .default = NA
   ))%>%
-  select(cd_nom_t, bdd_originale,espece, date, geom, geometry)
+  dplyr::filter(!is.na(cd_nom_t))%>%
+  dplyr::select(cd_nom_t, bdd_originale, espece, date, geom, geometry)
 
-View(test)
-summary(diro_sf$geometry)
-summary(as.factor(diro_sf$espece))
-summary(test$espece)
 sf::st_write(diro_sf, paste0(wd$data, "derived/diro.shp"))
 
-
-  
 ```

@@ -66,9 +66,18 @@ ajout_10x10_predetermine <- function(bdd = Total){
   bdd <- grille_10x10 %>%
     dplyr::select(CODE_10KM, X_10km, Y_10km)%>%
     sf::st_join(bdd, left = TRUE)
-    
-  bdd <- bdd %>%
-    dplyr::filter(!is.na(cd_nom))
+  
+  if("cd_nom" %in% colnames(bdd))
+  {
+    bdd <- bdd %>%
+      dplyr::filter(!is.na(cd_nom))
+  }else{
+    if("cd_nom_t" %in% colnames(bdd))
+    {
+      bdd <- bdd %>%
+        dplyr::filter(!is.na(cd_nom_t))
+    } 
+  }
   
   return(bdd)
 }

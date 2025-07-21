@@ -24,7 +24,10 @@ Mode <- function(x) {
 #' @examples
 #' 
 tab_glm <- function(espece_interet, espece_benchmark, bdd=Total){
-  tab <- bdd %>%
+  
+  if("clust" %in% colnames(bdd))
+  {
+    tab <- bdd %>%
       sf::st_drop_geometry() %>%
       dplyr::filter(cd_nom %in% c(espece_interet, espece_benchmark)) %>%
       dplyr::select(date, 
@@ -47,7 +50,28 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd=Total){
                     Code_10km, nb_annee_site, X_10km, Y_10km,
                     famille_paysage_max, clust_max)%>%
       dplyr::distinct(year, Code_10km, .keep_all = TRUE)
-    
+  }else{
+    tab <- bdd %>%
+      sf::st_drop_geometry() %>%
+      dplyr::filter(cd_nom %in% c(espece_interet, espece_benchmark)) %>%
+      dplyr::select(date, cd_nom, 
+                    Code_10km, X_10km, Y_10km, famille_paysage) %>%
+      dplyr::filter(date > as.Date("2010-01-01")) %>%
+      dplyr::mutate(year = lubridate::year(date)) %>%
+      dplyr::group_by(year, Code_10km) %>%
+      dplyr::mutate(proportion_interet = sum(cd_nom == espece_interet)/n(),
+                    famille_paysage_max = Mode(famille_paysage)) %>%
+      dplyr::ungroup() %>%
+      dplyr::group_by(Code_10km) %>%
+      dplyr::mutate(nb_annee_site = dplyr::n_distinct(year)) %>%
+      dplyr::ungroup() %>%
+      dplyr::group_by(Code_10km, year) %>%
+      dplyr::mutate(proportion_total = sum(proportion_interet)/nb_annee_site) %>%
+      dplyr::select(year, proportion_interet, proportion_total,
+                    Code_10km, nb_annee_site, X_10km, Y_10km,
+                    famille_paysage_max)%>%
+      dplyr::distinct(year, Code_10km, .keep_all = TRUE)
+  }
   
   return(tab)  
 }
