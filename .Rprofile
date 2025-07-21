@@ -7,9 +7,18 @@ packages <- c("dplyr", "stringr", "ggplot2", "readr",
               "purrr", "forcats","forecast", "targets", "tarchetypes",
               "ggpubr", "collapse", "vegan", "tidyverse", "ggspatial",
               "tigris", "permute", "viridis", "FactoMineR",
-              "scales", "ggfortify"
+              "scales", "ggfortify", "bookdown"
  )  
 
+# Install
+for (pkg in packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg)  # auto-install
+  }
+  library(pkg, character.only = TRUE)
+}
+
+# Load
 for (pkg in packages) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
     message(sprintf("Package '%s' is not installed.", pkg))
@@ -22,7 +31,9 @@ for (pkg in packages) {
 message("Packages auto-loaded: ", paste(packages, collapse = ", "))
 
 source("src/functions/analysedonnees.R")
+message("analysededonnees.R loaded")
 source("src/functions/cartographie.R")
+message("cartographie.R loaded")
 source("src/functions/comparaison_dans_mailles.R")
 source("src/functions/divers.R")
 source("src/functions/GLM.R")
@@ -32,3 +43,6 @@ source("src/functions/stats_desc.R")
 
 VN <- "VisioNature"
 GN <- "GeoNature"
+
+message(".Rprofile finished loading.")
+

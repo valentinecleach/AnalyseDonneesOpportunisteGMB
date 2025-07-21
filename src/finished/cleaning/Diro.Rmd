@@ -103,6 +103,6 @@ summary(as.factor(diro_sf$espece))
 summary(test$espece)
 sf::st_write(diro_sf, paste0(wd$data, "derived/diro.shp"))
 
-Morts_Naturalistes %>%
+
   
 ```
