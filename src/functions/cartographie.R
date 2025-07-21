@@ -1,6 +1,6 @@
-graph_ordre_tranche_annee <- function(ordre_voulu){
+graph_ordre_tranche_annee <- function(bdd = Total, ordre_voulu){
   # Creation de la BDD
-  ordre_data <- Total %>% 
+  ordre_data <- bdd %>% 
     dplyr::filter(ordre == ordre_voulu)
   bdd_props <- prop.table(table(ordre_data$bdd_originale))
   n_bdd1 <- round(5000 * bdd_props[1])

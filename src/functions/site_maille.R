@@ -72,14 +72,3 @@ ajout_10x10_predetermine <- function(bdd = Total){
   
   return(bdd)
 }
-hT <- head(Total)
-
-View(hT%>%
-  ajout_10x10_predetermine())
-
-
-Total <- ajout_10x10_predetermine()
-
-View(Total)
-
-View(bdd)

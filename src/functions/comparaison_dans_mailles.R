@@ -1,5 +1,5 @@
-histogramme_maillage_pos <- function(colonne, espece, taille){
-  nbr_maille_par_date <- Total %>%
+histogramme_maillage_pos <- function(bdd = Total, colonne, espece, taille){
+  nbr_maille_par_date <- bdd %>%
     filter(cd_nom == espece,
            date > as.Date("1980-01-01")) %>%
     group_by(year(date), {{colonne}}) %>%
@@ -25,7 +25,7 @@ histogramme_maillage_pos <- function(colonne, espece, taille){
 #'
 #' @examples
 #' 
-pour_chaque_maillage <- function(espece){
+pour_chaque_maillage <- function(bdd= Total, espece){
   p1 <- histogramme_maillage_pos(Grid2km, taille = 2, espece)
   p2 <- histogramme_maillage_pos(Grid5km, taille = 5, espece)
   p3 <- histogramme_maillage_pos(Grid10km, taille = 10, espece)
@@ -33,7 +33,7 @@ pour_chaque_maillage <- function(espece){
   
   p <- ggarrange(p1, p2, p3, p4) 
   
-  nom_espece <- Total %>%
+  nom_espece <- bdd %>%
     filter(cd_nom == espece) %>%
     st_drop_geometry() %>%
     select(nom_vernaculaire) %>%

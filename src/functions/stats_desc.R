@@ -10,7 +10,8 @@
 #'
 #' @examples
 #' 
-repartition_espece <- function(bdd = Total, nom_ordre, repartition, date_min = params$date_min) {
+repartition_espece <- function(bdd = Total, nom_ordre, 
+                               repartition, date_min = params$date_min) {
   
   pour_titre1 = deparse(substitute(repartition))
   pour_titre2 = deparse(substitute(nom_ordre))

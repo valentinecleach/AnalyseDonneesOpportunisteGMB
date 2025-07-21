@@ -7,8 +7,8 @@
 #'
 #' @examples
 #' 
-nb_ordre <- function(nom_ordre){
-  nb_o <- Total %>%
+nb_ordre <- function(bdd = Total, nom_ordre){
+  nb_o <- bdd %>%
     dplyr::filter(ordre == nom_ordre) %>%
     dplyr::group_by(observateurs) %>%
     dplyr::summarise(nbr = n(), 
