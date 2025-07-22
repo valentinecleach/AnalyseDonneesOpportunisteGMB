@@ -55,6 +55,7 @@ diro <- diro_sf%>%
 
 MortsTotal <- rbind(MortsNat, diro)
 ```
+Lapin blaireau
 ```{r}
 
 
@@ -95,10 +96,249 @@ reg <- glm(data = bdd_reg,
 summary(reg)
 
 reg <- glm(data = bdd_reg, 
+           proportion_interet ~ I(year**2)+year)
+
+reg <- glm(data = bdd_reg, 
            proportion_interet ~ as.factor(year))
 summary(reg)
 
 # Enlever les données de 2025 comme pas une année complète? Espèces par saisons peuvent biaser les choses?
 ```
+Lapin chevreuil
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+I(year**2))
 
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year))
+
+autoplot(reg)
+summary(reg)
+```
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km+Y_10km)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year) + X_10km + Y_10km)
+
+autoplot(reg)
+summary(reg)
+
+```
+
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60015)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+I(year**2)+year*X_10km)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year)+X_10km)
+
+autoplot(reg)
+summary(reg)
+
+```
+
+sanglier ragondin
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 60981,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+I(year**2)+X_10km + Y_10km)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year)+X_10km + Y_10km)
+
+autoplot(reg)
+summary(reg)
+```
+
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 60981,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+X_10km + Y_10km)
+summary(reg)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year + X_10km + Y_10km)
+
+autoplot(reg)
+summary(reg)
+
+```
+mieux si year est quali niveau AIC mais très peu voir pas significatifs
+
+Sanglier  - Blaireau
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 60981,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+X_10km+I(year**2))
+summary(reg)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year)+X_10km)
+
+autoplot(reg)
+summary(reg)
+```
+
+
+
+Sanglier hérisson
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 60981,
+                   espece_benchmark = 60015)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+X_10km+I(year**2)+Y_10km)
+summary(reg)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year)+X_10km+Y_10km)
+
+autoplot(reg)
+summary(reg)
+```
+RENARD - Ragondin
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 60585,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+I(year**2)+Y_10km+X_10km)
+summary(reg)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year)+X_10km+Y_10km)
+
+autoplot(reg)
+summary(reg)
+```
+
+renard - chevreuil
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 60585,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+I(year**2)+Y_10km+X_10km)
+summary(reg)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year)+X_10km+Y_10km)
+
+autoplot(reg)
+summary(reg)
+
+```
+
+renard - Blaireau
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 60585,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+I(year**2)+X_10km)
+summary(reg)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year)+X_10km)
+
+autoplot(reg)
+summary(reg)
+
+```
+
+renard - Hérisson
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 60585,
+                   espece_benchmark = 60015)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+Y_10km)
+summary(reg)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year)+X_10km+Y_10km)
+
+autoplot(reg)
+summary(reg)
+```
+
+Mustélidés - Ragondin
+
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 111,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+I(year**2))
+
+autoplot(reg)
+
+summary(reg)
+
+```
+Mustélidés - chevreuil
+
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 111,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+I(year**2)+X_10km)
+
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ as.factor(year)+X_10km)
+
+autoplot(reg)
+
+summary(reg)
+
+```
+Mustélidés - blaireau
+
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 111,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+I(year**2)+X_10km + Y_10km)
+
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ as.factor(year)+X_10km + Y_10km)
+
+autoplot(reg)
+
+summary(reg)
+
+```
+Mustélidés - Hérisson
+
+```{r}
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 111,
+                   espece_benchmark = 60015)
+reg <- glm(data = bdd_reg, 
+         proportion_interet ~ year+I(year**2)+ X_10km + Y_10km)
+
+autoplot(reg)
+
+summary(reg)
+
+```
 
