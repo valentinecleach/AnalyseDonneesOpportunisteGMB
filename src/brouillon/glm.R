@@ -41,7 +41,7 @@ bdd_reg <- tab_glm(Total,
                    espece_interet = 61714,
                    espece_benchmark = 61057)
 reg <- glm(data = bdd_reg, 
-           proportion_interet ~ year+X_10km)
+           proportion_interet ~ year+I(year**2)+X_10km)
 autoplot(reg)
 summary(reg)
 
@@ -55,15 +55,21 @@ bdd_reg <- tab_glm(Total,
                    espece_interet = 61714,
                    espece_benchmark = 60636)
 reg <- glm(data = bdd_reg, 
-           proportion_interet ~ year+X_10km)
+           proportion_interet ~ year+I(year**2)+X_10km)
 autoplot(reg)
 summary(reg)
 
 # LAPIN HERISSON
 reg <- glm_automatique(cd_nom_interet = 61714, 
-                       cd_nom_benchmark = 60015)
+                       cd_nom_benchmark = )
 autoplot(reg)
 summary(reg)
+
+bdd_reg <- tab_glm(Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60015)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+I(year**2)+X_10km)
 
 #######
 
@@ -72,6 +78,13 @@ reg <- glm_automatique(cd_nom_interet = 60981,
                        cd_nom_benchmark = 61667)
 autoplot(reg)
 summary(reg)
+
+bdd_reg <- tab_glm(Total, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60015)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+I(year**2)+X_10km)
+
 # SANGLIER CHEVREUIL
 reg <- glm_automatique(cd_nom_interet = 60981, 
                        cd_nom_benchmark = 61057)
@@ -91,10 +104,10 @@ summary(reg)
 ######
 
 # RENARD RAGONDIN
-reg <- glm_automatique(cd_nom_interet = 60585, 
+reg1 <- glm_automatique(cd_nom_interet = 60585, 
                        cd_nom_benchmark = 61667)
-autoplot(reg)
-summary(reg)
+autoplot(reg1)
+summary(reg1)
 # RENARD CHEVREUIL
 reg <- glm_automatique(cd_nom_interet = 60585, 
                        cd_nom_benchmark = 61057)
@@ -121,10 +134,10 @@ autoplot(reg)
 summary(reg)
 
 # MARTRES CHEVREUIL
-reg <- glm_automatique(cd_nom_interet = 60658, 
+reg1 <- glm_automatique(cd_nom_interet = 60658, 
                        cd_nom_benchmark = 61057)
-autoplot(reg)
-summary(reg)
+autoplot(reg1)
+summary(reg1)
 # MARTRES BLAIREAU
 reg <- glm_automatique(cd_nom_interet = 60658, 
                        cd_nom_benchmark = 60636)
