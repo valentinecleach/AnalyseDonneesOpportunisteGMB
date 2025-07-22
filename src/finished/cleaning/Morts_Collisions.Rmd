@@ -101,8 +101,8 @@ reg <- glm(data = bdd_reg,
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ as.factor(year))
 summary(reg)
-
-# Enlever les données de 2025 comme pas une année complète? Espèces par saisons peuvent biaser les choses?
+autoplot(reg)
+s# Enlever les données de 2025 comme pas une année complète? Espèces par saisons peuvent biaser les choses?
 ```
 Lapin chevreuil
 ```{r}

@@ -1,0 +1,206 @@
+---
+title: "Diro_desc"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+---
+
+# Importation des données
+
+```{r}
+wd <- set_wd()
+
+collision_faune_diro <- readr::read_csv(paste0(wd$data, "raw/collision_faune_diro.csv"))
+
+diro <- collision_faune_diro %>%
+  dplyr::mutate(
+    geom_x = as.numeric(stringr::str_match(geom, "POINT \\(([^ ]+)")[,2]),
+    geom_y = as.numeric(stringr::str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
+  )%>%
+  dplyr::filter(!is.na(geom))
+
+diro_sf <- sf::st_as_sf(diro, 
+                        coords = c("geom_x", "geom_y"), 
+                        crs = 2154)
+
+diro_sf <- sf::st_transform(diro_sf, 
+                        sf::st_crs(4326))
+
+carte_bretagne_44 <- sf::st_read(paste0(wd$data,                                    "masques/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp"
+                                    )) %>%
+  sf::st_transform(2154)%>%
+  sf::st_transform(sf::st_crs(4326))
+
+diro_conti <- sf::st_filter(diro_sf,
+                            carte_bretagne_44, 
+                            .predicate = sf::st_within)
+
+
+diro_sf <- diro_conti%>%
+  dplyr::filter(deppr != 44)
+
+diro_sf <- diro_sf %>%
+   dplyr::filter(!(espece %in% c("amphibien", "amphibiens", "autre", "autre oiseau",
+                          "castor", "chat", "chauve-souris", "chien", "chouette",
+                          "nr", "oiseaux sauf rapace", "rapace diurne", 
+                          "rapace nocturne", "rapaces nocturnes", "rapaces diurnes",
+                          "reptile", "reptiles")))%>%
+  dplyr::mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")),
+                espece = dplyr::if_else(commentaire == "Furet", 
+                          "furet", espece, missing=espece),
+                espece = as.factor(espece)) %>%
+  dplyr::select(-date_maj, -annee, -mois, -commentaire, -grp_espece)
+
+diro <- diro_sf%>%
+  sf::st_drop_geometry()
+
+```
+
+# Analyse descriptive
+
+## Répartition frequence des espèces
+
+```{r}
+diro%>% 
+  ggplot()+
+  geom_bar(aes(x=fct_infreq(espece), fill="#FFDB58"))+
+  coord_flip()+theme_bw()+
+  labs(title = "1. Repartition des especes de DIR Ouest",
+       x = "Espece",
+       y = "Nombre")+
+  scale_fill_brewer(palette = "Paired")
+```
+
+```{r}
+diro%>%
+  dplyr::mutate(
+    year = as.numeric(format(date, "%Y")),
+    nom_vernaculaire_grp = fct_lump(espece, prop = 0.03)
+  ) %>%
+  ggplot2::ggplot(aes(year, fill = nom_vernaculaire_grp)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "2. Repartition des differentes especes observes",
+    x = "Periode",
+    y = "Proportion",
+    fill = "Espece"
+  ) +
+  theme_minimal()+
+  scale_fill_brewer(palette = "Paired")
+```
+
+```{r}
+
+diro%>%
+  ggplot2::ggplot(aes(as.factor(wday(date, 
+                            week_start = getOption("lubridate.week.start", 1))),
+                      fill="#FFDB58"))+
+  labs(title="3. Barplot des observation selon le jour de la semaine",
+       y="Nombre d'observations",
+       x="Jour de la semaine")+ 
+  theme_bw()+
+  geom_bar()+
+  scale_x_discrete(labels=c("1" = "Lundi", 
+                            "2" = "Mardi",
+                            "3" = "Mercredi",
+                            "4" = "Jeudi",
+                            "5" = "Vendredi",
+                            "6" = "Samedi",
+                            "7" = "Dimanche"))
+
+```
+
+```{r}
+
+diro %>%
+  dplyr::mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)%>%
+  ggplot2::ggplot(aes(jour_annee, fill="#FFDB58")) +
+  labs(title="4. Frequence des observations selon le jour de l'annee",
+       y="Proportion",
+       x="Jour de l'annee")+
+  geom_density()+theme_bw()
+
+```
+
+```{r}
+
+diro%>%
+    ggplot2::ggplot(aes(factor(month(date)), fill="#FFDB58"))+
+    labs(title="5. Barplot des observation selon le mois",
+         y="Nombre d'observations",
+         x="Mois")+ 
+    theme_bw()+
+    geom_bar()+
+    scale_x_discrete(labels=c("1" = "Janvier", 
+                              "2" = "Fevrier",
+                              "3" = "Mars",
+                              "4" = "Avril",
+                              "5" = "Mai",
+                              "6" = "Juin",
+                              "7" = "Juillet",
+                              "8" = "Aout",
+                              "9" = "Septembre",
+                              "10" = "Octobre",
+                              "11" = "Novembre",
+                              "12" = "Decembre"))
+```
+
+```{r}
+diro%>%
+  ggplot(aes(date, col="#FFDB58"))+
+  labs(title=paste("6. Frequence des observations dans le temps"))+ 
+  theme_bw()+
+  geom_line(stat="density")
+```
+
+## Répartition géographique des données
+
+```{r}
+ggplot() +
+  geom_sf(data = carte_bretagne_44) +
+  geom_sf(data = diro_sf) +
+  theme_bw() + 
+  labs(title = "7. Toutes les donnees DIR Ouest utilises")
+```
+
+```{r}
+repartition_espece_geo <- function(bdd = diro_sf, nom_espece, num_graph=1){
+  grille_10x10 <- sf::st_read(
+    paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
+  )
+  RegionBretagneConti <- sf::st_read(
+    paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
+  )
+  
+  diro_sf <- diro_sf %>%
+    dplyr::filter(espece == nom_espece)%>%
+    transforme_carte()
+  grille_10x10 <- grille_10x10%>%
+    transforme_carte()
+  RegionBretagneConti <- RegionBretagneConti%>%
+    transforme_carte()
+  
+  grille_10x10$density <- lengths(sf::st_intersects(grille_10x10, 
+                                                    diro_sf))
+  grille_10x10 <- sf::st_intersection(grille_10x10, 
+                                      RegionBretagneConti)
+
+  g <- ggplot() +
+    geom_sf(data = RegionBretagneConti) + 
+    labs(title = paste0(num_graph, ". Densite des observations du ", 
+                        nom_espece, " en bretagne")) +
+    geom_sf(data = grille_10x10, aes(fill = density)) +
+    scale_fill_gradient(low="#f6dcb4", high="orangered3") +
+    theme_bw()
+
+return(g)
+}
+
+repartition_espece_geo(nom_espece = "renard", num_graph = 8)
+repartition_espece_geo(nom_espece = "martre", num_graph = 9)
+repartition_espece_geo(nom_espece = "fouine", num_graph = 10)
+repartition_espece_geo(nom_espece = "putois", num_graph = 11)
+```
+
