@@ -334,7 +334,8 @@ bdd_reg <- tab_glm(MortsTotal,
                    espece_interet = 111,
                    espece_benchmark = 60015)
 reg <- glm(data = bdd_reg, 
-         proportion_interet ~ year+I(year**2)+ X_10km + Y_10km)
+         proportion_interet ~ year+I(year**2))
+reg <- glm(data = bdd_reg, proportion_interet ~ as.factor(year))
 
 autoplot(reg)
 
@@ -342,3 +343,212 @@ summary(reg)
 
 ```
 
+### Uniquement collision naturalistes
+Lapin - Ragondin
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61667)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year+I(year**2))
+reg <- glm(data=bdd_reg, proportion_interet ~ as.factor(year))
+
+
+summary(reg)
+autoplot(reg)
+
+```
+Lapin - Chevreuil
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year)
+
+summary(reg)
+autoplot(reg)
+
+```
+Lapin - Blaireau
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60636)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year+I(year**2))
+
+summary(reg)
+autoplot(reg)
+
+```
+
+Lapin - Hérrison
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60015)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year)
+
+summary(reg)
+autoplot(reg)
+
+```
+
+Sanglier - Ragondin
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60981,
+                   espece_benchmark = 61667)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year)
+
+summary(reg)
+autoplot(reg)
+
+# On peut rien vrmt dire..
+```
+Sanglier - Chevreuil
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60981,
+                   espece_benchmark = 61057)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year)
+
+summary(reg)
+autoplot(reg)
+
+# On peut rien vrmt dire..
+```
+
+Sanglier - Blaireau
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60981,
+                   espece_benchmark = 60636)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year)
+
+summary(reg)
+autoplot(reg)
+
+# On peut rien vrmt dire..
+```
+
+Sanglier - hérisson
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60981,
+                   espece_benchmark = 60015)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year)
+
+summary(reg)
+autoplot(reg)
+
+```
+
+Renard - ragondin
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60585,
+                   espece_benchmark = 61667)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ as.factor(year)+Y_10km)
+
+summary(reg)
+autoplot(reg)
+
+```
+
+Renard - chevreuil
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60585,
+                   espece_benchmark = 61057)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year+Y_10km)
+
+summary(reg)
+autoplot(reg)
+
+```
+
+Renard - blaireau
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60585,
+                   espece_benchmark = 60636)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ as.factor(year))
+
+summary(reg)
+autoplot(reg)
+
+```
+
+Renard - hérisson
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60585,
+                   espece_benchmark = 60015)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ as.factor(year)+Y_10km+X_10km)
+
+summary(reg)
+autoplot(reg)
+
+```
+
+### Martre
+Martre - ragondin
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60658,
+                   espece_benchmark = 61667)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year)
+
+summary(reg)
+autoplot(reg)
+
+```
+Martre - chevreuil
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60658,
+                   espece_benchmark = 61057)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year+I(year**2))
+
+summary(reg)
+autoplot(reg)
+
+```
+
+Martre - blaireau
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60658,
+                   espece_benchmark = 60636)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year+I(year**2))
+
+summary(reg)
+autoplot(reg)
+
+```
+
+Martre - hérisson
+```{r}
+bdd_reg <- tab_glm(MortsNaturalistes, 
+                   espece_interet = 60658,
+                   espece_benchmark = 60015)
+
+reg <- glm(data=bdd_reg, proportion_interet ~ year+I(year**2))
+reg <- glm(data=bdd_reg, proportion_interet ~ as.factor(year))
+summary(reg)
+autoplot(reg)
+```

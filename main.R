@@ -60,6 +60,9 @@ rmarkdown::render(paste0(wd$src,
 rmarkdown::render(paste0(wd$src, "brouillon/glm.Rmd"))
 rmarkdown::render(paste0(wd$src, "brouillon/glm.Rmd"))
 
+rmarkdown::render(paste0(wd$src, "finished/cleaning/Morts_Collisions.Rmd"),
+                  output_file = paste0(wd$output, 
+                                       "models/glm/Morts_Collision.html"))
 
 
 #  scale_fill_gradient(low="#fbf0d1", high="#daa702") +
