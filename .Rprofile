@@ -8,7 +8,7 @@ packages <- c("dplyr", "stringr", "ggplot2", "readr",
               "purrr", "forcats", "forecast", "targets", "tarchetypes",
               "ggpubr", "collapse", "vegan", "tidyverse", "ggspatial",
               "tigris", "permute", "viridis", "FactoMineR",
-              "scales", "ggfortify", "bookdown")
+              "scales", "ggfortify", "bookdown", "raster", "tiff")
 
 for (pkg in packages) {
   if (!requireNamespace(pkg, quietly = TRUE)) {

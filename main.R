@@ -70,3 +70,22 @@ rmarkdown::render(paste0(wd$src, "brouillon/Diro_desc.Rmd"),
 
 
 #  scale_fill_gradient(low="#fbf0d1", high="#daa702") +
+EcoPaysage <- sf::st_read(paste0(wd$data, "masques/EcoPaysages/EcoPaysages_Vecteur_resol30m_L93.shp"))
+
+
+# Importer et traiter le raster :
+library(tiff)
+library(raster)
+
+str_name<-'MOD16A2_ET_0.05deg_GEO_2008M01.tif' 
+install.packages("raster")
+dist_ecotone_arbore <- tiff::readTIFF(paste0(wd$data, "masques/VariablesStructurates/Distance_EcotoneArbore.tif")) 
+?readTIFF
+
+imported_raster=raster::raster(paste0(wd$data, "masques/VariablesStructurates/Distance_EcotoneArbore.tif"))
+install.packages("terra") 
+r = visualraster::raster("raster.tif")
+imported_raster=visualraster::raster(paste0(wd$data, "masques/VariablesStructurates/Distance_EcotoneArbore.tif"))
+
+library("devtools")
+install_github("etiennebr/visualraster")

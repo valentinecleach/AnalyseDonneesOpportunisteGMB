@@ -192,7 +192,7 @@ repartition_espece_geo <- function(bdd = diro_sf, nom_espece, num_graph=1){
     labs(title = paste0(num_graph, ". Densite des observations du ", 
                         nom_espece, " en bretagne")) +
     geom_sf(data = grille_10x10, aes(fill = density)) +
-    scale_fill_gradient(low="#f6dcb4", high="orangered3") +
+    scale_fill_gradient(low="white", high="orangered3") +
     theme_bw()
 
 return(g)
