@@ -69,23 +69,36 @@ rmarkdown::render(paste0(wd$src, "brouillon/Diro_desc.Rmd"),
                                        "stats_desc/Diro.html"))
 
 
-#  scale_fill_gradient(low="#fbf0d1", high="#daa702") +
-EcoPaysage <- sf::st_read(paste0(wd$data, "masques/EcoPaysages/EcoPaysages_Vecteur_resol30m_L93.shp"))
+
+install.packages("terra")
+library(terra)
+
+# Grille de base
+grille_10x10 <- sf::st_read(
+  paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
+)
+RegionBretagneConti <- sf::st_read(
+  paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
+)
+grille_10x10 <- grille_10x10%>%
+  transforme_carte()
+RegionBretagneConti <- RegionBretagneConti%>%
+  transforme_carte()
+grille_10x10 <- sf::st_intersection(grille_10x10, RegionBretagneConti)
+
+# Import
+dist_ecotone_arbore <- terra::rast(paste0(wd$data, "masques/VariablesStructurates/Distance_EcotoneArbore.tif"))
+Indice_Diversite <- terra::rast(paste0(wd$data, "masques/VariablesStructurates/Indice_Diversite_500m.tif"))
+
+# Transformation
+grille_10x10 <- sf::st_transform(grille_10x10, crs(Indice_Diversite))
+grille_vect <- terra::vect(grille_10x10)
+moyenne <- terra::extract(Indice_Diversite, grille_vect, fun = mean, na.rm = TRUE)
+grille_10x10$Indice_Diversite_moyenne <- moyenne[, 2] 
 
 
-# Importer et traiter le raster :
-library(tiff)
-library(raster)
+ggplot(grille_10x10) +
+  geom_sf(aes(fill = Indice_Diversite_moyenne)) +
+  theme_minimal()+
+  scale_fill_gradientn(colors = topo.colors(6))
 
-str_name<-'MOD16A2_ET_0.05deg_GEO_2008M01.tif' 
-install.packages("raster")
-dist_ecotone_arbore <- tiff::readTIFF(paste0(wd$data, "masques/VariablesStructurates/Distance_EcotoneArbore.tif")) 
-?readTIFF
-
-imported_raster=raster::raster(paste0(wd$data, "masques/VariablesStructurates/Distance_EcotoneArbore.tif"))
-install.packages("terra") 
-r = visualraster::raster("raster.tif")
-imported_raster=visualraster::raster(paste0(wd$data, "masques/VariablesStructurates/Distance_EcotoneArbore.tif"))
-
-library("devtools")
-install_github("etiennebr/visualraster")
