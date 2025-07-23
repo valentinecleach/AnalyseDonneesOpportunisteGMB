@@ -1,6 +1,9 @@
 library(renv)
 renv::repair()
 
+loadedNamespaces()
+library(dplyr, sf, ggplot2)
+
 wd <- set_wd()
 set.seed(12345)
 
@@ -101,4 +104,5 @@ ggplot(grille_10x10) +
   geom_sf(aes(fill = Indice_Diversite_moyenne)) +
   theme_minimal()+
   scale_fill_gradientn(colors = topo.colors(6))
+
 
