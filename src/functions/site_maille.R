@@ -81,3 +81,32 @@ ajout_10x10_predetermine <- function(bdd = Total){
   
   return(bdd)
 }
+
+
+#' Ajoute la moyenne de l'une bdd .tif a l'interieur de chaque carré d'une maille
+#'
+#' @param bdd_grille La base de donnee avec les mailles 
+#' @param bdd_tif Une base de donnee .tif avec la variable qui nous interesse
+#'
+#' @return La base de donnee, avec la colonne en +
+#' @export
+#'
+#' @examples
+#' 
+ajout_variable_struct <- function(bdd_grille = grille_10x10, bdd_tif){
+  # Import BDD
+  bdd <- terra::rast(paste0(wd$data,
+                            "masques/VariablesStructurates/", 
+                            bdd_tif, 
+                            ".tif"))
+  terra::crs(bdd) <- "EPSG:2154"
+  
+  # Transformation
+  grille_10x10 <- sf::st_transform(grille_10x10, crs = "EPSG:2154")
+  grille_vect <- terra::vect(grille_10x10)
+  grille_10x10[bdd_tif] <- exactextractr::exact_extract(bdd,
+                                                        grille_10x10, 
+                                                        'mean')
+  return(grille_10x10)
+}
+
