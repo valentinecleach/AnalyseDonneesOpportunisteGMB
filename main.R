@@ -91,7 +91,8 @@ ggplot(Total) +
   theme_minimal()+
   scale_fill_gradientn(colors = topo.colors(6))
 
-
+summary(as.factor(Total$technique_observation))
+Autres, Entendu/Ultrasons
 ###############
 Total <- transform_Total(bdd = Total)
 summary(Total)

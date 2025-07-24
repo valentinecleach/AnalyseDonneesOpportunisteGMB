@@ -11,8 +11,10 @@ output:
 
 library(dplyr)
 
-Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
-Observateurs <- utils::read.csv(paste0(wd$data,"derived/Observateurs.csv"), sep=";")
+Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"),
+                     options = "ENCODING=UTF8")
+Observateurs <- utils::read.csv(paste0(wd$data,"derived/Observateurs.csv"),
+                                sep=";")
 
 Total <- Total %>%
   transform_Total() %>%
@@ -55,6 +57,7 @@ Total <- Total %>%
 ```
 
 ```{r}
-sf::st_write(Total, paste0(wd$data, "derived/TotalComplet.shp"))
+sf::st_write(Total, paste0(wd$data, "derived/TotalComplet.shp"), 
+             layer_options = "ENCODING=UTF-8")
 ```
 

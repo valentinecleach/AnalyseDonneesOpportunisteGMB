@@ -36,7 +36,7 @@ GeoN <- GeoN %>%
     cd_nom = ifelse(cd_nom==194944, 60704, cd_nom),
     # Ecureuil
     nom_vernaculaire = ifelse(cd_nom==197486, 
-                              "Ãcureuil roux", 
+                              "ÃÂcureuil roux", 
                               nom_vernaculaire),
     cd_nom = ifelse(cd_nom==197486, 61153, cd_nom),
     # Martre
@@ -46,7 +46,7 @@ GeoN <- GeoN %>%
     cd_nom = ifelse(cd_nom==194481, 60658, cd_nom),
     # Rat
     nom_vernaculaire = ifelse(cd_nom==61585, 
-                              "Rat surmulot, Surmulot, Rat d'Ã©gout", 
+                              "Rat surmulot, Surmulot, Rat d'égout", 
                               nom_vernaculaire))%>%
   dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Core
          !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
@@ -58,22 +58,14 @@ GeoN <- GeoN %>%
                          nombre_min)
   )%>%
   dplyr::mutate(technique_observation = ifelse(
-    technique_observation %in% c("F�ces/Guano/Epreintes", 
-                                 "Empreintes", "CoulÃ©",
-                                 "Galerie/terrier", 
-                                 "Hutte (Castor, Rat musquÃ©)", "Nid/GÃ®te",
-                                 "Indices de pr�sence divers",
-                                 "Restes de repas",
-                                 "Empreintes et f�ces",
-                                 "Restes dans pelote de rÃ©jection"
-    ),
+    !(technique_observation %in% c("Autres", "Entendu", "Ultrasons", "Vu")),
     "Indices",
     ifelse(technique_observation %in% c("Entendu", "Ultrasons"), 
-           "Entendu/Ultrasons",
+           "Entendu",
            technique_observation)),
     technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
   dplyr::mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
-                                  "Non renseignÃ©", etat_biologique))%>%
+                                  "Non renseigné", etat_biologique))%>%
   dplyr::filter(!jdd_nom %in% c(490,53))%>% 
   # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
   # 53:  Donnes faunebretagne.org
@@ -97,10 +89,8 @@ GeoN <- GeoN %>%
          "cd_nom",
          "nom_valide",	"nom_vernaculaire",
          "ordre",
-         "famille",	"rang_taxo",
          "nombre",
-         "observateurs",
-         "communes",	
+         "observateurs",	
          "geometrie_wkt_4326",	
          "x_centroid_4326",
          "y_centroid_4326",
@@ -126,7 +116,7 @@ VisioN_FB <- rbind(donnees_VisioNature_FB, VN_Rodentia)
 
 VisioN_FB <- VisioN_FB %>%
   dplyr::filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
-  dplyr::filter(technique_observation != "Restes dans pelote de rjection")%>%
+  dplyr::filter(technique_observation != "Restes dans pelote de réjection")%>%
   dplyr::mutate(technique_observation = ifelse(
     !is.na(comment_occurrence) & technique_observation == "Inconnu",
     ifelse(any(grepl("TAUPINIERE", toupper(gsub("[[:punct:]]", 
@@ -148,22 +138,22 @@ VisioN_FB <- VisioN_FB %>%
            technique_observation),
     technique_observation))%>%
   dplyr::mutate(technique_observation = ifelse(technique_observation=="Entendu",
-                                        "Entendu/Ultrasons",
+                                               "Entendu",
                                         technique_observation),
          technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
   dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Core
          !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
          !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
         !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
-# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal dor, Putois domestique
+# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
   dplyr::mutate(technique_observation = ifelse(technique_observation == "Inconnu", "Vu", technique_observation))%>%
   dplyr::mutate(etat_biologique = ifelse(champs_additionnels %in% c("{'death_cause': 'ROAD_VEHICLE'}",
                                                              "{'death_cause': 'OTHER_TRANSPORT'}",
                                                              "{'death_cause': 'UNKNOWN_TRANSPORT'}"),
-                                  "TrouvÃ© mort : impact routier",
+                                  "Trouvé mort : impact routier",
                                   etat_biologique),
-         etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "TrouvÃ© mort") & grepl("ROUT", toupper(comment_occurrence))), 
-                                  "TrouvÃ© mort : impact routier",
+         etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "Trouvé mort") & grepl("ROUT", toupper(comment_occurrence))), 
+                                  "Trouvé mort : impact routier",
                                   etat_biologique)
          )%>%
   dplyr::mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
@@ -185,10 +175,8 @@ VisioN_FB <- VisioN_FB %>%
          "cd_nom",
          "nom_valide", "nom_vernaculaire",
          "ordre",
-         "famille",	"rang_taxo",
          "nombre",
-         "observateurs",
-         "communes",	
+         "observateurs",	
          "geometrie_wkt_4326",	
          "x_centroid_4326",
          "y_centroid_4326",
@@ -258,6 +246,8 @@ que_bretagne <- anti_join(total_bretagne_44,
 #   labs(title = "Points en Bretagne (sauf dans le 44)")
 
 
-sf::st_write(que_bretagne, paste0(wd$data, "derived/Total.shp"))
+sf::st_write(que_bretagne, 
+             paste0(wd$data, "derived/Total.shp"), 
+             layer_options = "ENCODING=UTF-8")
 ```
 
