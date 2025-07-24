@@ -30,6 +30,16 @@ creer_maille <- function(bdd, taille_en_km){
   return(bdd)
 }
 
+#' Ajoute la maille 10x10 prédéterminé a une autre bdd, ainsi que les 
+#' coordonnées lontitude et latitude du centre de la maille.
+#'
+#' @param bdd La base de donnee auquel superposer la maille
+#'
+#' @return La base de donnee, avec les colonnes du 10x10 en +
+#' @export
+#'
+#' @examples
+#' 
 ajout_10x10_predetermine <- function(bdd = Total){
   grille_10x10 <- sf::st_read(
     paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
