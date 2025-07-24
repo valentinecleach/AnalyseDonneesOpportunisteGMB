@@ -577,7 +577,7 @@ reg <- glm(data = bdd_reg,
 summary(reg)
 autoplot(reg)
 
-corrplot::corrplot(cor(Donnes_Nat))
+corrplot::corrplot(cor(bdd_reg))
 
 ```
 
@@ -718,3 +718,6 @@ corrplot::corrplot(cor(Donnes_Nat))
 ```{r}
 
 ```
+
+# Temoins entre eux
+

@@ -41,9 +41,6 @@ transform_Total <- function(bdd = Total){
                 if('pysg_nm' %in% names(.)) 'pysg_nm',
                 if('pysg_ID' %in% names(.)) 'pysg_ID',
                 if('fmll_py' %in% names(.)) 'fmll_py',
-                if('Indc_Dv' %in% names(.)) 'Indc_Dv',
-                if('Dnst_Cl' %in% names(.)) 'Dnst_Cl',
-                if('Dstn_EA' %in% names(.)) 'Dstn_EA',
                 if('CODE_10' %in% names(.)) 'CODE_10'),
               as.factor) %>%
     dplyr::rename_with(
