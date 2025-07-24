@@ -58,13 +58,13 @@ GeoN <- GeoN %>%
                          nombre_min)
   )%>%
   dplyr::mutate(technique_observation = ifelse(
-    technique_observation %in% c("FÃ¨ces/Guano/Epreintes", 
+    technique_observation %in% c("F�ces/Guano/Epreintes", 
                                  "Empreintes", "CoulÃ©",
                                  "Galerie/terrier", 
                                  "Hutte (Castor, Rat musquÃ©)", "Nid/GÃ®te",
-                                 "Indices de prsence divers",
+                                 "Indices de pr�sence divers",
                                  "Restes de repas",
-                                 "Empreintes et fÃ¨ces",
+                                 "Empreintes et f�ces",
                                  "Restes dans pelote de rÃ©jection"
     ),
     "Indices",
@@ -131,17 +131,17 @@ VisioN_FB <- VisioN_FB %>%
     !is.na(comment_occurrence) & technique_observation == "Inconnu",
     ifelse(any(grepl("TAUPINIERE", toupper(gsub("[[:punct:]]", 
                                                 "", 
-                                                stri_trans_general(
+                                                stringi::stri_trans_general(
                                                   comment_occurrence, 
                                                   "Latin-ASCII")))),
                grepl("EMPREINTES", toupper(gsub(":punct:]]",
                                                 "",
-                                                stri_trans_general(
+                                                stringi::stri_trans_general(
                                                   comment_occurrence, 
                                                   "Latin-ASCII")))),
                grepl("TRACE", toupper(gsub(":punct:]]",
                                            "",
-                                           stri_trans_general(
+                                           stringi::stri_trans_general(
                                              comment_occurrence, 
                                              "Latin-ASCII"))))),
            "Indices",
@@ -200,7 +200,8 @@ Total <- rbind(VisioN_FB, GeoN)
 
 Total <- Total %>%
   dplyr::mutate(observateurs = gsub("-", " ", observateurs), # enlever tirets
-         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
+         observateurs = janitor::make_clean_names(observateurs, 
+                                                  allow_dupes = TRUE), # Accents
          observateurs = toupper(observateurs),
          observateurs = ifelse(observateurs == "NA", NA, observateurs)#majuscule
   )%>%

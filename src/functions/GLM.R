@@ -78,9 +78,10 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd=Total){
 
 tab <- tab_glm(bdd = Total, 
                    espece_interet = 61714,
-                   espece_benchmark = 61057)
-head(tab%>%
-  filter(Code_10km == "E028N679"))
+                   espece_benchmark = c(61057, 61028))
+summary(as.factor(Total$cd_nom))
+
+View(Total)
 
 
 #' Supprime les sites qui sont toujours 0 ou 1

@@ -556,3 +556,125 @@ reg <- glm(data=bdd_reg, proportion_interet ~ as.factor(year))
 summary(reg)
 autoplot(reg)
 ```
+
+# Toutes données naturalistes
+
+### Lapin - Ragondin
+```{r}
+
+```
+
+### Lapin - Chevreuil
+```{r}
+
+```
+
+### Lapin - Blaireau
+```{r}
+
+```
+
+### Lapin - Chevreuil+Ragondin
+```{r}
+
+```
+
+### Sanglier - Ragondin
+```{r}
+
+```
+
+### Sanglier - Chevreuil
+```{r}
+
+```
+
+### Sanglier - Blaireau
+```{r}
+
+```
+
+### Sanglier - Chevreuil+Ragondin
+```{r}
+
+```
+
+### Renard - Ragondin
+```{r}
+
+```
+
+### Renard - Chevreuil
+```{r}
+
+```
+
+### Renard - Blaireau
+```{r}
+
+```
+
+### Renard - Chevreuil+Ragondin
+```{r}
+
+```
+
+### Martre - Ragondin
+```{r}
+
+```
+
+### Martre - Chevreuil
+```{r}
+
+```
+
+### Martre - Blaireau
+```{r}
+
+```
+
+### Martre - Chevreuil+Ragondin
+```{r}
+
+```
+
+### Lievre - Ragondin
+```{r}
+
+```
+
+### Lievre - Chevreuil
+```{r}
+
+```
+
+### Lievre - Blaireau
+```{r}
+
+```
+
+### Lievre - Chevreuil+Ragondin
+```{r}
+
+```
+
+### Herisson - Ragondin
+```{r}
+
+```
+
+### Herisson - Chevreuil
+```{r}
+
+```
+
+### Herisson - Blaireau
+```{r}
+
+```
+
+### Herisson - Chevreuil+Ragondin
+```{r}
+
+```

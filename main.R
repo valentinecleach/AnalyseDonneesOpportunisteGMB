@@ -10,6 +10,8 @@ library(ggplot2)
 wd <- set_wd()
 set.seed(12345)
 
+summary(Total)
+
 Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"))
 Total <- transform_Total()
 library(dplyr)
@@ -74,28 +76,6 @@ rmarkdown::render(paste0(wd$src, "brouillon/Diro_desc.Rmd"),
                   output_file = paste0(wd$output, 
                                        "stats_desc/Diro.html"))
 
-#####
-
-grille_10x10 <- sf::st_read(
-  paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
-)
-RegionBretagneConti <- sf::st_read(
-  paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
-)
-grille_10x10 <- grille_10x10|>
-  transforme_carte()
-RegionBretagneConti <- RegionBretagneConti|>
-  transforme_carte()
-grille_10x10 <- sf::st_intersection(grille_10x10, RegionBretagneConti)
-
-grille_10x10 <- ajout_variable_struct(bdd_grille = grille_10x10, 
-                                      bdd_tif = "Indice_Diversite_500m")
-grille_10x10 <- ajout_variable_struct(bdd_grille = grille_10x10, 
-                                      bdd_tif = "Densite_Cultures_500m")
-grille_10x10 <- ajout_variable_struct(bdd_grille = grille_10x10, 
-                                      bdd_tif = "Distance_EcotoneArbore")
-
-
 ggplot(grille_10x10) +
   geom_sf(aes(fill = Densite_Cultures_500m)) +
   theme_minimal()+
@@ -106,12 +86,15 @@ ggplot(grille_10x10) +
   theme_minimal()+
   scale_fill_gradientn(colors = topo.colors(6))
 
-ggplot(grille_10x10) +
-  geom_sf(aes(fill = Indice_Diversite_500m)) +
+ggplot(Total) +
+  geom_sf(aes(fill = Indice_Diversite)) +
   theme_minimal()+
   scale_fill_gradientn(colors = topo.colors(6))
 
-grille_10x10 <- grille_10x10 |>
-  dplyr::rename(Densite_Cultures = Densite_Cultures_500m,
-                Indice_Diversite = Indice_Diversite_500m)
 
+###############
+Total <- transform_Total(bdd = Total)
+summary(Total)
+Total%>%
+  select(-c(id_synt,nom_valide,ordre, famille, rang_tx,nombre, observateurs,
+            communs, commnt_c)

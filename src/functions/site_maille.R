@@ -103,7 +103,7 @@ ajout_10x10_predetermine <- function(bdd = Total){
 #'
 #' @examples
 #' 
-ajout_variable_struct <- function(bdd_grille = grille_10x10, bdd_tif){
+cree_variable_struct <- function(bdd_grille = grille_10x10, bdd_tif){
   # Import BDD
   bdd <- terra::rast(paste0(wd$data,
                             "masques/VariablesStructurates/", 
@@ -119,4 +119,3 @@ ajout_variable_struct <- function(bdd_grille = grille_10x10, bdd_tif){
                                                         'mean')
   return(grille_10x10)
 }
-
