@@ -97,3 +97,8 @@ ggplot(Total) +
 
 Total <- transform_Total(bdd = Total)
 summary(Total)
+
+Donnes_Nat <- Total%>%
+  filter(technique_observation == "Vu")
+corrplot::corrplot(cor(Donnes_Nat[-c("date", "nom_valide", "nom_verniculaire")]))
+Donnes_Nat$
