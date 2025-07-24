@@ -13,6 +13,7 @@ library(dplyr)
 
 Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"),
                      options = "ENCODING=UTF8")
+
 Observateurs <- utils::read.csv(paste0(wd$data,"derived/Observateurs.csv"),
                                 sep=";")
 
@@ -23,37 +24,41 @@ Total <- Total %>%
   ajout_10x10_predetermine() 
 ```
 ```{r}
-  grille_10x10 <- sf::st_read(
-    paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
-  )
-  RegionBretagneConti <- sf::st_read(
+grille_10x10 <- sf::st_read(
+  paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
+)
+RegionBretagneConti <- sf::st_read(
     paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
-  )
-  grille_10x10 <- grille_10x10|>
-    transforme_carte()
-  RegionBretagneConti <- RegionBretagneConti|>
-    transforme_carte()
-  grille_10x10 <- sf::st_intersection(grille_10x10, RegionBretagneConti)
+)
+grille_10x10 <- grille_10x10 %>%
+  transforme_carte()
+RegionBretagneConti <- RegionBretagneConti %>%
+  transforme_carte()
+grille_10x10 <- sf::st_intersection(grille_10x10, 
+                                    RegionBretagneConti)
   
-  # Ajout des variables
-  grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
-                                       bdd_tif = "Indice_Diversite_500m")
-  grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
-                                       bdd_tif = "Densite_Cultures_500m")
-  grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
-                                       bdd_tif = "Distance_EcotoneArbore")
+# Ajout des variables
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Indice_Diversite_500m")
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Densite_Cultures_500m")
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Distance_EcotoneArbore")
   
   
-  grille_10x10 <-  sf::st_transform(grille_10x10, sf::st_crs(Total))
+grille_10x10 <-  sf::st_transform(grille_10x10, sf::st_crs(Total))
   
-  Total <- grille_10x10 |>
-    dplyr::rename( Densite_Cultures = Densite_Cultures_500m,
-                   Indice_Diversite = Indice_Diversite_500m ) |>
-    dplyr::select( Indice_Diversite, 
-                   Densite_Cultures,
-                   Distance_EcotoneArbore) %>%
-    sf::st_join(Total, left = TRUE)
+Total <- grille_10x10 %>%
+  dplyr::rename( Densite_Cultures = Densite_Cultures_500m,
+                 Indice_Diversite = Indice_Diversite_500m ) %>%
+  dplyr::select( Indice_Diversite, 
+                 Densite_Cultures,
+                 Distance_EcotoneArbore) %>%
+  sf::st_join(Total, left = TRUE)
 
+Total <- Total%>%
+  select(-c(cmmnt_c, chmps_d))%>%
+  filter(!is.na(date))
 ```
 
 ```{r}

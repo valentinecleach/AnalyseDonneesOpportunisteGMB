@@ -70,11 +70,13 @@ rmarkdown::render(paste0(wd$src, "brouillon/glm.Rmd"))
 
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Morts_Collisions.Rmd"),
                   output_file = paste0(wd$output, 
-                                       "models/glm/Morts_Collision.html"))
+                                       "models/glm/Morts_Collision.html"),
+                  encoding="UTF-8")
 
 rmarkdown::render(paste0(wd$src, "brouillon/Diro_desc.Rmd"),
                   output_file = paste0(wd$output, 
-                                       "stats_desc/Diro.html"))
+                                       "stats_desc/Diro.html"),
+                  encoding="UTF-8")
 
 ggplot(grille_10x10) +
   geom_sf(aes(fill = Densite_Cultures_500m)) +
@@ -91,11 +93,7 @@ ggplot(Total) +
   theme_minimal()+
   scale_fill_gradientn(colors = topo.colors(6))
 
-summary(as.factor(Total$technique_observation))
-Autres, Entendu/Ultrasons
 ###############
+
 Total <- transform_Total(bdd = Total)
 summary(Total)
-Total%>%
-  select(-c(id_synt,nom_valide,ordre, famille, rang_tx,nombre, observateurs,
-            communs, commnt_c)

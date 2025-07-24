@@ -6,7 +6,9 @@ output:
     toc: true
     toc_float: true
 ---
+
 # Importations / nettoyage
+
 ```{r}
 Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"))
 Total <- transform_Total()
@@ -210,7 +212,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-### Sanglier  - Blaireau
+### Sanglier - Blaireau
 
 ```{r}
 bdd_reg <- tab_glm(MortsTotal, 
@@ -435,7 +437,7 @@ autoplot(reg)
 
 ```
 
-### Sanglier - HÃ©risson
+### Sanglier - Hérisson
 
 ```{r}
 bdd_reg <- tab_glm(MortsNaturalistes, 
@@ -559,122 +561,160 @@ autoplot(reg)
 
 # Toutes données naturalistes
 
-### Lapin - Ragondin
 ```{r}
+Donnes_Nat <- Total%>%
+  filter(technique_observation == "Vu")
+```
+
+### Lapin - Ragondin
+
+```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year)
+summary(reg)
+autoplot(reg)
+
+corrplot::corrplot(cor(Donnes_Nat))
 
 ```
 
 ### Lapin - Chevreuil
+
 ```{r}
 
 ```
 
 ### Lapin - Blaireau
+
 ```{r}
 
 ```
 
 ### Lapin - Chevreuil+Ragondin
+
 ```{r}
 
 ```
 
 ### Sanglier - Ragondin
+
 ```{r}
 
 ```
 
 ### Sanglier - Chevreuil
+
 ```{r}
 
 ```
 
 ### Sanglier - Blaireau
+
 ```{r}
 
 ```
 
 ### Sanglier - Chevreuil+Ragondin
+
 ```{r}
 
 ```
 
 ### Renard - Ragondin
+
 ```{r}
 
 ```
 
 ### Renard - Chevreuil
+
 ```{r}
 
 ```
 
 ### Renard - Blaireau
+
 ```{r}
 
 ```
 
 ### Renard - Chevreuil+Ragondin
+
 ```{r}
 
 ```
 
 ### Martre - Ragondin
+
 ```{r}
 
 ```
 
 ### Martre - Chevreuil
+
 ```{r}
 
 ```
 
 ### Martre - Blaireau
+
 ```{r}
 
 ```
 
 ### Martre - Chevreuil+Ragondin
+
 ```{r}
 
 ```
 
 ### Lievre - Ragondin
+
 ```{r}
 
 ```
 
 ### Lievre - Chevreuil
+
 ```{r}
 
 ```
 
 ### Lievre - Blaireau
+
 ```{r}
 
 ```
 
 ### Lievre - Chevreuil+Ragondin
+
 ```{r}
 
 ```
 
 ### Herisson - Ragondin
+
 ```{r}
 
 ```
 
 ### Herisson - Chevreuil
+
 ```{r}
 
 ```
 
 ### Herisson - Blaireau
+
 ```{r}
 
 ```
 
 ### Herisson - Chevreuil+Ragondin
+
 ```{r}
 
 ```
