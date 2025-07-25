@@ -158,8 +158,9 @@ bdd_reg <- bdd_reg %>%
                                         prev_y),
                 prev_prev_y = dplyr::if_else(is.na(prev_prev_y),
                                              0,
-                                             prev_prev_y)) %>%
-  dplyr::mutate(year2 = year**2)
+                                             prev_prev_y),
+                year2 = year**2
+                )
 
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ year+X_10km+Dist_Ecotone+Dnst_Cultures+prev_proportion_interet+prev_prev_y)
@@ -205,7 +206,7 @@ points(which.min(reg.summary$bic), reg.summary$bic[which.min(reg.summary$bic)], 
 par(mfrow=c(1 ,1))
 plot(regfit.full , scale ="bic") # adjr2 R^2_a, Cp, bic
 
-
+#### en Facteur.
 
 bdd_reg3<- bdd_reg3%>%
   dplyr::select(-year2)
@@ -232,3 +233,11 @@ points(which.min(reg.summary$bic), reg.summary$bic[which.min(reg.summary$bic)], 
 
 par(mfrow=c(1 ,1))
 plot(regfit.full , scale ="adjr2") # adjr2 R^2_a, Cp, bic
+
+
+### Non parametrique.
+
+Kendall::MannKendall(bdd_reg2$proportion_interet)
+?MannKendall
+
+bdd_reg2$proportion_interet

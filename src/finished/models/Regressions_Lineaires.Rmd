@@ -1038,5 +1038,4 @@ autoplot(reg)
 
 bptest(reg, studentize = FALSE) # Homosedasticité 
 bgtest(reg, type = "F") # Corrélation des erreurs
-
 ```
