@@ -10,6 +10,10 @@ output:
 # Importations / nettoyage
 
 ```{r}
+wd <- set_wd()
+source(paste0(wd$src, "functions/site_maille.R"))
+source(paste0(wd$src, "functions/site_psg.R"))
+
 Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"))
 Total <- transform_Total()
 
@@ -21,12 +25,11 @@ library(lmtest)
 
 ```{r}
 MortsNaturalistes <- Total%>%
-  dplyr::filter(etat_biologique %in% c("TrouvÃƒÂ© mort : impact routier", 
-                                       "TrouvÃ© mort : impact routier"), 
+  dplyr::filter(etat_biologique %in% c("TrouvÃ© mort : impact routier", 
+                                       "TrouvÃƒÂ© mort : impact routier"), 
                 technique_observation == "Vu")%>%
   dplyr::select(id_synt, nom_vernaculaire, 
                 date, cd_nom, cd_nom, 
-                bdd_originale, clust, famille,
                 paysage_ID, paysage_nom, famille_paysage, 
                 Code_10km, X_10km, Y_10km)
 ```
@@ -42,7 +45,7 @@ MortsNat <- MortsNaturalistes%>%
                  cd_nom = as.factor(cd_nom))%>%
   dplyr::rename(espece = nom_vernaculaire) %>%
   dplyr::select(Code_10km, X_10km, Y_10km, 
-                date, cd_nom, bdd_originale,
+                date, cd_nom, 
                 paysage_ID, paysage_nom, famille_paysage)%>%
   sf::st_drop_geometry()
 ```
@@ -113,7 +116,7 @@ diro_sf <- diro_sf%>%
     .default = NA
   ))%>%
   dplyr::filter(!is.na(cd_nom_t))%>%
-  dplyr::select(cd_nom_t, bdd_originale, espece, date, geom, geometry)
+  dplyr::select(cd_nom_t, espece, date, geom, geometry)
 
 
 diro_sf <- diro_sf%>%
@@ -122,7 +125,7 @@ diro_sf <- diro_sf%>%
   dplyr::rename(cd_nom = cd_nom_t,
                 Code_10km = CODE_10KM)%>%
   dplyr::select(Code_10km, X_10km, Y_10km, 
-                date, cd_nom, bdd_originale,
+                date, cd_nom, 
                 paysage_ID, paysage_nom, famille_paysage)
 
 diro <- diro_sf%>%
@@ -133,7 +136,7 @@ diro <- diro_sf%>%
 MortsTotal <- rbind(MortsNat, diro)
 ```
 
-# Mortalité Toutes données comprises.
+# MortalitÃ© Toutes donnÃ©es comprises.
 
 ### Lapin - ragondin
 
@@ -144,7 +147,7 @@ bdd_reg <- tab_glm(MortsTotal,
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ as.factor(year))
 summary(reg)
-ggfortify::autoplot(reg)
+autoplot(reg)
 ```
 
 ### Lapin - chevreuil
@@ -157,7 +160,7 @@ bdd_reg <- tab_glm(MortsTotal,
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ as.factor(year))
 summary(reg)
-ggfortify::autoplot(reg)
+autoplot(reg)
 ```
 
 ### Lapin - Blaireau
@@ -171,10 +174,10 @@ reg <- glm(data = bdd_reg,
            proportion_interet ~ as.factor(year) + X_10km + Y_10km)
 
 summary(reg)
-ggfortify::autoplot(reg)
+autoplot(reg)
 ```
 
-### Lapin - HÃ©risson
+### Lapin - HÃƒÂ©risson
 
 ```{r}
 bdd_reg <- tab_glm(MortsTotal, 
@@ -227,7 +230,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-### Sanglier - HÃ©risson
+### Sanglier - HÃƒÂ©risson
 
 ```{r}
 bdd_reg <- tab_glm(MortsTotal, 
@@ -279,7 +282,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-### Renard - HÃ©risson
+### Renard - HÃƒÂ©risson
 
 ```{r}
 bdd_reg <- tab_glm(MortsTotal, 
@@ -293,7 +296,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-### MustÃ©lidÃ©s - Ragondin
+### MustÃƒÂ©lidÃƒÂ©s - Ragondin
 
 ```{r}
 bdd_reg <- tab_glm(MortsTotal, 
@@ -305,7 +308,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-### MustÃ©lidÃ©s - Chevreuil
+### MustÃƒÂ©lidÃƒÂ©s - Chevreuil
 
 ```{r}
 bdd_reg <- tab_glm(MortsTotal, 
@@ -319,7 +322,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-### MustÃ©lidÃ©s - Blaireau
+### MustÃƒÂ©lidÃƒÂ©s - Blaireau
 
 ```{r}
 bdd_reg <- tab_glm(MortsTotal, 
@@ -333,7 +336,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-### MustÃ©lidÃ©s - HÃ©risson
+### MustÃƒÂ©lidÃƒÂ©s - HÃƒÂ©risson
 
 ```{r}
 bdd_reg <- tab_glm(MortsTotal, 
@@ -386,7 +389,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-### Lapin - HÃ©rrison
+### Lapin - HÃƒÂ©rrison
 
 ```{r}
 bdd_reg <- tab_glm(MortsNaturalistes, 
@@ -439,7 +442,7 @@ autoplot(reg)
 
 ```
 
-### Sanglier - Hérisson
+### Sanglier - HÃ©risson
 
 ```{r}
 bdd_reg <- tab_glm(MortsNaturalistes, 
@@ -492,7 +495,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-### Renard - HÃ©risson
+### Renard - HÃƒÂ©risson
 
 ```{r}
 bdd_reg <- tab_glm(MortsNaturalistes, 
@@ -548,7 +551,7 @@ autoplot(reg)
 
 ```
 
-### Martre - hÃ©risson
+### Martre - hÃƒÂ©risson
 
 ```{r}
 bdd_reg <- tab_glm(MortsNaturalistes, 
@@ -561,7 +564,7 @@ summary(reg)
 autoplot(reg)
 ```
 
-# Toutes données naturalistes
+# Toutes donnÃ©es naturalistes
 
 ```{r}
 Donnes_Nat <- Total%>%
@@ -579,8 +582,9 @@ reg <- glm(data = bdd_reg,
 summary(reg)
 autoplot(reg) # 239 c'est une proportion de 1 en 2010, talus, 11 ans du site...
 
-bptest(reg, studentize = FALSE) # Homosedasticité okay a 90%
-bgtest(reg, type = "F") # On ne peut pas dire qu'il n'y a pas d'autocorrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© okay a 90%
+bgtest(reg, type = "F") # On ne peut pas dire qu'il n'y a pas d'autocorrÃ©lation des erreurs
+shapiro.test(reg$residuals)
 ```
 
 
@@ -596,9 +600,9 @@ reg <- lm(data = bdd_reg,
 summary(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité Okay
-bgtest(reg, type = "F") # auto corrélation des erreurs
-
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© Okay
+bgtest(reg, type = "F") # auto corrÃ©lation des erreurs
+shapiro.test(reg$residuals)
 ```
 
 
@@ -614,10 +618,10 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-View(bdd_reg)
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs ...
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs ...
+shapiro.test(reg$residuals)
 ```
 
 ### Lapin - Chevreuil+Ragondin
@@ -634,9 +638,9 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs ...
-shapiro.test(reg$residuals) # Résidus ne sont pas normaux.
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs ...
+shapiro.test(reg$residuals) # RÃ©sidus ne sont pas normaux.
 ```
 
 ### Sanglier - Ragondin
@@ -652,9 +656,9 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
-shapiro.test(reg$residuals) # Résidus ne sont pas normaux.
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
+shapiro.test(reg$residuals) # RÃ©sidus ne sont pas normaux.
 ```
 
 ### Sanglier - Chevreuil
@@ -670,9 +674,9 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
-shapiro.test(reg$residuals) # Résidus ne sont pas normaux.
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
+shapiro.test(reg$residuals) # RÃ©sidus ne sont pas normaux.
 ```
 
 ### Sanglier - Blaireau
@@ -690,8 +694,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Sanglier - Chevreuil+Ragondin
@@ -707,8 +711,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 
 ```
 
@@ -725,8 +729,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 
 ```
 
@@ -743,8 +747,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Renard - Blaireau
@@ -760,8 +764,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Renard - Chevreuil+Ragondin
@@ -777,8 +781,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Martre - Ragondin
@@ -794,8 +798,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Martre - Chevreuil
@@ -811,8 +815,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Martre - Blaireau
@@ -828,8 +832,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Martre - Chevreuil+Ragondin
@@ -845,8 +849,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Lievre - Ragondin
@@ -862,8 +866,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Lievre - Chevreuil
@@ -879,8 +883,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Lievre - Blaireau
@@ -896,8 +900,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Lievre - Chevreuil+Ragondin
@@ -913,8 +917,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Herisson - Ragondin
@@ -930,8 +934,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Herisson - Chevreuil
@@ -947,8 +951,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Herisson - Blaireau
@@ -964,8 +968,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Herisson - Chevreuil+Ragondin
@@ -981,8 +985,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 # Temoins entre eux
@@ -999,8 +1003,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 ```
 
 ### Ragondin - Blaireau
@@ -1015,8 +1019,8 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 
 ```
 
@@ -1032,7 +1036,7 @@ reg <- glm(data = bdd_reg,
 summary(reg);BIC(reg)
 autoplot(reg) 
 
-bptest(reg, studentize = FALSE) # Homosedasticité 
-bgtest(reg, type = "F") # Corrélation des erreurs
+bptest(reg, studentize = FALSE) # HomosedasticitÃ© 
+bgtest(reg, type = "F") # CorrÃ©lation des erreurs
 
 ```
