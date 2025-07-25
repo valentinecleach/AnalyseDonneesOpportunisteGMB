@@ -14,6 +14,9 @@ Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"))
 Total <- transform_Total()
 
 collision_faune_diro <- readr::read_csv(paste0(wd$data, "raw/collision_faune_diro.csv"))
+
+library(ggfortify)
+library(lmtest)
 ```
 
 ```{r}
@@ -573,41 +576,104 @@ bdd_reg <- tab_glm(Donnes_Nat,
                    espece_interet = 61714,
                    espece_benchmark = 61667)
 reg <- glm(data = bdd_reg, 
-           proportion_interet ~ year)
+           proportion_interet ~ year+X_10km+Dist_Ecotone+Dnst_Cultures)
 summary(reg)
-autoplot(reg)
+autoplot(reg) # 239 c'est une proportion de 1 en 2010, talus, 11 ans du site...
 
-corrplot::corrplot(cor(bdd_reg))
-
+bptest(reg, studentize = FALSE) # Homosedasticité okay a 90%
+bgtest(reg, type = "F") # On ne peut pas dire qu'il n'y a pas d'autocorrélation des erreurs
 ```
+
 
 ### Lapin - Chevreuil
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057)
+reg <- lm(data = bdd_reg, 
+           proportion_interet ~ year+I(year**2)+X_10km+Y_10km+Dist_Ecotone+Ind_Diversite
+           )
+summary(reg)
+autoplot(reg) 
+
+bptest(reg, studentize = FALSE) # Homosedasticité Okay
+bgtest(reg, type = "F") # auto corrélation des erreurs
 
 ```
+On peut accepter.
 
 ### Lapin - Blaireau
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ as.factor(year)+X_10km+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+View(bdd_reg)
+
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs ...
 ```
 
 ### Lapin - Chevreuil+Ragondin
 
 ```{r}
 
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61714,
+                   espece_benchmark = c(61667,61057))
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             as.factor(year)+X_10km+Y_10km+Dist_Ecotone+Ind_Diversite
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
+
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs ...
+
 ```
 
 ### Sanglier - Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60981,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Ind_Diversite
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
+
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 
 ```
 
 ### Sanglier - Chevreuil
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60981,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
+
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
+
 
 ```
 

@@ -116,7 +116,7 @@ Donnes_Nat <- Donnes_Nat %>%
 
 bdd_reg <- tab_glm(Donnes_Nat, 
                    espece_interet = 61714,
-                   espece_benchmark = 61667)
+                   espece_benchmark = c(61667, 61057))
 
 summary(bdd_reg)
 cor(bdd_reg[-c("clust_max", "famille_paysage_max", "Code_10km")])

@@ -52,13 +52,16 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
     tab <- tab %>% dplyr::mutate(clust_max = Mode(clust))
   }
   if ("Indice_Diversite" %in% names(tab)) {
-    tab <- tab %>% dplyr::mutate(Indice_Diversite_m = as.numeric(Mode(Indice_Diversite)))
+    tab <- tab %>% dplyr::mutate(Indice_Diversite_m = mean(as.numeric(as.character(Indice_Diversite)))
+                                 )
   }
   if ("Densite_Cultures" %in% names(tab)) {
-    tab <- tab %>% dplyr::mutate(Densite_Cultures_m = as.numeric(Mode(Densite_Cultures)))
+    tab <- tab %>% dplyr::mutate(Densite_Cultures_m = mean(as.numeric(as.character(Densite_Cultures)))
+    )
   }
   if ("Distance_EcotoneArbore" %in% names(tab)) {
-    tab <- tab %>% dplyr::mutate(Distance_EcotoneArbore_m = as.numeric(Mode(Distance_EcotoneArbore)))
+    tab <- tab %>% dplyr::mutate(Distance_EcotoneArbore_m = mean(as.numeric(as.character(Distance_EcotoneArbore)))
+    )
   }
   
   tab <- tab %>%
@@ -80,6 +83,13 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
     tab <- tab %>%
       dplyr::select(any_of(c(ttes_collones_sortantes, collones_sortantes_presentes))) %>%
       dplyr::distinct(year, Code_10km, .keep_all = TRUE)
+    
+    tab <- tab%>%
+      dplyr::rename_with(~ case_when(
+        . == "Indice_Diversite_m" ~ "Ind_Diversite",
+        . == "Densite_Cultures_m" ~ "Dnst_Cultures",
+        . == "Distance_EcotoneArbore_m" ~ "Dist_Ecotone",
+        TRUE ~ .))
     
   return(tab)
 }
