@@ -172,7 +172,10 @@ france_1x1 <- sf::st_read(
 
 #transform to UTM
 france <- sf::st_transform(france, 3055)
-france_1x1 <- sf::st_transform(france_1x1, 3055)
+france_1x1 <- france_1x1%>%
+  sf::st_transform(3055)%>%
+  dplyr::select(CELLCODE)
+
 
 france_1x1 <- sf::st_intersection(france, france_1x1)
 
@@ -198,37 +201,34 @@ france_1x1 <- france_1x1 %>%
     by = "CELLCODE"
   )
 
-df <- data.frame(distance = as.vector(distance)/1000,
-                 X_10km = france_1x1$X_1km, 
-                 Y_10km = france_1x1$Y_1km)
 
 df <- cbind(france_1x1, distance=as.vector(distance)/1000)
 
-col_dist <- RColorBrewer::brewer.pal(11, "RdGy")
-ggplot() +
-  geom_sf(data = france_1x1) +
-  labs(title = "Distance du littoral en France Metropolitaine")+
-  geom_sf(data = df, aes(fill = distance)) +
-  scale_fill_gradientn(colours = rev(col_dist))+ #colors for plotting the distance
-  theme_bw()
+# col_dist <- RColorBrewer::brewer.pal(11, "RdGy")
+# ggplot() +
+#   geom_sf(data = france_1x1) +
+#   labs(title = "Distance du littoral en France Metropolitaine")+
+#   geom_sf(data = df, aes(fill = distance)) +
+#   scale_fill_gradientn(colours = rev(col_dist))+ #colors for plotting the distance
+#   theme_bw()
 
-# Uniquement en Bretagne:  
-RegionBretagneConti <- sf::st_read(
-  paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
-)
-RegionBretagneConti <- RegionBretagneConti %>%
-  transforme_carte()
-df <- df %>%
-  transforme_carte()
-df2 <- sf::st_intersection(df, RegionBretagneConti)
-
-col_dist <- RColorBrewer::brewer.pal(11, "RdGy")
-ggplot() +
-  geom_sf(data = RegionBretagneConti) +
-  labs(title = "Distance du littoral en Bretagne")+
-  geom_sf(data = df2, aes(fill = distance)) +
-  scale_fill_gradientn(colours = rev(col_dist))+ #colors for plotting the distance
-  theme_bw()
+# # Uniquement en Bretagne:  
+# RegionBretagneConti <- sf::st_read(
+#   paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
+# )
+# RegionBretagneConti <- RegionBretagneConti %>%
+#   transforme_carte()
+# df <- df %>%
+#   transforme_carte()
+# df2 <- sf::st_intersection(df, RegionBretagneConti)
+# 
+# col_dist <- RColorBrewer::brewer.pal(11, "RdGy")
+# ggplot() +
+#   geom_sf(data = RegionBretagneConti) +
+#   labs(title = "Distance du littoral en Bretagne")+
+#   geom_sf(data = df2, aes(fill = distance)) +
+#   scale_fill_gradientn(colours = rev(col_dist))+ #colors for plotting the distance
+#   theme_bw()
 
 # Exporter les données.
 france_1x1 <- france_1x1%>%

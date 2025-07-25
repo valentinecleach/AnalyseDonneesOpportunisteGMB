@@ -133,7 +133,7 @@ diro <- diro_sf%>%
 MortsTotal <- rbind(MortsNat, diro)
 ```
 
-# MortalitÃ© Toutes donnÃ©es comprises.
+# Mortalité Toutes données comprises.
 
 ### Lapin - ragondin
 
@@ -144,7 +144,7 @@ bdd_reg <- tab_glm(MortsTotal,
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ as.factor(year))
 summary(reg)
-autoplot(reg)
+ggfortify::autoplot(reg)
 ```
 
 ### Lapin - chevreuil
@@ -157,7 +157,7 @@ bdd_reg <- tab_glm(MortsTotal,
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ as.factor(year))
 summary(reg)
-autoplot(reg)
+ggfortify::autoplot(reg)
 ```
 
 ### Lapin - Blaireau
@@ -170,9 +170,8 @@ bdd_reg <- tab_glm(MortsTotal,
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ as.factor(year) + X_10km + Y_10km)
 
-autoplot(reg)
 summary(reg)
-
+ggfortify::autoplot(reg)
 ```
 
 ### Lapin - HÃ©risson
@@ -601,7 +600,7 @@ bptest(reg, studentize = FALSE) # Homosedasticité Okay
 bgtest(reg, type = "F") # auto corrélation des erreurs
 
 ```
-On peut accepter.
+
 
 ### Lapin - Blaireau
 
@@ -637,7 +636,7 @@ autoplot(reg)
 
 bptest(reg, studentize = FALSE) # Homosedasticité 
 bgtest(reg, type = "F") # Corrélation des erreurs ...
-
+shapiro.test(reg$residuals) # Résidus ne sont pas normaux.
 ```
 
 ### Sanglier - Ragondin
@@ -655,7 +654,7 @@ autoplot(reg)
 
 bptest(reg, studentize = FALSE) # Homosedasticité 
 bgtest(reg, type = "F") # Corrélation des erreurs
-
+shapiro.test(reg$residuals) # Résidus ne sont pas normaux.
 ```
 
 ### Sanglier - Chevreuil
@@ -673,10 +672,13 @@ autoplot(reg)
 
 bptest(reg, studentize = FALSE) # Homosedasticité 
 bgtest(reg, type = "F") # Corrélation des erreurs
+shapiro.test(reg$residuals) # Résidus ne sont pas normaux.
 ```
 
 ### Sanglier - Blaireau
-PAS FAIT
+
+PAS FAIT. PAS FAIT. PAS FAIT. PAS FAIT. PAS FAIT. PAS FAIT. PAS FAIT.
+
 ```{r}
 bdd_reg <- tab_glm(Donnes_Nat, 
                    espece_interet = 60981,
