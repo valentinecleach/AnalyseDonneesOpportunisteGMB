@@ -673,117 +673,364 @@ autoplot(reg)
 
 bptest(reg, studentize = FALSE) # Homosedasticité 
 bgtest(reg, type = "F") # Corrélation des erreurs
-
-
 ```
 
 ### Sanglier - Blaireau
-
+PAS FAIT
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60981,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Sanglier - Chevreuil+Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60981,
+                   espece_benchmark = c(61667,61057))
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
+
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 
 ```
 
 ### Renard - Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60585,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
+
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 
 ```
 
 ### Renard - Chevreuil
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60585,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Renard - Blaireau
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60585,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Renard - Chevreuil+Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60585,
+                   espece_benchmark = c(61667, 61057))
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Martre - Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60658,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Martre - Chevreuil
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60658,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Martre - Blaireau
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60658,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Martre - Chevreuil+Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60658,
+                   espece_benchmark = c(61667, 61057))
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Lievre - Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61678,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Lievre - Chevreuil
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61678,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Lievre - Blaireau
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61678,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Lievre - Chevreuil+Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61678,
+                   espece_benchmark = c(61667, 61057))
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Herisson - Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60015,
+                   espece_benchmark = 61667)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Herisson - Chevreuil
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60015,
+                   espece_benchmark = 61057)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Herisson - Blaireau
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60015,
+                   espece_benchmark = 60636)
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 ### Herisson - Chevreuil+Ragondin
 
 ```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60015,
+                   espece_benchmark = c(61667,61057))
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
 
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
 ```
 
 # Temoins entre eux
 
+### Ragondin - Chevreuil
+```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61667,
+                   espece_benchmark = c(61057))
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
+
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
+```
+
+### Ragondin - Blaireau
+```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61667,
+                   espece_benchmark = c(60636))
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
+
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
+
+```
+
+### Blaireau - Chevreuil
+```{r}
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 60636,
+                   espece_benchmark = c(61057))
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~
+             year+I(year**2)+Dist_Ecotone+Dnst_Cultures
+           )
+summary(reg);BIC(reg)
+autoplot(reg) 
+
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
+
+```
