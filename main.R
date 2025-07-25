@@ -103,14 +103,6 @@ summary(Total)
 
 Donnes_Nat <- Total%>%
   filter(technique_observation == "Vu")
-corrplot::corrplot(cor(Donnes_Nat[-c("date", "nom_valide", "nom_verniculaire")]))
-Donnes_Nat$
-
-View(bdd_reg)
-
-corrplot::corrplot(cor(bdd_reg))
-
-Donnes_Nat$Indice_Diversite
 
 Donnes_Nat <- Donnes_Nat %>%
   sf::st_drop_geometry()
@@ -148,3 +140,95 @@ t <- bdd_reg %>%
 cor(t)
 str(t)
 
+
+###########
+
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61667)
+
+bdd_reg <- bdd_reg %>%
+  dplyr::group_by(Code_10km) %>%
+  dplyr::arrange(year, Code_10km) %>%
+  dplyr::mutate(prev_y = dplyr::lag(proportion_interet)) %>%
+  dplyr::mutate(prev_prev_y = dplyr::lag(prev_y)) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(prev_y = dplyr::if_else(is.na(prev_y),
+                                        0,
+                                        prev_y),
+                prev_prev_y = dplyr::if_else(is.na(prev_prev_y),
+                                             0,
+                                             prev_prev_y)) %>%
+  dplyr::mutate(year2 = year**2)
+
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km+Dist_Ecotone+Dnst_Cultures+prev_proportion_interet+prev_prev_y)
+summary(reg)
+autoplot(reg) # 239 c'est une proportion de 1 en 2010, talus, 11 ans du site...
+
+bptest(reg, studentize = FALSE) # Homosedasticité okay a 90%
+bgtest(reg, type = "F") # On ne peut pas dire qu'il n'y a pas d'autocorrélation des erreurs
+shapiro.test(reg$residuals)
+
+summary(bdd_reg)
+View(bdd_reg)
+
+bdd_reg2 <- bdd_reg%>%
+  dplyr::select(-c(Code_10km, famille_paysage_max))
+
+bdd_reg3 <- bdd_reg%>%
+  dplyr::mutate(year = as.factor(year))%>%
+  dplyr::select(-c(Code_10km, famille_paysage_max))
+
+
+car::vif(glm(data=bdd_reg2, proportion_interet~.))
+
+regfit.full <- leaps::regsubsets(proportion_interet~., data=bdd_reg2)
+
+reg.summary = summary(regfit.full)
+
+par(mfrow=c(2 ,2))
+plot(reg.summary$rss , xlab =" Number of Variables " , ylab =" RSS " ,type ="l")
+plot(reg.summary$adjr2 , xlab =" Number of Variables " , ylab =" Adjusted RSq " , type ="l")
+which.max(reg.summary$adjr2)
+
+points(which.max(reg.summary$adjr2), reg.summary$adjr2[which.max(reg.summary$adjr2)], col =" red " , cex =2 , pch =20)
+
+plot(reg.summary$cp , xlab =" Number of Variables " , ylab =" Cp " ,type = "l")
+which.min(reg.summary$cp)
+points(which.min(reg.summary$cp), reg.summary$cp[which.min(reg.summary$cp)], col =" red " , cex =2 , pch =20)
+
+plot(reg.summary$bic , xlab =" Number of Variables " , ylab =" BIC " , type ="l")
+which.min(reg.summary$bic)
+points(which.min(reg.summary$bic), reg.summary$bic[which.min(reg.summary$bic)], col =" red " , cex =2 , pch =20)
+
+par(mfrow=c(1 ,1))
+plot(regfit.full , scale ="bic") # adjr2 R^2_a, Cp, bic
+
+
+
+bdd_reg3<- bdd_reg3%>%
+  dplyr::select(-year2)
+car::vif(glm(data=bdd_reg3, proportion_interet~.))
+
+regfit.full <- leaps::regsubsets(proportion_interet~., data=bdd_reg3)
+
+reg.summary = summary(regfit.full)
+
+par(mfrow=c(2 ,2))
+plot(reg.summary$rss , xlab =" Number of Variables " , ylab =" RSS " ,type ="l")
+plot(reg.summary$adjr2 , xlab =" Number of Variables " , ylab =" Adjusted RSq " , type ="l")
+which.max(reg.summary$adjr2)
+
+points(which.max(reg.summary$adjr2), reg.summary$adjr2[which.max(reg.summary$adjr2)], col =" red " , cex =2 , pch =20)
+
+plot(reg.summary$cp , xlab =" Number of Variables " , ylab =" Cp " ,type = "l")
+which.min(reg.summary$cp)
+points(which.min(reg.summary$cp), reg.summary$cp[which.min(reg.summary$cp)], col =" red " , cex =2 , pch =20)
+
+plot(reg.summary$bic , xlab =" Number of Variables " , ylab =" BIC " , type ="l")
+which.min(reg.summary$bic)
+points(which.min(reg.summary$bic), reg.summary$bic[which.min(reg.summary$bic)], col =" red " , cex =2 , pch =20)
+
+par(mfrow=c(1 ,1))
+plot(regfit.full , scale ="adjr2") # adjr2 R^2_a, Cp, bic

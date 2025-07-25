@@ -2,24 +2,25 @@ To do:
 
 Priorité
 
+- ajouter de l'autocorrélation dans les variables.
+   - pour chaque site, mettre la proportion de la dernière fois 
+   que le site a été sondé, et avant...
+
+Ajouter toutes les données DIR Ouest et Vu naturalistes a la BDD.
+
 - Créer des packages..
 
-- me créer une map des distances au littoral en france.
+- importer distances au littoral et distance a la présence d'eau.
 
-- ajouter de l'autocorrélation dans les variables.
-- pour chaque site, mettre la proportion de la dernière fois que le site a été sondé.
 
 - faire des cartes avec a chaque année, oui ou non de détéction par espèce temoin.
 
-
-
-- regression sur les "Vu"
-
-- faire des tests pour tester l'homosedasticité, et autocorrelation.
-
 - corriger, j'ai des endroits en trop dans ma carte de bretagne.
 
+
 - discuter du reste des unkown avec Franck
+
+MAX 1 semaine de plus sur les GLM, puis site occupancy.
 
 
 Relire cours de GLM : préparer fiche étape quoi regarder, différents modèles, etc...
