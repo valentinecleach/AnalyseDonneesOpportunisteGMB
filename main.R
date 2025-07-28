@@ -3,6 +3,7 @@ renv::repair()
 
 loadedNamespaces()
 
+install.packages("lmtest")
 library(dplyr)
 library(sf)
 library(ggplot2)
