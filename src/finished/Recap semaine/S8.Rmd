@@ -1,0 +1,12 @@
+---
+title: "Semaine 8"
+date: "28/07 - ..."
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+---
+
+Cette semaine, j'ai voulu terminer les régressions.
+
+Tout d'abord, comme nous avons vu la semaine passé qu'il y avais de l'autocorrélation dans les résidus, j'ai voulu déterminer l'ordre des corrélations. Pour cela j'ai regardé l'autocorrélogramme des résidus.
