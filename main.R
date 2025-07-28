@@ -3,7 +3,8 @@ renv::repair()
 
 loadedNamespaces()
 
-install.packages("lmtest")
+source("init.R")
+
 library(dplyr)
 library(sf)
 library(ggplot2)
@@ -164,7 +165,7 @@ bdd_reg <- bdd_reg %>%
                 )
 
 reg <- glm(data = bdd_reg, 
-           proportion_interet ~ year+X_10km+Dist_Ecotone+Dnst_Cultures+prev_proportion_interet+prev_prev_y)
+           proportion_interet ~ year+X_10km+Dist_Ecotone+Dnst_Cultures)
 summary(reg)
 autoplot(reg) # 239 c'est une proportion de 1 en 2010, talus, 11 ans du site...
 
@@ -174,6 +175,8 @@ shapiro.test(reg$residuals)
 
 summary(bdd_reg)
 View(bdd_reg)
+
+acf(reg$residuals)
 
 bdd_reg2 <- bdd_reg%>%
   dplyr::select(-c(Code_10km, famille_paysage_max))
@@ -236,10 +239,63 @@ par(mfrow=c(1 ,1))
 plot(regfit.full , scale ="adjr2") # adjr2 R^2_a, Cp, bic
 
 
+bdd_reg <- tab_glm(Donnes_Nat, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60636)
+
+bdd_reg <- bdd_reg %>%
+  dplyr::group_by(Code_10km) %>%
+  dplyr::arrange(year, Code_10km) %>%
+  dplyr::mutate(prev_y = dplyr::lag(proportion_interet)) %>%
+  dplyr::mutate(prev_prev_y = dplyr::lag(prev_y)) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(prev_y = dplyr::if_else(is.na(prev_y),
+                                        0,
+                                        prev_y),
+                prev_prev_y = dplyr::if_else(is.na(prev_prev_y),
+                                             0,
+                                             prev_prev_y),
+                year2 = year**2
+  )
+reg <- glm(data = bdd_reg, 
+           proportion_interet ~ year+X_10km+Dist_Ecotone+Dnst_Cultures+prev_y)
+par(mfrow=c(1,2))
+acf(reg$residuals)
+pacf(reg$residuals)
+
+spec.ar(reg$residuals)
+spec.pgram(reg$residuals, 100)
+
+install.packages("zoib")
+library(zoib)
+
+reg_01 <- zoib(proportion_interet ~ year,
+               data = bdd_reg,
+               zero.inflation = TRUE,
+               one.inflation = TRUE
+               )
+
+reg_01 <- zoib(
+  proportion_interet ~ year | 1 | 1 | 1,    # mean depends on year, others only intercept
+  data = bdd_reg,
+  zero.inflation = TRUE,
+  one.inflation = TRUE
+)
+sample1 <- reg_01$coeff
+summary(sample1)
+# check convergence on the regression coefficients
+traceplot(sample1);
+autocorr.plot(sample1);
+check.psrf(sample1)
+
+paraplot(reg_01)
+str(bdd_reg$proportion_interet)
+str(bdd_reg$year)
+
+?zoib
 ### Non parametrique.
 
 Kendall::MannKendall(bdd_reg2$proportion_interet)
 ?MannKendall
 
 bdd_reg2$proportion_interet
-
