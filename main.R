@@ -3,6 +3,7 @@ renv::repair()
 
 loadedNamespaces()
 
+install.packages("lmtest")
 library(dplyr)
 library(sf)
 library(ggplot2)
@@ -167,8 +168,8 @@ reg <- glm(data = bdd_reg,
 summary(reg)
 autoplot(reg) # 239 c'est une proportion de 1 en 2010, talus, 11 ans du site...
 
-bptest(reg, studentize = FALSE) # Homosedasticité okay a 90%
-bgtest(reg, type = "F") # On ne peut pas dire qu'il n'y a pas d'autocorrélation des erreurs
+bptest(reg, studentize = FALSE) # Homosedasticit? okay a 90%
+bgtest(reg, type = "F") # On ne peut pas dire qu'il n'y a pas d'autocorr?lation des erreurs
 shapiro.test(reg$residuals)
 
 summary(bdd_reg)
@@ -241,3 +242,4 @@ Kendall::MannKendall(bdd_reg2$proportion_interet)
 ?MannKendall
 
 bdd_reg2$proportion_interet
+

@@ -21,12 +21,16 @@ collision_faune_diro <- readr::read_csv(paste0(wd$data, "raw/collision_faune_dir
 
 library(ggfortify)
 library(lmtest)
+library(dplyr)
+library(sf)
+library(ggplot2)
+
 ```
 
 ```{r}
 MortsNaturalistes <- Total%>%
   dplyr::filter(etat_biologique %in% c("Trouvé mort : impact routier", 
-                                       "TrouvÃ© mort : impact routier"), 
+                                       "Trouv� mort : impact routier"), 
                 technique_observation == "Vu")%>%
   dplyr::select(id_synt, nom_vernaculaire, 
                 date, cd_nom, cd_nom, 
