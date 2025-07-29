@@ -17,8 +17,8 @@ Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"),
                      options = "ENCODING=UTF8")
 
 Observateurs <- utils::read.csv(paste0(wd$data,"derived/Observateurs.csv"),
-                                sep=";")
-
+                                sep=";",
+                                encoding = "UTF-8")
 Total <- Total %>%
   transform_Total() %>%
   ajoute_clust_a_Total() %>%
@@ -50,8 +50,8 @@ grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10,
                                      bdd_tif = "Distance_Littoral")
 grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
                                      bdd_tif = "Distance_Eau")
-  
-  
+
+
 grille_10x10 <-  sf::st_transform(grille_10x10, sf::st_crs(Total))
   
 Total <- grille_10x10 %>%
@@ -59,16 +59,21 @@ Total <- grille_10x10 %>%
                  Indice_Diversite = Indice_Diversite_500m ) %>%
   dplyr::select( Indice_Diversite, 
                  Densite_Cultures,
-                 Distance_EcotoneArbore) %>%
+                 Distance_EcotoneArbore,
+                 Distance_Littoral,
+                 Distance_Eau) %>%
   sf::st_join(Total, left = TRUE)
 
 Total <- Total%>%
-  select(-c(cmmnt_c, chmps_d))%>%
-  filter(!is.na(date))
+  dplyr::select(-c(cmmnt_c, chmps_d))%>%
+  dplyr::filter(!is.na(date))
 ```
+
 
 ```{r}
 sf::st_write(Total, paste0(wd$data, "derived/TotalComplet.shp"), 
-             layer_options = "ENCODING=UTF-8")
+             layer_options = "ENCODING=UTF-8",
+             append=FALSE)
+
 ```
 

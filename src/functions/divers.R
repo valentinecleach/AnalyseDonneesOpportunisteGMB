@@ -53,6 +53,8 @@ transform_Total <- function(bdd = Total){
         . == "Indc_Dv" ~ "Indice_Diversite",
         . == "Dnst_Cl" ~ "Densite_Cultures",
         . == "Dstn_EA" ~ "Distance_EcotoneArbore",
+        . == "" ~ "Distance_Littoral",
+        . == "" ~ "Distance_Eau",
         . == "CODE_10" ~ "Code_10km",
         TRUE ~ .))
   
@@ -82,7 +84,7 @@ ajoute_clust_a_Total <- function(bdd = Total){
                             sep = ";")
   
   bdd <- bdd %>%
-    dplyr::left_join(Observateurs %>% select(observateurs, clust), 
+    dplyr::left_join(Observateurs %>% dplyr::select(observateurs, clust), 
                      by = "observateurs")
   
   return(bdd)
