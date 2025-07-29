@@ -10,9 +10,9 @@ output:
 # Importations / nettoyage
 
 ```{r}
+source("init.R")
+
 wd <- set_wd()
-source(paste0(wd$src, "functions/site_maille.R"))
-source(paste0(wd$src, "functions/site_psg.R"))
 
 Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"))
 Total <- transform_Total()
