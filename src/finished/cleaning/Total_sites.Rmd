@@ -9,6 +9,8 @@ output:
 
 ```{r}
 
+wd <- set_wd()
+
 library(dplyr)
 
 Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"),
@@ -44,6 +46,10 @@ grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10,
                                      bdd_tif = "Densite_Cultures_500m")
 grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
                                      bdd_tif = "Distance_EcotoneArbore")
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Distance_Littoral")
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Distance_Eau")
   
   
 grille_10x10 <-  sf::st_transform(grille_10x10, sf::st_crs(Total))

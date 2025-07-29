@@ -9,7 +9,7 @@ packages <- c(
   "dplyr", "stringr", "ggplot2", "readr", "sf", "stringi", "janitor", "rsample",
   "patchwork", "scales", "lubridate", "purrr", "forcats", "forecast", "targets", "tarchetypes",
   "ggpubr", "collapse", "vegan", "ggspatial", "tigris", "permute", "viridis", "FactoMineR",
-  "ggfortify", "bookdown", "Rcpp", "car", "corrplot", "Kendall"
+  "ggfortify", "bookdown", "Rcpp", "car", "corrplot", "Kendall", "terra", "exactextractr"
 )
 
 # Install missing packages

@@ -299,3 +299,21 @@ Kendall::MannKendall(bdd_reg2$proportion_interet)
 ?MannKendall
 
 bdd_reg2$proportion_interet
+
+bdd_tif = "Distance_Littoral"
+# Import BDD
+bdd <- terra::rast(paste0(wd$data,
+                          "masques/VariablesStructurates/", 
+                          bdd_tif, 
+                          ".tif"))
+terra::crs(bdd) <- sf::st_transform(bdd, "EPSG:2154")
+
+t <- sf::st_transform(bdd, "EPSG:2154")
+
+b
+# Transformation
+grille_10x10 <- sf::st_transform(grille_10x10, crs = "EPSG:2154")
+grille_vect <- terra::vect(grille_10x10)
+grille_10x10[bdd_tif] <- exactextractr::exact_extract(bdd,
+                                                      grille_10x10, 
+                                                      'mean')
