@@ -57,5 +57,5 @@ distance_raster <- terra::rasterize(points_sv,
 # Export
 plot(distance_raster)
 writeRaster(distance_raster, 
-            "Distance_Littoral.tif", 
+            paste0(wd$data, "masques/VariablesStructurates/Distance_Littoral.tif"), 
             overwrite = TRUE)
