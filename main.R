@@ -3,6 +3,7 @@ renv::repair()
 
 loadedNamespaces()
 
+options(encoding = 'UTF-8')
 source("init.R")
 
 library(dplyr)

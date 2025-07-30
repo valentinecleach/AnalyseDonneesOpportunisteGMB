@@ -17,32 +17,38 @@ library(ggplot2)
 
 wd <- set_wd()
 
-Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"),
+TotalC <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"),
                      options = "ENCODING=UTF8")
-Total <- transform_Total()
 
 collision_faune_diro <- readr::read_csv(paste0(wd$data, 
                                                "raw/collision_faune_diro.csv"))
 ```
 
 ```{r}
+Total <- transform_Total(bdd = TotalC)
+
 Total <- Total%>%
   dplyr::filter(technique_observation == "Vu")%>%
   dplyr::select(id_synt, nom_vernaculaire, 
-                date, cd_nom, cd_nom, 
+                date, cd_nom, 
                 paysage_ID, paysage_nom, famille_paysage, 
-                Code_10km, X_10km, Y_10km, bdd_originale)
+                Code_10km, X_10km, Y_10km, bdd_originale,
+                etat_biologique, 
+                Indice_Diversite, Densite_Cultures, Distance_EcotoneArbore,
+                Distance_Littoral, Distance_Eau)
 Total <- Total%>%
   dplyr:: mutate(cd_nom = as.numeric(cd_nom),
                  cd_nom_grp_must = dplyr::if_else(cd_nom %in% c("60704", "60658", 
                                                        "60716", "60686", "199752",
                                                        "60674", "60731", "60746"),
-                                         111, cd_nom),
-                 cd_nom = as.factor(cd_nom))%>%
+                                         111, cd_nom)
+                 )%>%
   dplyr::select(Code_10km, X_10km, Y_10km, 
                 date, cd_nom, cd_nom_grp_must,
                 paysage_ID, paysage_nom, famille_paysage, 
-                etat_biologique)%>%
+                etat_biologique, 
+                Indice_Diversite, Densite_Cultures, Distance_EcotoneArbore,
+                Distance_Littoral, Distance_Eau)%>%
   sf::st_drop_geometry()
 
 ```
@@ -112,14 +118,14 @@ diro_sf <- diro_sf%>%
     espece == "putois" ~ 60731, 
     .default = NA
   ),
-  cd_nom_grp_must = dplyr::case_when(
+  cd_nom_grp_must = dplyr::if_else(
     cd_nom %in% c("60704", "60658", "60716", "60686", "199752","60674", "60731",
-                  "60746"), 111, cd_nom
+                  "60746"), 111, cd_nom, missing = NA
     )
   )%>%
   dplyr::filter(!is.na(cd_nom))%>%
-  dplyr::select(cd_nom, cd_nom_grp_must, espece, date, geom, geometry, etat_biologique)
-
+  dplyr::select(cd_nom, cd_nom_grp_must, espece, date, geom, geometry, 
+                etat_biologique)
 
 diro_sf <- diro_sf%>%
   ajout_famille_paysage() %>%
@@ -130,10 +136,52 @@ diro_sf <- diro_sf%>%
                 paysage_ID, paysage_nom, famille_paysage,
                 etat_biologique)
 
+grille_10x10 <- sf::st_read(
+  paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
+)
+RegionBretagneConti <- sf::st_read(
+    paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
+)
+grille_10x10 <- grille_10x10 %>%
+  transforme_carte()
+RegionBretagneConti <- RegionBretagneConti %>%
+  transforme_carte()
+grille_10x10 <- sf::st_intersection(grille_10x10, 
+                                    RegionBretagneConti)
+  
+# Ajout des variables
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Indice_Diversite_500m")
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Densite_Cultures_500m")
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Distance_EcotoneArbore")
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Distance_Littoral")
+grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
+                                     bdd_tif = "Distance_Eau")
+
+
+grille_10x10 <-  sf::st_transform(grille_10x10, sf::st_crs(diro_sf))
+  
+diro_sf <- grille_10x10 %>%
+  dplyr::rename( Densite_Cultures = Densite_Cultures_500m,
+                 Indice_Diversite = Indice_Diversite_500m ) %>%
+  dplyr::select( Indice_Diversite, 
+                 Densite_Cultures,
+                 Distance_EcotoneArbore,
+                 Distance_Littoral,
+                 Distance_Eau) %>%
+  sf::st_join(diro_sf, left = TRUE)
+
 diro <- diro_sf%>%
   sf::st_drop_geometry()
 ```
+
 ```{r}
-MortsTotal <- rbind(MortsNat, diro)
+Total_et_Diro <- rbind(Total, diro)
+utils::write.csv(x = Total_et_Diro, 
+                 file = paste0(wd$data, "derived/Total_et_Diro.csv"),
+                 fileEncoding = "UTF-8")
 ```
 
