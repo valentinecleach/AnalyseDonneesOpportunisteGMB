@@ -146,22 +146,22 @@ str(t)
 
 ###########
 
-bdd_reg <- tab_glm(Donnes_Nat, 
+bdd_reg <- tab_glm(Total_et_Diro, 
                    espece_interet = 61714,
                    espece_benchmark = 61667)
 
 bdd_reg <- bdd_reg %>%
   dplyr::group_by(Code_10km) %>%
   dplyr::arrange(year, Code_10km) %>%
-  dplyr::mutate(prev_y = dplyr::lag(proportion_interet)) %>%
-  dplyr::mutate(prev_prev_y = dplyr::lag(prev_y)) %>%
+  dplyr::mutate(prop_tmoins1 = dplyr::lag(proportion_interet)) %>%
+  dplyr::mutate(prop_tmoins2 = dplyr::lag(prop_tmoins1)) %>%
   dplyr::ungroup() %>%
-  dplyr::mutate(prev_y = dplyr::if_else(is.na(prev_y),
+  dplyr::mutate(prop_tmoins1 = dplyr::if_else(is.na(prop_tmoins1),
                                         0,
-                                        prev_y),
-                prev_prev_y = dplyr::if_else(is.na(prev_prev_y),
+                                        prop_tmoins1),
+                prop_tmoins2 = dplyr::if_else(is.na(prop_tmoins2),
                                              0,
-                                             prev_prev_y),
+                                             prop_tmoins2),
                 year2 = year**2
                 )
 
@@ -180,36 +180,28 @@ View(bdd_reg)
 acf(reg$residuals)
 
 bdd_reg2 <- bdd_reg%>%
-  dplyr::select(-c(Code_10km, famille_paysage_max))
+  dplyr::select(-c(proportion_total, nb_annee_site, 
+                   Code_10km, famille_paysage_max))
 
 bdd_reg3 <- bdd_reg%>%
   dplyr::mutate(year = as.factor(year))%>%
-  dplyr::select(-c(Code_10km, famille_paysage_max))
-
-
+  dplyr::select(-c(Code_10km, famille_paysage_max,
+                   proportion_total, nb_annee_site))
 car::vif(glm(data=bdd_reg2, proportion_interet~.))
 
-regfit.full <- leaps::regsubsets(proportion_interet~., data=bdd_reg2)
+regfit.full <- leaps::regsubsets(proportion_interet~., 
+                                 data=bdd_reg3,
+                                 method ="seqrep")
 
 reg.summary = summary(regfit.full)
 
-par(mfrow=c(2 ,2))
-plot(reg.summary$rss , xlab =" Number of Variables " , ylab =" RSS " ,type ="l")
-plot(reg.summary$adjr2 , xlab =" Number of Variables " , ylab =" Adjusted RSq " , type ="l")
-which.max(reg.summary$adjr2)
-
-points(which.max(reg.summary$adjr2), reg.summary$adjr2[which.max(reg.summary$adjr2)], col =" red " , cex =2 , pch =20)
-
-plot(reg.summary$cp , xlab =" Number of Variables " , ylab =" Cp " ,type = "l")
-which.min(reg.summary$cp)
-points(which.min(reg.summary$cp), reg.summary$cp[which.min(reg.summary$cp)], col =" red " , cex =2 , pch =20)
-
-plot(reg.summary$bic , xlab =" Number of Variables " , ylab =" BIC " , type ="l")
-which.min(reg.summary$bic)
-points(which.min(reg.summary$bic), reg.summary$bic[which.min(reg.summary$bic)], col =" red " , cex =2 , pch =20)
+plot_regsubsets(reg.summary)
 
 par(mfrow=c(1 ,1))
 plot(regfit.full , scale ="bic") # adjr2 R^2_a, Cp, bic
+
+reg <- lm(data = bdd_reg2, proportion_interet~year+proportion_total+prop_t_minus_1+prop_t_minus_2+year2)
+summary(reg)
 
 #### en Facteur.
 
@@ -227,7 +219,7 @@ plot(reg.summary$adjr2 , xlab =" Number of Variables " , ylab =" Adjusted RSq " 
 which.max(reg.summary$adjr2)
 
 points(which.max(reg.summary$adjr2), reg.summary$adjr2[which.max(reg.summary$adjr2)], col =" red " , cex =2 , pch =20)
-
+ 
 plot(reg.summary$cp , xlab =" Number of Variables " , ylab =" Cp " ,type = "l")
 which.min(reg.summary$cp)
 points(which.min(reg.summary$cp), reg.summary$cp[which.min(reg.summary$cp)], col =" red " , cex =2 , pch =20)
@@ -300,24 +292,6 @@ Kendall::MannKendall(bdd_reg2$proportion_interet)
 ?MannKendall
 
 bdd_reg2$proportion_interet
-
-bdd_tif = "Distance_Littoral"
-# Import BDD
-bdd <- terra::rast(paste0(wd$data,
-                          "masques/VariablesStructurates/", 
-                          bdd_tif, 
-                          ".tif"))
-terra::crs(bdd) <- sf::st_transform(bdd, "EPSG:2154")
-
-t <- sf::st_transform(bdd, "EPSG:2154")
-
-b
-# Transformation
-grille_10x10 <- sf::st_transform(grille_10x10, crs = "EPSG:2154")
-grille_vect <- terra::vect(grille_10x10)
-grille_10x10[bdd_tif] <- exactextractr::exact_extract(bdd,
-                                                      grille_10x10, 
-                                                      'mean')
 
 ###############################
 ### Step by step quoi faire ###

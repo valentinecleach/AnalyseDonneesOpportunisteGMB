@@ -23,7 +23,8 @@ wd <- set_wd()
 Total_et_Diro <- readr::read_csv(paste0(wd$data, 
                                         "derived/Total_et_Diro.csv"),
                                  locale = readr::locale(encoding = "UTF-8"))
-View(Total_et_Diro)
+Total_et_Diro <- Total_et_Diro %>%
+  dplyr::select(-`...1`)
 ```
 
 # Mortalité Toutes données comprises.

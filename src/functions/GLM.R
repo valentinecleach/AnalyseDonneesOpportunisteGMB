@@ -33,7 +33,8 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
     
   colonnes <- c("famille_paysage", "clust", 
                 "Indice_Diversite", "Densite_Cultures", 
-                "Distance_EcotoneArbore")
+                "Distance_EcotoneArbore", "Distance_Littoral",
+                "Distance_Eau")
   colonnes_presentes <- intersect(colonnes, names(tab))
   
   tab <- tab %>%
@@ -45,25 +46,22 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
     dplyr::group_by(year, Code_10km) %>%
     dplyr::mutate(proportion_interet = sum(cd_nom == espece_interet) / dplyr::n())
   
-  if ("famille_paysage" %in% names(tab)) {
-    tab <- tab %>% dplyr::mutate(famille_paysage_max = Mode(famille_paysage))
-  }
-  if ("clust" %in% names(tab)) {
-    tab <- tab %>% dplyr::mutate(clust_max = Mode(clust))
-  }
-  if ("Indice_Diversite" %in% names(tab)) {
-    tab <- tab %>% dplyr::mutate(Indice_Diversite_m = mean(as.numeric(as.character(Indice_Diversite)))
-                                 )
-  }
-  if ("Densite_Cultures" %in% names(tab)) {
-    tab <- tab %>% dplyr::mutate(Densite_Cultures_m = mean(as.numeric(as.character(Densite_Cultures)))
-    )
-  }
-  if ("Distance_EcotoneArbore" %in% names(tab)) {
-    tab <- tab %>% dplyr::mutate(Distance_EcotoneArbore_m = mean(as.numeric(as.character(Distance_EcotoneArbore)))
-    )
-  }
-  
+  tab <- tab %>%
+    ajoute_si_present(variable = "famille_paysage", 
+                      technique = Mode) %>%
+    ajoute_si_present(variable = "clust", 
+                      technique = Mode) %>%
+    ajoute_si_present(variable = "Indice_Diversite",
+                      technique = mean) %>%
+    ajoute_si_present(variable = "Densite_Cultures",
+                      technique = mean) %>%
+    ajoute_si_present(variable = "Distance_EcotoneArbore",
+                      technique = mean) %>%
+    ajoute_si_present(variable = "Distance_Littoral",
+                      technique = mean) %>%
+    ajoute_si_present(variable = "Distance_Eau",
+                      technique = mean)
+    
   tab <- tab %>%
     dplyr::ungroup() %>%
     dplyr::group_by(Code_10km) %>%
@@ -77,7 +75,8 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
   
     collones_sortantes_opt <- c("famille_paysage_max", "clust_max", 
                               "Indice_Diversite_m", "Densite_Cultures_m", 
-                              "Distance_EcotoneArbore_m")
+                              "Distance_EcotoneArbore_m", "Distance_Littoral_m",
+                              "Distance_Eau_m")
     collones_sortantes_presentes <- intersect(collones_sortantes_opt, names(tab))
     
     tab <- tab %>%
@@ -89,18 +88,50 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
         . == "Indice_Diversite_m" ~ "Ind_Diversite",
         . == "Densite_Cultures_m" ~ "Dnst_Cultures",
         . == "Distance_EcotoneArbore_m" ~ "Dist_Ecotone",
+        . == "Distance_Littoral_m" ~ "Dist_Littoral",
+        . == "Distance_Eau_m" ~ "Dist_Eau",
         TRUE ~ .))
     
+    tab <- tab %>%
+      dplyr::group_by(Code_10km) %>%
+      dplyr::arrange(year, Code_10km) %>%
+      dplyr::mutate(prop_tmoins1 = dplyr::lag(proportion_interet)) %>%
+      dplyr::mutate(prop_tmoins2 = dplyr::lag(prop_tmoins1)) %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(prop_tmoins1 = dplyr::if_else(is.na(prop_tmoins1),
+                                                  0, prop_tmoins1),
+                    prop_tmoins2 = dplyr::if_else(is.na(prop_tmoins2),
+                                                  0, prop_tmoins2),
+                    year2 = year**2)
   return(tab)
 }
 
+#' Ajoute la moyenne/mean
+#'
+#' @param bdd La base de donnée.
+#'
+#' @return La bdd modifié
+#'
+#' @examples
+#' 
+ajoute_si_present <- function(bdd, variable, technique = mean) {
+  variable <- as.character(variable)
+  
+  if (variable %in% names(bdd)) {
+    new_var_name <- paste0(variable, "_m")
+    
+    bdd <- bdd %>%
+      mutate(!!new_var_name := technique(as.numeric(.data[[variable]]), na.rm = TRUE))
+  }
+  
+  return(bdd)
+}
 
 #' Supprime les sites qui sont toujours 0 ou 1
 #'
 #' @param bdd La base de donnée.
 #'
-#' @return 
-#' @export
+#' @return La bdd modifié
 #'
 #' @examples
 #' 
@@ -166,4 +197,36 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
               proportion_interet ~ year+X_10km+Y_10km+clust_max)
    
    return(reg)
+}
+
+
+#' Affiche les 4 plots généréres par leaps::plot.regsubsets
+#'
+#' @param reg.summary Un object summary(regsubsets(...))
+#'
+#' @examples
+#' 
+plot_regsubsets <- function(reg.summary){
+  #  2x2 grid 
+  par(mfrow = c(2,2))
+  
+  # 
+  plot(reg.summary$rss, xlab = "Number of Variables", ylab = "RSS", type = "l")
+  plot(reg.summary$adjr2, xlab = "Number of Variables", ylab = "Adjusted RSq", type = "l")
+  
+  # The red dot to indicates the model with the largest adjusted R^2 statistic.
+  # Ie model to take with this statistic
+  adj_r2_max = which.max(reg.summary$adjr2) 
+  points(adj_r2_max, reg.summary$adjr2[adj_r2_max], col ="red", cex = 2, pch = 20)
+  
+  # Same for C_p and BIC
+  plot(reg.summary$cp, xlab = "Number of Variables", ylab = "Cp", type = "l")
+  cp_min = which.min(reg.summary$cp) # 10
+  points(cp_min, reg.summary$cp[cp_min], col = "red", cex = 2, pch = 20)
+  
+  plot(reg.summary$bic, xlab = "Number of Variables", ylab = "BIC", type = "l")
+  bic_min = which.min(reg.summary$bic) # 6
+  points(bic_min, reg.summary$bic[bic_min], col = "red", cex = 2, pch = 20)
+  
+  par(mfrow=c(1 ,1))
 }
