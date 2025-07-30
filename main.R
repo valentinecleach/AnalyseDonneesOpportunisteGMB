@@ -13,71 +13,58 @@ library(ggplot2)
 wd <- set_wd()
 set.seed(12345)
 
-summary(Total)
-
 Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"), 
                      options = "ENCODING=UTF8")
 Total <- transform_Total()
 
 
-Total %>%
-  dplyr::distinct(cd_nom)%>%
-  dplyr::select(nom_vernaculaire, cd_nom)
-
-
-diro <- st_read(paste0(wd$data,"derived/diro.shp"))
-
-# Total : 160991
-# DIR Ouest : 26129
-
-26129/160991
 
 rm(list=setdiff(ls(), "Total"))
 
 #### Nettoyage de donnees ####
 # Total:
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Total.Rmd"), 
-                  output_file = paste0(wd$output, "cleaning/Total.html"))
+                  output_file = paste0(wd$output, "cleaning/Total.html"),
+                  encoding="UTF-8")
 
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Diro.Rmd"), 
-                  output_file = paste0(wd$output, "cleaning/Diro.html"))
+                  output_file = paste0(wd$output, "cleaning/Diro.html"),
+                  encoding="UTF-8")
 
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Total_sites.Rmd"), 
-                  output_file = paste0(wd$output, "cleaning/Total_sites.html"))
+                  output_file = paste0(wd$output, "cleaning/Total_sites.html"),
+                  encoding="UTF-8")
 
 #### Stats Desc ####
 rmarkdown::render(paste0(wd$src, "finished/stats_desc/Repartitions.Rmd"), 
-                  output_file = paste0(wd$output, "stats_desc/Repartitions.html"))
+                  output_file = paste0(wd$output, "stats_desc/Repartitions.html"),
+                  encoding="UTF-8")
 
 rmarkdown::render(paste0(wd$src, "finished/stats_desc/Geographie.Rmd"), 
-                  output_file = paste0(wd$output, "stats_desc/Geographie.html"))
+                  output_file = paste0(wd$output, "stats_desc/Geographie.html"),
+                  encoding="UTF-8")
 
 rmarkdown::render(paste0(wd$src, "finished/stats_desc/Observateurs.Rmd"), 
-                  output_file = paste0(wd$output, "stats_desc/Observateurs.html"))
+                  output_file = paste0(wd$output, "stats_desc/Observateurs.html"),
+                  encoding="UTF-8")
 
 #### Classification ####
 
 rmarkdown::render(paste0(wd$src, 
                          "finished/acp/Ordres.Rmd"), 
                   output_file = paste0(wd$output, 
-                                       "acp/Ordres.html")
-)
+                                       "acp/Ordres.html",
+                  encoding="UTF-8")
+                  )
 
 #### Regression ####
 
 rmarkdown::render(paste0(wd$src, 
                          "finished/models/glm.Rmd"), 
                   output_file = paste0(wd$output, 
-                                       "models/glm/debuts.html"))
-
-rmarkdown::render(paste0(wd$src, "brouillon/glm.Rmd"))
-rmarkdown::render(paste0(wd$src, "brouillon/glm.Rmd"))
-
-
-rmarkdown::render(paste0(wd$src, "finished/models/Regressions_Lineaires.Rmd"),
-                  output_file = paste0(wd$output, 
-                                       "models/glm/Regressions_Lineaire.html"),
+                                       "models/glm/debuts.html"),
                   encoding="UTF-8")
+
 
 rmarkdown::render(paste0(wd$src, "brouillon/Diro_desc.Rmd"),
                   output_file = paste0(wd$output, 
@@ -150,20 +137,6 @@ bdd_reg <- tab_glm(Total_et_Diro,
                    espece_interet = 61714,
                    espece_benchmark = 61667)
 
-bdd_reg <- bdd_reg %>%
-  dplyr::group_by(Code_10km) %>%
-  dplyr::arrange(year, Code_10km) %>%
-  dplyr::mutate(prop_tmoins1 = dplyr::lag(proportion_interet)) %>%
-  dplyr::mutate(prop_tmoins2 = dplyr::lag(prop_tmoins1)) %>%
-  dplyr::ungroup() %>%
-  dplyr::mutate(prop_tmoins1 = dplyr::if_else(is.na(prop_tmoins1),
-                                        0,
-                                        prop_tmoins1),
-                prop_tmoins2 = dplyr::if_else(is.na(prop_tmoins2),
-                                             0,
-                                             prop_tmoins2),
-                year2 = year**2
-                )
 
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ year+X_10km+Dist_Ecotone+Dnst_Cultures)
@@ -307,3 +280,21 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICqg4sS84WPnDkdq+gXGx3d/ryAZak4IeZleKT3NbOsP
 # Dans bash a nouveau.
 ssh -T git@github.com
 git remote -v
+
+
+###########################
+#####                 #####
+###########################
+Total_et_Diro <- readr::read_csv(paste0(wd$data, 
+                                        "derived/Total_et_Diro.csv"),
+                                 locale = readr::locale(encoding = "UTF-8"))
+Total_et_Diro <- Total_et_Diro %>%
+  dplyr::select(-`...1`)
+
+MortsTotal <- Total_et_Diro %>%
+  filter(etat_biologique == "Trouvé mort : impact routier")
+
+bdd_reg <- tab_glm(MortsTotal, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61667)
+

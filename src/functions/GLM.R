@@ -109,23 +109,28 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
 #' Ajoute la moyenne/mean
 #'
 #' @param bdd La base de donnée.
+#' @param variable La variable a ajouter
+#' @param technique Mean ou Mode, selon les cas.
 #'
 #' @return La bdd modifié
 #'
 #' @examples
 #' 
 ajoute_si_present <- function(bdd, variable, technique = mean) {
-  variable <- as.character(variable)
   
   if (variable %in% names(bdd)) {
     new_var_name <- paste0(variable, "_m")
     
     bdd <- bdd %>%
-      mutate(!!new_var_name := technique(as.numeric(.data[[variable]]), na.rm = TRUE))
+      dplyr::group_by(Code_10km) %>%
+      dplyr::mutate(
+        !!new_var_name := technique(.data[[variable]])
+      ) %>%
+      dplyr::ungroup()
   }
-  
   return(bdd)
-}
+}  
+
 
 #' Supprime les sites qui sont toujours 0 ou 1
 #'
