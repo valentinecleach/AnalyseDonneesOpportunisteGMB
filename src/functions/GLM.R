@@ -102,7 +102,8 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
                                                   0, prop_tmoins1),
                     prop_tmoins2 = dplyr::if_else(is.na(prop_tmoins2),
                                                   0, prop_tmoins2),
-                    year2 = year**2)
+                    year2 = year**2) %>%
+      dplyr::select(-proportion_total, -nb_annee_site)
   return(tab)
 }
 
@@ -234,4 +235,39 @@ plot_regsubsets <- function(reg.summary){
   points(bic_min, reg.summary$bic[bic_min], col = "red", cex = 2, pch = 20)
   
   par(mfrow=c(1 ,1))
+}
+
+#' Compare quali vs quanti
+#' @param data
+#' @return chaine de charactaire quanti ou quali
+choisi_forme_year <- function(bdd) {
+  # Modif des bdd
+  data_quanti <- bdd %>%
+    dplyr::select(-c(Code_10km))
+  data_quali  <- bdd %>%
+    dplyr::mutate(year=as.factor(year)) %>%
+    dplyr::select(-c(year2, Code_10km))
+  
+  # Modelisation
+  regfit_quanti <- leaps::regsubsets(
+    formula = proportion_interet~. ,
+    data = data_quanti,
+    method = "seqrep"
+  )
+  regfit_quali <- leaps::regsubsets(
+    formula = proportion_interet~. ,
+    data = data_quali,
+    method = "seqrep"
+  )
+
+  # BIC_minimum
+  min_bic_quanti <- min(summary(regfit_quanti)$bic, na.rm = TRUE)
+  min_bic_quali  <- min(summary(regfit_quali)$bic, na.rm = TRUE)
+  
+  # Choix
+  if (min_bic_quanti < min_bic_quali) {
+    return(list(choice = "quantitative", min_bic = min_bic_quanti))
+  } else {
+    return(list(choice = "qualitative", min_bic = min_bic_quali))
+  }
 }

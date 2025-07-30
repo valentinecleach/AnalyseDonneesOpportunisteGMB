@@ -40,6 +40,27 @@ MortsTotal <- Total_et_Diro %>%
 bdd_reg <- tab_glm(MortsTotal, 
                    espece_interet = 61714,
                    espece_benchmark = 61667)
+
+
+print(choisi_forme_year(bdd = bdd_reg))
+
+plot_regsubsets(reg.summary.quanti)
+# 5 ou 6 variables a l'air bien.
+par(mfrow=c(1 ,1))
+plot(regfit.full.quanti, 
+     scale ="bic")
+
+
+
+plot_regsubsets(reg.summary.quali)
+# 5 ou 6 variables a l'air bien.
+par(mfrow=c(1 ,1))
+plot(regfit.full.quali, 
+     scale ="bic")
+
+min(reg.summary.quanti$bic)
+min(reg.summary.quali$bic)
+
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ as.factor(year))
 summary(reg)

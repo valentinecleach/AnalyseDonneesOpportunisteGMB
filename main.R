@@ -171,7 +171,7 @@ reg.summary = summary(regfit.full)
 plot_regsubsets(reg.summary)
 
 par(mfrow=c(1 ,1))
-plot(regfit.full , scale ="bic") # adjr2 R^2_a, Cp, bic
+plot(regfit.full , scale ="bic")
 
 reg <- lm(data = bdd_reg2, proportion_interet~year+proportion_total+prop_t_minus_1+prop_t_minus_2+year2)
 summary(reg)
@@ -186,51 +186,22 @@ regfit.full <- leaps::regsubsets(proportion_interet~., data=bdd_reg3)
 
 reg.summary = summary(regfit.full)
 
-par(mfrow=c(2 ,2))
-plot(reg.summary$rss , xlab =" Number of Variables " , ylab =" RSS " ,type ="l")
-plot(reg.summary$adjr2 , xlab =" Number of Variables " , ylab =" Adjusted RSq " , type ="l")
-which.max(reg.summary$adjr2)
-
-points(which.max(reg.summary$adjr2), reg.summary$adjr2[which.max(reg.summary$adjr2)], col =" red " , cex =2 , pch =20)
- 
-plot(reg.summary$cp , xlab =" Number of Variables " , ylab =" Cp " ,type = "l")
-which.min(reg.summary$cp)
-points(which.min(reg.summary$cp), reg.summary$cp[which.min(reg.summary$cp)], col =" red " , cex =2 , pch =20)
-
-plot(reg.summary$bic , xlab =" Number of Variables " , ylab =" BIC " , type ="l")
-which.min(reg.summary$bic)
-points(which.min(reg.summary$bic), reg.summary$bic[which.min(reg.summary$bic)], col =" red " , cex =2 , pch =20)
+plot_regsubsets(reg.summary)
 
 par(mfrow=c(1 ,1))
-plot(regfit.full , scale ="adjr2") # adjr2 R^2_a, Cp, bic
+plot(regfit.full , scale ="bic") # adjr2 R^2_a, Cp, bic
 
 
-bdd_reg <- tab_glm(Donnes_Nat, 
-                   espece_interet = 61714,
-                   espece_benchmark = 60636)
-
-bdd_reg <- bdd_reg %>%
-  dplyr::group_by(Code_10km) %>%
-  dplyr::arrange(year, Code_10km) %>%
-  dplyr::mutate(prev_y = dplyr::lag(proportion_interet)) %>%
-  dplyr::mutate(prev_prev_y = dplyr::lag(prev_y)) %>%
-  dplyr::ungroup() %>%
-  dplyr::mutate(prev_y = dplyr::if_else(is.na(prev_y),
-                                        0,
-                                        prev_y),
-                prev_prev_y = dplyr::if_else(is.na(prev_prev_y),
-                                             0,
-                                             prev_prev_y),
-                year2 = year**2
-  )
-reg <- glm(data = bdd_reg, 
-           proportion_interet ~ year+X_10km+Dist_Ecotone+Dnst_Cultures+prev_y)
 par(mfrow=c(1,2))
 acf(reg$residuals)
 pacf(reg$residuals)
 
 spec.ar(reg$residuals)
 spec.pgram(reg$residuals, 100)
+
+############
+### ZOIB ###
+############
 
 install.packages("zoib")
 library(zoib)
@@ -283,18 +254,5 @@ git remote -v
 
 
 ###########################
-#####                 #####
+#####   BROUILLONS    #####
 ###########################
-Total_et_Diro <- readr::read_csv(paste0(wd$data, 
-                                        "derived/Total_et_Diro.csv"),
-                                 locale = readr::locale(encoding = "UTF-8"))
-Total_et_Diro <- Total_et_Diro %>%
-  dplyr::select(-`...1`)
-
-MortsTotal <- Total_et_Diro %>%
-  filter(etat_biologique == "Trouvé mort : impact routier")
-
-bdd_reg <- tab_glm(MortsTotal, 
-                   espece_interet = 61714,
-                   espece_benchmark = 61667)
-
