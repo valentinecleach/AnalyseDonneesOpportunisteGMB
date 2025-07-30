@@ -317,3 +317,18 @@ grille_vect <- terra::vect(grille_10x10)
 grille_10x10[bdd_tif] <- exactextractr::exact_extract(bdd,
                                                       grille_10x10, 
                                                       'mean')
+
+###############################
+### Step by step quoi faire ###
+###############################
+# Dans Bash
+ls ~/.ssh/id_ed25519.pub
+ssh-keygen -t ed25519 -C "valentine.cleach@gmail.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+cat ~/.ssh/id_ed25519.pub
+# Ajouter clef ssh a github:
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICqg4sS84WPnDkdq+gXGx3d/ryAZak4IeZleKT3NbOsP valentine.cleach@gmail.com
+# Dans bash a nouveau.
+ssh -T git@github.com
+git remote -v

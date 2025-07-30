@@ -1,0 +1,139 @@
+---
+title: "Preparation pour regressions linéaires."
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+---
+
+```{r}
+source("init.R")
+
+library(ggfortify)
+library(dplyr)
+library(sf)
+library(ggplot2)
+
+wd <- set_wd()
+
+Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"),
+                     options = "ENCODING=UTF8")
+Total <- transform_Total()
+
+collision_faune_diro <- readr::read_csv(paste0(wd$data, 
+                                               "raw/collision_faune_diro.csv"))
+```
+
+```{r}
+Total <- Total%>%
+  dplyr::filter(technique_observation == "Vu")%>%
+  dplyr::select(id_synt, nom_vernaculaire, 
+                date, cd_nom, cd_nom, 
+                paysage_ID, paysage_nom, famille_paysage, 
+                Code_10km, X_10km, Y_10km, bdd_originale)
+Total <- Total%>%
+  dplyr:: mutate(cd_nom = as.numeric(cd_nom),
+                 cd_nom_grp_must = dplyr::if_else(cd_nom %in% c("60704", "60658", 
+                                                       "60716", "60686", "199752",
+                                                       "60674", "60731", "60746"),
+                                         111, cd_nom),
+                 cd_nom = as.factor(cd_nom))%>%
+  dplyr::select(Code_10km, X_10km, Y_10km, 
+                date, cd_nom, cd_nom_grp_must,
+                paysage_ID, paysage_nom, famille_paysage, 
+                etat_biologique)%>%
+  sf::st_drop_geometry()
+
+```
+
+```{r}
+diro <- collision_faune_diro %>%
+  dplyr::mutate(
+    geom_x = as.numeric(stringr::str_match(geom, "POINT \\(([^ ]+)")[,2]),
+    geom_y = as.numeric(stringr::str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
+  )%>%
+  dplyr::filter(!is.na(geom))
+
+diro_sf <- sf::st_as_sf(diro, 
+                        coords = c("geom_x", "geom_y"), 
+                        crs = 2154)
+diro_sf <- sf::st_transform(diro_sf, 
+                        sf::st_crs(4326))
+
+carte_bretagne_44 <- sf::st_read(paste0(wd$data,                                    "masques/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp"
+                                        )) %>%
+  sf::st_transform(2154)%>%
+  sf::st_transform(sf::st_crs(4326))
+
+diro_conti <- sf::st_filter(diro_sf,
+                            carte_bretagne_44, 
+                            .predicate = sf::st_within)
+
+diro_sf <- diro_conti%>%
+  dplyr::filter(deppr != 44)
+
+diro_sf <- diro_sf %>%
+   dplyr::filter(!(espece %in% c("amphibien", "amphibiens", "autre", "autre oiseau",
+                          "castor", "chat", "chauve-souris", "chien", "chouette",
+                          "nr", "oiseaux sauf rapace", "rapace diurne", 
+                          "rapace nocturne", "rapaces nocturnes", "rapaces diurnes",
+                          "reptile", "reptiles")))%>%
+  dplyr::mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")),
+                espece = dplyr::if_else(commentaire == "Furet", 
+                          "furet", espece, missing=espece))%>% 
+  dplyr::mutate(bdd_originale = "DIRO",
+                etat_biologique = "Trouvé mort : impact routier")%>%
+  dplyr::mutate(espece = as.factor(espece)) %>%
+  dplyr::select(-date_maj, -annee, -mois, -commentaire, -grp_espece)
+
+diro_sf <- diro_sf%>%
+  dplyr::mutate(cd_nom = dplyr::case_when(
+    espece == "blaireau" ~ 60636,
+    espece == "cerf/biche" ~ 61000,
+    espece == "chevreuil" ~ 61057,
+    espece == "écureuil" ~ 61153,
+    espece == "hérisson" ~ 60015,
+    espece == "lapin" ~ 61714,
+    espece == "lièvre" ~ 61678,
+    espece == "loutre" ~ 60630,
+    espece == "mustélidé" ~ 111,
+    espece == "ragondin" ~ 61667,
+    espece == "rat" ~ NA,
+    espece == "rat musqué" ~ 61448,
+    espece == "renard" ~ 60658,
+    espece == "sanglier" ~ 60981,
+    espece == "martre" ~ 60658, 
+    espece == "furet" ~ 199752, 
+    espece == "vison d'amérique" ~ 60746, 
+    espece == "belette" ~ 60716, 
+    espece == "fouine" ~ 60674, 
+    espece == "hermine" ~ 60686, 
+    espece == "putois" ~ 60731, 
+    .default = NA
+  ),
+  cd_nom_grp_must = dplyr::case_when(
+    cd_nom %in% c("60704", "60658", "60716", "60686", "199752","60674", "60731",
+                  "60746"), 111, cd_nom
+    )
+  )%>%
+  dplyr::filter(!is.na(cd_nom))%>%
+  dplyr::select(cd_nom, cd_nom_grp_must, espece, date, geom, geometry, etat_biologique)
+
+
+diro_sf <- diro_sf%>%
+  ajout_famille_paysage() %>%
+  ajout_10x10_predetermine()%>%
+  dplyr::rename(Code_10km = CODE_10KM)%>%
+  dplyr::select(Code_10km, X_10km, Y_10km, 
+                date, cd_nom, cd_nom_grp_must,
+                paysage_ID, paysage_nom, famille_paysage,
+                etat_biologique)
+
+diro <- diro_sf%>%
+  sf::st_drop_geometry()
+```
+```{r}
+MortsTotal <- rbind(MortsNat, diro)
+```
+

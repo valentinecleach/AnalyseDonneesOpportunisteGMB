@@ -249,5 +249,7 @@ que_bretagne <- anti_join(total_bretagne_44,
 sf::st_write(que_bretagne, 
              paste0(wd$data, "derived/Total.shp"), 
              layer_options = "ENCODING=UTF-8")
+
+MortsTotal <- rbind(MortsNat, diro)
 ```
 

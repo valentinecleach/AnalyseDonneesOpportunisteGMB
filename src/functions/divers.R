@@ -53,8 +53,8 @@ transform_Total <- function(bdd = Total){
         . == "Indc_Dv" ~ "Indice_Diversite",
         . == "Dnst_Cl" ~ "Densite_Cultures",
         . == "Dstn_EA" ~ "Distance_EcotoneArbore",
-        . == "" ~ "Distance_Littoral",
-        . == "" ~ "Distance_Eau",
+        . == "Dstnc_L" ~ "Distance_Littoral",
+        . == "Dstnc_E" ~ "Distance_Eau",
         . == "CODE_10" ~ "Code_10km",
         TRUE ~ .))
   

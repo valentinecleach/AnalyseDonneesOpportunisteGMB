@@ -12,44 +12,34 @@ output:
 ```{r}
 source("init.R")
 
-wd <- set_wd()
-
-Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"))
-Total <- transform_Total()
-
-collision_faune_diro <- readr::read_csv(paste0(wd$data, "raw/collision_faune_diro.csv"))
-
 library(ggfortify)
 library(lmtest)
 library(dplyr)
 library(sf)
 library(ggplot2)
 
-```
+wd <- set_wd()
 
-```{r}
-MortsNaturalistes <- Total%>%
-  dplyr::filter(etat_biologique %in% c("TrouvÃ© mort : impact routier", 
-                                       "Trouvé mort : impact routier"), 
-                technique_observation == "Vu")%>%
-  dplyr::select(id_synt, nom_vernaculaire, 
-                date, cd_nom, cd_nom, 
-                paysage_ID, paysage_nom, famille_paysage, 
-                Code_10km, X_10km, Y_10km)
+Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"),
+                     options = "ENCODING=UTF8")
+Total <- transform_Total()
+
+collision_faune_diro <- readr::read_csv(paste0(wd$data, 
+                                               "raw/collision_faune_diro.csv"))
+
+
 ```
 
 ```{r}
 MortsNat <- MortsNaturalistes%>%
-  dplyr::filter(date>as.Date("2010-01-01"))%>%
   dplyr:: mutate(cd_nom = as.numeric(cd_nom),
-                 cd_nom = dplyr::if_else(cd_nom %in% c("60704", "60658", 
+                 cd_nom_grp_must = dplyr::if_else(cd_nom %in% c("60704", "60658", 
                                                        "60716", "60686", "199752",
                                                        "60674", "60731", "60746"),
                                          111, cd_nom),
                  cd_nom = as.factor(cd_nom))%>%
-  dplyr::rename(espece = nom_vernaculaire) %>%
   dplyr::select(Code_10km, X_10km, Y_10km, 
-                date, cd_nom, 
+                date, cd_nom, cd_nom_grp_must,
                 paysage_ID, paysage_nom, famille_paysage)%>%
   sf::st_drop_geometry()
 ```
