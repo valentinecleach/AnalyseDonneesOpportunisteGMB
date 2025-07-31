@@ -43,7 +43,7 @@ bdd_reg <- tab_glm(MortsTotal,
 
 liste <- choisi_forme_year(bdd = bdd_reg)
 regfit <- liste[1]$regfit
-bdd <- liste[1]$bdd
+bdd <- liste[2]$bdd
 ```
 
 ```{r}
@@ -56,7 +56,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 
 ```{r}
-reg <- glm(data = bdd_reg, 
+reg <- glm(data = bdd, 
            formula = proportion_interet ~ year +  Dist_Littoral + prop_tmoins1 + prop_tmoins2 )
 summary(reg)
 autoplot(reg)
@@ -74,7 +74,7 @@ bdd_reg <- tab_glm(MortsTotal,
 
 liste <- choisi_forme_year(bdd = bdd_reg)
 regfit <- liste[1]$regfit
-bdd <- liste[1]$bdd
+bdd <- liste[2]$bdd
 ```
 
 
@@ -88,7 +88,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 
 ```{r}
-reg <- glm(data = bdd_reg, 
+reg <- glm(data = bdd, 
            formula = proportion_interet ~ year + X_10km + Dnst_Cultures  + Dist_Ecotone + 
     prop_tmoins1 + prop_tmoins2 + year2)
 summary(reg)
@@ -106,7 +106,7 @@ bdd_reg <- tab_glm(MortsTotal,
 
 liste <- choisi_forme_year(bdd = bdd_reg)
 regfit <- liste[1]$regfit
-bdd <- liste[1]$bdd
+bdd <- liste[2]$bdd
 ```
 
 
@@ -121,7 +121,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 
 ```{r}
-reg <- glm(data = bdd_reg, 
+reg <- glm(data = bdd, 
            proportion_interet ~ year + Ind_Diversite + Dist_Littoral +
              prop_tmoins1 + prop_tmoins2)
 summary(reg)
@@ -139,7 +139,7 @@ bdd_reg <- tab_glm(MortsTotal,
 
 liste <- choisi_forme_year(bdd = bdd_reg)
 regfit <- liste[1]$regfit
-bdd <- liste[1]$bdd
+bdd <- liste[2]$bdd
 ```
 
 
@@ -173,7 +173,8 @@ bdd_reg <- tab_glm(MortsTotal,
                    espece_benchmark = 61667)
 liste <- choisi_forme_year(bdd = bdd_reg)
 regfit <- liste[1]$regfit
-bdd <- liste[1]$bdd
+bdd <- liste[2]$bdd
+View(liste[1])
 ```
 
 
@@ -204,8 +205,30 @@ bdd_reg <- tab_glm(MortsTotal,
                    espece_interet = 60981,
                    espece_benchmark = 61057)
 
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit; bdd <- liste[2]$bdd
 ```
 
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+
+```{r}
+reg <- glm(data = bdd, 
+           formula = proportion_interet ~ year + X_10km + Dist_Littoral +
+             prop_tmoins1 + prop_tmoins2)
+summary(reg)
+autoplot(reg)
+bptest(reg, studentize = FALSE) # Homosedasticité 
+bgtest(reg, type = "F") # Corrélation des erreurs
+```
 ### Sanglier - Blaireau
 
 ```{r}
