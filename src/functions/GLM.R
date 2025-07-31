@@ -250,12 +250,12 @@ choisi_forme_year <- function(bdd) {
   
   # Modelisation
   regfit_quanti <- leaps::regsubsets(
-    formula = proportion_interet~. ,
+    x = proportion_interet~. ,
     data = data_quanti,
     method = "seqrep"
   )
   regfit_quali <- leaps::regsubsets(
-    formula = proportion_interet~. ,
+    x = proportion_interet~. ,
     data = data_quali,
     method = "seqrep"
   )
@@ -266,8 +266,10 @@ choisi_forme_year <- function(bdd) {
   
   # Choix
   if (min_bic_quanti < min_bic_quali) {
-    return(list(choice = "quantitative", min_bic = min_bic_quanti))
+    print(list(choice = "quantitative", min_bic = min_bic_quanti))
+    return(list(regfit = regfit_quanti, bdd = data_quanti))
   } else {
-    return(list(choice = "qualitative", min_bic = min_bic_quali))
+    print(list(choice = "qualitative", min_bic = min_bic_quali))
+    return(list(regfit = regfit_quali, bdd = data_quali))
   }
 }

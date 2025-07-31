@@ -7,6 +7,12 @@ output:
     toc_float: true
 ---
 
-Cette semaine, j'ai voulu terminer les rÃ©gressions.
+# Régressions
 
-Tout d'abord, comme nous avons vu la semaine passÃ© qu'il y avais de l'autocorrÃ©lation dans les rÃ©sidus, j'ai voulu dÃ©terminer l'ordre des corrÃ©lations. Pour cela j'ai regardÃ© l'autocorrÃ©logramme des rÃ©sidus.
+Nous avons vu la semaine passée qu'il y avais de la corrélation dans les résidus. J'ai donc voulu déterminer l'ordre des corrélations, a l'aide des ACF et PACF (autocorrelation function et partial autocorrelation function) des résidus. Cependant, il n'y avait pas beaucoup de sens, avec lag 34 ie 
+proportortion a la date t dépends de celle à la date t-34. Mais nous avons des données annuelles, et maximum 11 ans pour un même site. 
+
+J'ai donc décidé arbitrairement que prendre la proportion a la date t-1 et t-2 suffisait.
+
+Ensuite, j'ai ajouté toutes les variables, en corrigeant certaines erreures de code. 
+Comme il y avait beaucoup de combinaisons, 
