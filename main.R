@@ -71,6 +71,17 @@ rmarkdown::render(paste0(wd$src, "brouillon/Diro_desc.Rmd"),
                                        "stats_desc/Diro.html"),
                   encoding="UTF-8")
 
+rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd"),
+                  output_file = paste0(wd$output, 
+                                       "models/glm/Reg_Lin_CollisionsRoutieres.html"),
+                  encoding="UTF-8")
+
+lines <- readLines(paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd", 
+                          encoding = "UTF-8"))
+cat(lines[1:10], sep = "\n")
+tools::file_test("-f", paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd"))
+file.info(paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd"))$Encoding
+
 ggplot(grille_10x10) +
   geom_sf(aes(fill = Densite_Cultures_500m)) +
   theme_minimal()+
