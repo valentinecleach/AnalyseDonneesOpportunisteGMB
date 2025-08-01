@@ -16,3 +16,5 @@ J'ai donc décidé arbitrairement que prendre la proportion a la date t-1 et t-2 s
 
 Ensuite, j'ai ajouté toutes les variables, en corrigeant certaines erreures de code. 
 Comme il y avait beaucoup de combinaisons, 
+
+seqrep
