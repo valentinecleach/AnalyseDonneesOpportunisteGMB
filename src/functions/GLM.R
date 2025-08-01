@@ -18,11 +18,7 @@ Mode <- function(x) {
 #' @param espece_benchmark L'espece avec laquel on compare l'espece d'interet
 #' @param taillegrid La colonne de maille qu'on utilise 
 #'
-#' @return 
-#' @export
-#'
-#' @examples
-#' 
+#' @return La base de donnee pour le glm
 tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
   
   tab <- bdd %>%
@@ -109,16 +105,12 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
 
 #' Ajoute la moyenne/mean
 #'
-#' @param bdd La base de donnée.
+#' @param bdd La base de donnee.
 #' @param variable La variable a ajouter
 #' @param technique Mean ou Mode, selon les cas.
 #'
-#' @return La bdd modifié
-#'
-#' @examples
-#' 
+#' @return La bdd modifie
 ajoute_si_present <- function(bdd, variable, technique = mean) {
-  
   if (variable %in% names(bdd)) {
     new_var_name <- paste0(variable, "_m")
     
@@ -132,25 +124,23 @@ ajoute_si_present <- function(bdd, variable, technique = mean) {
   return(bdd)
 }  
 
-
 #' Supprime les sites qui sont toujours 0 ou 1
 #'
-#' @param bdd La base de donnée.
+#' @param bdd La base de donnee.
 #'
-#' @return La bdd modifié
-#'
-#' @examples
-#' 
+#' @return La bdd modifie
 suppression_prop01 <- function(bdd = bdd_reg){
-  return(dplyr::filter(bdd_reg, proportion_total %in% c(0,1)))
+  bdd <- bdd %>%
+    dplyr::filter(proportion_total %in% c(0,1))
+  return(bdd)
 }
 
 #' Fait automatiquement la glm (hyp et tout)
 #'
-#' @param cd_nom_interet L'espèce qu'on souhaite étudier
-#' @param cd_nom_benchmark L'espèce témoin.
+#' @param cd_nom_interet L'espece qu'on souhaite etudier
+#' @param cd_nom_benchmark L'espece temoin.
 #' @param supprimer01 TRUE si on souhaite supprimer les sites avec 0 ou 1
-#' @param bdd La base de donnée qu'on utilise
+#' @param bdd La base de donnee qu'on utilise
 #' #'
 #' @return 
 #' @export
@@ -205,8 +195,7 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
    return(reg)
 }
 
-
-#' Affiche les 4 plots généréres par leaps::plot.regsubsets
+#' Affiche les 4 plots genereres par leaps::plot.regsubsets
 #'
 #' @param reg.summary Un object summary(regsubsets(...))
 #'

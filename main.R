@@ -76,6 +76,8 @@ rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rm
                                        "models/glm/Reg_Lin_CollisionsRoutieres.html"),
                   encoding="UTF-8")
 
+###############
+
 lines <- readLines(paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd", 
                           encoding = "UTF-8"))
 cat(lines[1:10], sep = "\n")
