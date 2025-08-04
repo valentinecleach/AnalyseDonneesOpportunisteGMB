@@ -82,6 +82,7 @@ rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"),
                   output_file = paste0(wd$output, 
                                        "models/glm/Reg_Lin_ToutesDonnes.html"),
                   encoding="UTF-8")
+knitr::knit(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"))
 
 ###############
 

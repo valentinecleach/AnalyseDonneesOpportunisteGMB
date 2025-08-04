@@ -1,6 +1,6 @@
 ---
 title: "Semaine 8"
-date: "28/07 - ..."
+date: "28/07 - 01/08"
 output:
   bookdown::html_document2:
     toc: true
@@ -10,11 +10,16 @@ output:
 # Régressions
 
 Nous avons vu la semaine passée qu'il y avais de la corrélation dans les résidus. J'ai donc voulu déterminer l'ordre des corrélations, a l'aide des ACF et PACF (autocorrelation function et partial autocorrelation function) des résidus. Cependant, il n'y avait pas beaucoup de sens, avec lag 34 ie 
-proportortion a la date t dépends de celle à la date t-34. Mais nous avons des données annuelles, et maximum 11 ans pour un même site. 
+proportion a la date t dépends de celle à la date t-34. Mais nous avons des données annuelles, et maximum 11 ans pour un même site. 
 
 J'ai donc décidé arbitrairement que prendre la proportion a la date t-1 et t-2 suffisait.
 
 Ensuite, j'ai ajouté toutes les variables, en corrigeant certaines erreures de code. 
-Comme il y avait beaucoup de combinaisons, 
+Comme il y avait beaucoup de combinaisons, j'ai décidé de faire des tentatives automatiques en utilisisant la procédure "seqrep". Ie au lieu de faire une procédure backward ou forward, lorsqu'on ajoute ou supprime une variable, on regarde a la fois s'il faut en ajouter ou en supprimer. Ensuite, j'ai décidé de regarder uniquement le critère BIC au lieu du Cp de mallow ou du R^2 ajusté car nous avons bcp de données et la proba que le BIC selectionne le bon modèle tend vers 1 quand n-> infiny, ce qui n'est pas le cas pour les autres critères.
 
-seqrep
+Les résultats des régressions sont dans les autres pages ici sur le Rpubs et voici un tableur recap: (insérer lien)
+
+
+On remarque que les résidus ne ressemblent que très peu a quelque chose de gaussien pour certaines espèces comme le putois, alors que les autres non. Ceci est parce qu'il y a peu de données...
+
+?
