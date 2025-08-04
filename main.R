@@ -278,3 +278,113 @@ git remote -v
 #####   BROUILLONS    #####
 ###########################
 
+install.packages("unmarked")
+library(unmarked)
+
+#' Donne la valeur dominante d'une colonne d'une bdd
+#'
+#' @param x la colonne 
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+#' 
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+#' Donne le tableau sur lequel pour le site occupency
+#'
+#' @param espece_interet L'espece qui nous interesse 
+#' @param espece_benchmark L'espece avec laquel on compare l'espece d'interet
+#' @param taillegrid La colonne de maille qu'on utilise 
+#'
+#' @return La base de donnee pour le glm
+tab_site_occup <- function(espece, bdd = Total){
+  
+  tab <- bdd %>%
+    sf::st_drop_geometry() %>%
+    dplyr::filter(cd_nom %in% c(espece)) %>%
+    dplyr::filter(date > as.Date("2010-01-01")) %>%
+    dplyr::mutate(year = lubridate::year(date))
+  
+  colonnes <- c("famille_paysage", "clust", 
+                "Indice_Diversite", "Densite_Cultures", 
+                "Distance_EcotoneArbore", "Distance_Littoral",
+                "Distance_Eau")
+  colonnes_presentes <- intersect(colonnes, names(tab))
+  
+  tab <- tab %>%
+    dplyr::select(any_of(c("date", "nom_vernaculaire", "cd_nom", 
+                           "Code_10km", "X_10km", "Y_10km", "year",
+                           colonnes_presentes)))
+  
+  tab <- tab %>%
+    dplyr::group_by(year, Code_10km) %>%
+    dplyr::mutate(detect = dplyr::if_else(sum(cd_nom == espece)>0, 
+                                            1, 0, missing=0))
+  
+  tab <- tab %>%
+    ajoute_si_present(variable = "famille_paysage", 
+                      technique = Mode) %>%
+    ajoute_si_present(variable = "clust", 
+                      technique = Mode) %>%
+    ajoute_si_present(variable = "Indice_Diversite",
+                      technique = mean) %>%
+    ajoute_si_present(variable = "Densite_Cultures",
+                      technique = mean) %>%
+    ajoute_si_present(variable = "Distance_EcotoneArbore",
+                      technique = mean) %>%
+    ajoute_si_present(variable = "Distance_Littoral",
+                      technique = mean) %>%
+    ajoute_si_present(variable = "Distance_Eau",
+                      technique = mean)
+  
+  tab <- tab %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(Code_10km) %>%
+    dplyr::mutate(nb_annee_site = dplyr::n_distinct(year)) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(Code_10km, year) 
+  
+  ttes_collones_sortantes <- c("year", "detect", 
+                               "Code_10km", "nb_annee_site", "X_10km", "Y_10km")
+  
+  collones_sortantes_opt <- c("famille_paysage_max", "clust_max", 
+                              "Indice_Diversite_m", "Densite_Cultures_m", 
+                              "Distance_EcotoneArbore_m", "Distance_Littoral_m",
+                              "Distance_Eau_m")
+  collones_sortantes_presentes <- intersect(collones_sortantes_opt, names(tab))
+  
+  tab <- tab %>%
+    dplyr::select(any_of(c(ttes_collones_sortantes, collones_sortantes_presentes))) %>%
+    dplyr::distinct(year, Code_10km, .keep_all = TRUE)
+  
+  tab <- tab%>%
+    dplyr::rename_with(~ case_when(
+      . == "Indice_Diversite_m" ~ "Ind_Diversite",
+      . == "Densite_Cultures_m" ~ "Dnst_Cultures",
+      . == "Distance_EcotoneArbore_m" ~ "Dist_Ecotone",
+      . == "Distance_Littoral_m" ~ "Dist_Littoral",
+      . == "Distance_Eau_m" ~ "Dist_Eau",
+      TRUE ~ .))%>%
+    dplyr::select(-nb_annee_site)
+  
+  return(tab)
+}
+
+tab <- tab_site_occup(espece = 61714, bdd= Total)
+View(tab)
+
+tab_vide <- tab %>%
+  select(year, Code_10km)%>%
+  dplyr::arrange(Code_10km, year)
+
+output <- lapply(names(year),function(x){
+  res <- data.frame(VarName=Code_10km, 
+                    Level=levels(tab[,Code_10km]), 
+                    Number=1:nlevels(tab[,Code_10km]))
+  return(res)
+})
