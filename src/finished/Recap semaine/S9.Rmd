@@ -1,0 +1,34 @@
+---
+title: "Semaine 9"
+date: "04/08 - .../08"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+---
+
+# Modèles d'occupancy
+
+## Bibliographie -\> but : lire + recap d'ici demain soir, max mercredi soir.
+
+-   Ref de Simon Lacombe :
+
+    -   [Occupancy Modeling, Morgan Byrne, James Golde](https://kevintshoemaker.github.io/NRES-746/Occupancy.html)
+
+    -   [Citizen science indicates significant range recovery and defines new conservation priorities for Earth's most endangered pinniped in Greece](https://zslpublications.onlinelibrary.wiley.com/doi/10.1111/acv.12806)
+
+-   Ref de Franck Simonnet :
+
+    -   [Estimating Site Occupancy Rates When Detection Probabilities Are Less Than One](https://www.researchgate.net/publication/228821155_Estimating_Site_Occupancy_Rates_When_Detection_Probabilities_Are_Less_Than_One){.uri}
+
+    -   [Journal of Biogeography Journal of Biogeography Free Access Predicting species distributions from checklist data using site-occupancy models](https://onlinelibrary.wiley.com/doi/10.1111/j.1365-2699.2010.02345.x)
+
+-   Autres références :
+
+    -   ??
+
+    -   Déjà un article de lu sur le sujet le mois dernier a retrouver aussi ?
+
+## Début de modélisation -\> **but : au moins avoir une bdd sur une espèce, début de création fonction. top si la fonction marche sur ttes les espèces.**
+
+## 
