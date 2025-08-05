@@ -34,3 +34,11 @@ output:
 ## Début de modélisation -\> **but : au moins avoir une bdd sur une espèce, début de création fonction. top si la fonction marche sur ttes les espèces.**
 
 ## 
+
+En etudiant le lapin de garenne avec 2 periodes:
+
+-   2005 - 2014
+
+-   2015-2024
+
+Nous avons une augementation significative du lapin... (Je crois, même si je ne comprends pas encore tt a fait ce modèle). Je n'ai pas encore inclue de variables d'environnement etc, juste les dates.
