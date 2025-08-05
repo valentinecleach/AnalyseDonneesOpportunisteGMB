@@ -315,10 +315,10 @@ ggplot() +
   scale_fill_gradient(low="white", high="orangered3") +
   theme_bw()
 
-####################################
+###############################
+##### Méthode grenouilles #####
+###############################
 
-# grid <- grid %>% 
-#   filter(as.numeric(areakm2)>10) # Enlever les petits sites? Un problème ou pas?
 
 mois <- c('Jan', 'Fev', 'Mars', 'Avr', 'Mai', 'Juin', 
         'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec') # extract month with data
@@ -350,6 +350,7 @@ Lapins <- Total%>%
 
 ind <- 1
 
+# Error: object 'mom_detections' not found
 for (k in 1:length(indyear)){
   mom_detections[[k]] <- matrix(0,nrow=length(ids),ncol=length(mois))
   data <- filter(Lapins,
@@ -378,8 +379,8 @@ for (i in 1:length(indyear)){
 }
 
 
-# convert list into array (https://stackoverflow.com/questions/37433509/convert-list-to-a-matrix-or-array)
-y <- array(unlist(y), dim = c(nrow(y[[1]]), ncol(y[[1]]), length(y)))
+y <- array(unlist(y), 
+           dim = c(nrow(y[[1]]), ncol(y[[1]]), length(y)))
 
 new_y <- NULL
 for (i in 1:dim(y)[3]){ # loop over years
@@ -389,12 +390,14 @@ new_y <- (new_y > 0)
 annee <- apply(new_y[,1:10],1,sum)
 y2 <- apply(new_y[,11:20],1,sum)
 y <- cbind(annee,y2)
+
 dim(y)
 summary(y)
 range(y)
 
-#################################
-
+#####################
+##### Methode 2 #####
+#####################
 
 Lapins <- Total%>%
   filter(cd_nom == 61714,
@@ -462,66 +465,21 @@ unmarked::summary(model_null)
 # Model with detection depending on era
 model_era <- unmarked::occu(~periode ~1, data = umf)
 
-# Summaries
+# Regards des modèles
 unmarked::summary(model_null)
 unmarked::summary(model_era)
+# Ici, on compare les 2 modèles a l'aide de l'AIC
+unmarked::modSel(unmarked::fitList(aucune_variable = model_null, deux_periodes = model_era))
 
 
 ########################################
 ################# EESSAIS ##############
 ########################################
-# Load necessary libraries
+
 library(dplyr)
 library(tidyr)
 
-# Input data
-x1 <- c("a", "b", "a", "b", "b", "a")
-y1 <- c(2010, 2012, 2010, 2023, 2013, 2012)
-data1 <- data.frame(x1, y1)
-
-# Create a complete grid of all combinations (to ensure 0s for missing years)
-data_full <- data1 %>%
-  count(x1, y1) %>%
-  complete(x1, y1 = full_seq(y1, 1), fill = list(n = 0)) %>%
-  pivot_wider(names_from = y1, values_from = n, names_prefix = "y") %>%
-  arrange(x1)
-
-data_full[,-1] <- ifelse(data_full[,-1]>0, 1, 0)
-
-# View the result
-print(data_full)
-
-# Detection matrix
-y <- as.matrix(data_full[, -1])  # remove site column
-rownames(y) <- data_full$x1
+### Ajouter les variables de site -> On devrait pouvoir les garder pour toutes 
+# les espèces?
 
 
-years <- as.numeric(sub("y", "", colnames(y)))
-era_vector <- ifelse(years <= 2016, "periode1", "periode2")
-
-era_matrix <- matrix(rep(era_vector, each = nrow(y)), 
-                     nrow = nrow(y), 
-                     byrow = FALSE)
-colnames(era_matrix) <- colnames(y)
-rownames(era_matrix) <- rownames(y)
-
-# Convert to data.frame
-era_df <- as.data.frame(era_matrix)
-era_df
-# Now build unmarkedFrameOccu
-umf <- unmarked::unmarkedFrameOccu(y = y, obsCovs = list(era = era_df))
-
-
-# Null model (no effect of era)
-model_null <- unmarked::occu(~1 ~1, data = umf)
-
-unmarked::summary(model_null)
-# Model with detection depending on era
-model_era <- unmarked::occu(~era ~1, data = umf)
-
-# Summaries
-unmarked::summary(model_null)
-unmarked::summary(model_era)
-
-# Model comparison
-unmarked::modSel(unmarked::fitList(model_null, model_era))
