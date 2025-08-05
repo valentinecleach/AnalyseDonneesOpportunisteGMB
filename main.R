@@ -92,12 +92,12 @@ cat(lines[1:10], sep = "\n")
 tools::file_test("-f", paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd"))
 file.info(paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd"))$Encoding
 
-ggplot(grille_10x10) +
+ggplot(grille_10Code_10km0) +
   geom_sf(aes(fill = Densite_Cultures_500m)) +
   theme_minimal()+
   scale_fill_gradientn(colors = topo.colors(6))
 
-ggplot(grille_10x10) +
+ggplot(grille_10Code_10km0) +
   geom_sf(aes(fill = Distance_EcotoneArbore)) +
   theme_minimal()+
   scale_fill_gradientn(colors = topo.colors(6))
@@ -288,8 +288,8 @@ library(ggplot2)
 
 # Map des lapins
 
-grille_10x10 <- sf::st_read(
-  paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
+grille_10Code_10km0 <- sf::st_read(
+  paste0(wd$data, "masques/Grille_10Code_10km0/Grille_10Code_10km0.shp")
 )
 RegionBretagneConti <- sf::st_read(
   paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
@@ -298,20 +298,20 @@ RegionBretagneConti <- sf::st_read(
 tab <- Total %>%
   dplyr::filter(cd_nom == 61714)%>%
   transforme_carte()
-grille_10x10 <- grille_10x10%>%
+grille_10Code_10km0 <- grille_10Code_10km0%>%
   transforme_carte()
 RegionBretagneConti <- RegionBretagneConti%>%
   transforme_carte()
 
-grille_10x10$density <- lengths(sf::st_intersects(grille_10x10, 
+grille_10Code_10km0$density <- lengths(sf::st_intersects(grille_10Code_10km0, 
                                                   tab))
-grille_10x10 <- sf::st_intersection(grille_10x10, 
+grille_10Code_10km0 <- sf::st_intersection(grille_10Code_10km0, 
                                     RegionBretagneConti)
 
 ggplot() +
   geom_sf(data = RegionBretagneConti) + 
   labs(title = paste0(". Densite des observations du lapin de garenne en bretagne")) +
-  geom_sf(data = grille_10x10, aes(fill = density)) +
+  geom_sf(data = grille_10Code_10km0, aes(fill = density)) +
   scale_fill_gradient(low="white", high="orangered3") +
   theme_bw()
 
@@ -325,13 +325,13 @@ mois <- c('Jan', 'Fev', 'Mars', 'Avr', 'Mai', 'Juin',
 
 indyear <- c(2006:2015, 2015:2024) # define two periods
 
-ids <- unique(grille_10x10$CODE_10KM)
+ids <- unique(Total$Code_10km)
 
 Lapins <- Total%>%
   filter(cd_nom == 61714,
          technique_observation == "Vu",
          date > as.Date("2005-01-01"))%>%
-  select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
+  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
   select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation)%>%
   mutate(mois = lubridate::month(date),
          mois = case_when(mois == 1 ~ "Jan", 
@@ -386,9 +386,9 @@ for (i in 1:dim(y)[3]){ # loop over years
   new_y <- cbind(new_y,apply(y[,1:12,i],1,sum))
 }
 new_y <- (new_y > 0) 
-y1 <- apply(new_y[,1:10],1,sum)
+annee <- apply(new_y[,1:10],1,sum)
 y2 <- apply(new_y[,11:20],1,sum)
-y <- cbind(y1,y2)
+y <- cbind(annee,y2)
 dim(y)
 summary(y)
 range(y)
@@ -400,7 +400,7 @@ Lapins <- Total%>%
   filter(cd_nom == 61714,
          technique_observation == "Vu",
          date > as.Date("2005-01-01"))%>%
-  select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
+#  select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
   select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation)
 
 t_lapins <- Lapins%>%
@@ -415,4 +415,113 @@ t_lapins <- Lapins %>%
   distinct(Code_10km, annee)%>%
   select(Code_10km, annee)
 
-t_lapins <- 
+str(t_lapins)
+
+t_lapins <- Lapins %>%
+  sf::st_drop_geometry()%>%
+  dplyr::mutate(annee = lubridate::year(date))%>%
+  dplyr::select(Code_10km, annee)%>%
+  dplyr::count(Code_10km, annee) %>%
+  tidyr::complete(Code_10km, 
+                  annee = tidyr::full_seq(annee, 1), 
+                  fill = list(n = 0)) %>%
+  tidyr::pivot_wider(names_from = annee, 
+                     values_from = n) %>%
+  dplyr::arrange(Code_10km)
+
+t_lapins[,-1] <- ifelse(t_lapins[,-1]>0, 1, 0)
+
+# Detection matrix
+noms <- t_lapins$Code_10km
+t_lapins <- as.matrix(t_lapins[, -1])
+rownames(t_lapins) <- noms
+
+
+annees <- as.numeric(colnames(t_lapins))
+periodes_vector <- ifelse(annees < 2015, "periode1", "periode2")
+
+periodes_matrix <- matrix(rep(periodes_vector, each = nrow(t_lapins)), 
+                     nrow = nrow(t_lapins), 
+                     byrow = FALSE)
+colnames(periodes_matrix) <- colnames(t_lapins)
+rownames(periodes_matrix) <- rownames(t_lapins)
+
+# Convert to data.frame
+periodes_df <- as.data.frame(periodes_matrix)
+View(periodes_df)
+
+
+umf <- unmarked::unmarkedFrameOccu(y = t_lapins, 
+                                   obsCovs = list(periode = periodes_df))
+
+
+# Null model (no effect of era)
+model_null <- unmarked::occu(~1 ~1, data = umf)
+
+unmarked::summary(model_null)
+# Model with detection depending on era
+model_era <- unmarked::occu(~periode ~1, data = umf)
+
+# Summaries
+unmarked::summary(model_null)
+unmarked::summary(model_era)
+
+
+########################################
+################# EESSAIS ##############
+########################################
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+
+# Input data
+x1 <- c("a", "b", "a", "b", "b", "a")
+y1 <- c(2010, 2012, 2010, 2023, 2013, 2012)
+data1 <- data.frame(x1, y1)
+
+# Create a complete grid of all combinations (to ensure 0s for missing years)
+data_full <- data1 %>%
+  count(x1, y1) %>%
+  complete(x1, y1 = full_seq(y1, 1), fill = list(n = 0)) %>%
+  pivot_wider(names_from = y1, values_from = n, names_prefix = "y") %>%
+  arrange(x1)
+
+data_full[,-1] <- ifelse(data_full[,-1]>0, 1, 0)
+
+# View the result
+print(data_full)
+
+# Detection matrix
+y <- as.matrix(data_full[, -1])  # remove site column
+rownames(y) <- data_full$x1
+
+
+years <- as.numeric(sub("y", "", colnames(y)))
+era_vector <- ifelse(years <= 2016, "periode1", "periode2")
+
+era_matrix <- matrix(rep(era_vector, each = nrow(y)), 
+                     nrow = nrow(y), 
+                     byrow = FALSE)
+colnames(era_matrix) <- colnames(y)
+rownames(era_matrix) <- rownames(y)
+
+# Convert to data.frame
+era_df <- as.data.frame(era_matrix)
+era_df
+# Now build unmarkedFrameOccu
+umf <- unmarked::unmarkedFrameOccu(y = y, obsCovs = list(era = era_df))
+
+
+# Null model (no effect of era)
+model_null <- unmarked::occu(~1 ~1, data = umf)
+
+unmarked::summary(model_null)
+# Model with detection depending on era
+model_era <- unmarked::occu(~era ~1, data = umf)
+
+# Summaries
+unmarked::summary(model_null)
+unmarked::summary(model_era)
+
+# Model comparison
+unmarked::modSel(unmarked::fitList(model_null, model_era))
