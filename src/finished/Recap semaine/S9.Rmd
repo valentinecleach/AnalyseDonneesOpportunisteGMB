@@ -31,7 +31,9 @@ output:
 
     -   Déjà un article de lu sur le sujet le mois dernier a retrouver aussi ?
 
-## Début de modélisation -\> **but : au moins avoir une bdd sur une espèce, début de création fonction. top si la fonction marche sur ttes les espèces.**
+    -   reference du truc github de occupancy modeling. Présente les hypothèses et les problèmes si les hypothèses ne sont pas vérifiés. <https://pubs.usgs.gov/fs/2005/3096/fs20053096.pdf>
+
+## Début de modélisation -\> **but : Au moins un modèle qui marche avec méthode fréquentiste. Cool si semaine pro je fais pareil mais bayésien (?)**
 
 ## 
 
@@ -42,3 +44,5 @@ En etudiant le lapin de garenne avec 2 periodes:
 -   2015-2024
 
 Nous avons une augementation significative du lapin... (Je crois, même si je ne comprends pas encore tt a fait ce modèle). Je n'ai pas encore inclue de variables d'environnement etc, juste les dates.
+
+En regardant il y a très peu de sites présent de 2005 a 2010 (peu d'observations et peu d'observateurs). Essayer de faire 2010 - 2015 puis 2019 - 2024 et on ca permet de mettre notre hypothèse que les individus ne peuvent pas varier au sein d'une periode.
