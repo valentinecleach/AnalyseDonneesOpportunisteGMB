@@ -110,7 +110,7 @@ ggplot(Total) +
 ###############
 
 Total <- transform_Total(bdd = Total)
-summary(Total)
+sumoisary(Total)
 
 Donnes_Nat <- Total%>%
   filter(technique_observation == "Vu")
@@ -122,7 +122,7 @@ bdd_reg <- tab_glm(Donnes_Nat,
                    espece_interet = 61714,
                    espece_benchmark = c(61667, 61057))
 
-summary(bdd_reg)
+sumoisary(bdd_reg)
 cor(bdd_reg[-c("clust_max", "famille_paysage_max", "Code_10km")])
 corrplot::corrplot(cor(bdd_reg[c(1:3,5:7,9:12)]))
 
@@ -161,14 +161,14 @@ bdd_reg <- tab_glm(Total_et_Diro,
 
 reg <- glm(data = bdd_reg, 
            proportion_interet ~ year+X_10km+Dist_Ecotone+Dnst_Cultures)
-summary(reg)
+sumoisary(reg)
 autoplot(reg) # 239 c'est une proportion de 1 en 2010, talus, 11 ans du site...
 
 bptest(reg, studentize = FALSE) # Homosedasticit? okay a 90%
 bgtest(reg, type = "F") # On ne peut pas dire qu'il n'y a pas d'autocorr?lation des erreurs
 shapiro.test(reg$residuals)
 
-summary(bdd_reg)
+sumoisary(bdd_reg)
 View(bdd_reg)
 
 acf(reg$residuals)
@@ -187,15 +187,15 @@ regfit.full <- leaps::regsubsets(proportion_interet~.,
                                  data=bdd_reg3,
                                  method ="seqrep")
 
-reg.summary = summary(regfit.full)
+reg.sumoisary = sumoisary(regfit.full)
 
-plot_regsubsets(reg.summary)
+plot_regsubsets(reg.sumoisary)
 
 par(mfrow=c(1 ,1))
 plot(regfit.full , scale ="bic")
 
 reg <- lm(data = bdd_reg2, proportion_interet~year+proportion_total+prop_t_minus_1+prop_t_minus_2+year2)
-summary(reg)
+sumoisary(reg)
 
 #### en Facteur.
 
@@ -205,9 +205,9 @@ car::vif(glm(data=bdd_reg3, proportion_interet~.))
 
 regfit.full <- leaps::regsubsets(proportion_interet~., data=bdd_reg3)
 
-reg.summary = summary(regfit.full)
+reg.sumoisary = sumoisary(regfit.full)
 
-plot_regsubsets(reg.summary)
+plot_regsubsets(reg.sumoisary)
 
 par(mfrow=c(1 ,1))
 plot(regfit.full , scale ="bic") # adjr2 R^2_a, Cp, bic
@@ -240,7 +240,7 @@ reg_01 <- zoib(
   one.inflation = TRUE
 )
 sample1 <- reg_01$coeff
-summary(sample1)
+sumoisary(sample1)
 # check convergence on the regression coefficients
 traceplot(sample1);
 autocorr.plot(sample1);
@@ -280,111 +280,120 @@ git remote -v
 
 install.packages("unmarked")
 library(unmarked)
+library(dplyr)
+library(sf)
+library(ggplot2)
 
-#' Donne la valeur dominante d'une colonne d'une bdd
-#'
-#' @param x la colonne 
-#'
-#' @return 
-#' @export
-#'
-#' @examples
-#' 
-Mode <- function(x) {
-  ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
+
+
+# Map des lapins
+
+grille_10x10 <- sf::st_read(
+  paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
+)
+RegionBretagneConti <- sf::st_read(
+  paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
+)
+
+tab <- Total %>%
+  dplyr::filter(cd_nom == 61714)%>%
+  transforme_carte()
+grille_10x10 <- grille_10x10%>%
+  transforme_carte()
+RegionBretagneConti <- RegionBretagneConti%>%
+  transforme_carte()
+
+grille_10x10$density <- lengths(sf::st_intersects(grille_10x10, 
+                                                  tab))
+grille_10x10 <- sf::st_intersection(grille_10x10, 
+                                    RegionBretagneConti)
+
+ggplot() +
+  geom_sf(data = RegionBretagneConti) + 
+  labs(title = paste0(". Densite des observations du lapin de garenne en bretagne")) +
+  geom_sf(data = grille_10x10, aes(fill = density)) +
+  scale_fill_gradient(low="white", high="orangered3") +
+  theme_bw()
+
+
+
+# grid <- grid %>% 
+#   filter(as.numeric(areakm2)>10) # Enlever les petits sites? Un problème ou pas?
+
+mois <- c('Jan', 'Fev', 'Mars', 'Avr', 'Mai', 'Juin', 
+        'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec') # extract month with data
+
+indyear <- c(2006:2015, 2015:2024) # define two periods
+
+ids <- unique(grille_10x10$CODE_10KM)
+
+Lapins <- Total%>%
+  filter(cd_nom == 61714,
+         technique_observation == "Vu",
+         date > as.Date("2005-01-01"))%>%
+  select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
+  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation)%>%
+  mutate(mois = lubridate::month(date),
+         mois = case_when(mois == 1 ~ "Jan", 
+                          mois == 2 ~ "Fev",
+                          mois == 3 ~ "Mars",
+                          mois == 4 ~ "Avr",
+                          mois == 5 ~ "Mai",
+                          mois == 6 ~ "Juin",
+                          mois == 7 ~ "Juil",
+                          mois == 8 ~ "Aout",
+                          mois == 9 ~ "Sept",
+                          mois == 10 ~ "Oct",
+                          mois == 11 ~ "Nov",
+                          mois == 12 ~ "Dec"),
+         year = lubridate::year(date))
+
+ind <- 1
+
+for (k in 1:length(indyear)){
+  mom_detections[[k]] <- matrix(0,nrow=length(ids),ncol=length(mois))
+  data <- filter(Lapins,
+                 year == indyear[k])
+  ind <- 1
+  for (i in mois){
+    temp <- filter(data, mois==i)
+    utm_temp <- unique(temp$CODE_10KM)
+    for (j in utm_temp){
+      
+      # 1 if a sighting was made in square j in month i
+      mom_detections[[k]][ids==j,ind] <- 1
+    }
+    ind <- ind + 1
+  }
+}
+mom_det <- do.call(cbind, mom_detections) # bind data from all year in columns
+summary(mom_det)
+# convert the occupancy dataset in a 3D array:
+y <- list()
+ind <- 0
+for (i in 1:length(indyear)){
+  mask <- (ind + i):(ind + i + length(mois) - 1)
+  y[[i]] <- mom_det[,mask]
+  ind <- ind + length(mois) - 1
 }
 
-#' Donne le tableau sur lequel pour le site occupency
-#'
-#' @param espece_interet L'espece qui nous interesse 
-#' @param espece_benchmark L'espece avec laquel on compare l'espece d'interet
-#' @param taillegrid La colonne de maille qu'on utilise 
-#'
-#' @return La base de donnee pour le glm
-tab_site_occup <- function(espece, bdd = Total){
-  
-  tab <- bdd %>%
-    sf::st_drop_geometry() %>%
-    dplyr::filter(cd_nom %in% c(espece)) %>%
-    dplyr::filter(date > as.Date("2010-01-01")) %>%
-    dplyr::mutate(year = lubridate::year(date))
-  
-  colonnes <- c("famille_paysage", "clust", 
-                "Indice_Diversite", "Densite_Cultures", 
-                "Distance_EcotoneArbore", "Distance_Littoral",
-                "Distance_Eau")
-  colonnes_presentes <- intersect(colonnes, names(tab))
-  
-  tab <- tab %>%
-    dplyr::select(any_of(c("date", "nom_vernaculaire", "cd_nom", 
-                           "Code_10km", "X_10km", "Y_10km", "year",
-                           colonnes_presentes)))
-  
-  tab <- tab %>%
-    dplyr::group_by(year, Code_10km) %>%
-    dplyr::mutate(detect = dplyr::if_else(sum(cd_nom == espece)>0, 
-                                            1, 0, missing=0))
-  
-  tab <- tab %>%
-    ajoute_si_present(variable = "famille_paysage", 
-                      technique = Mode) %>%
-    ajoute_si_present(variable = "clust", 
-                      technique = Mode) %>%
-    ajoute_si_present(variable = "Indice_Diversite",
-                      technique = mean) %>%
-    ajoute_si_present(variable = "Densite_Cultures",
-                      technique = mean) %>%
-    ajoute_si_present(variable = "Distance_EcotoneArbore",
-                      technique = mean) %>%
-    ajoute_si_present(variable = "Distance_Littoral",
-                      technique = mean) %>%
-    ajoute_si_present(variable = "Distance_Eau",
-                      technique = mean)
-  
-  tab <- tab %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(Code_10km) %>%
-    dplyr::mutate(nb_annee_site = dplyr::n_distinct(year)) %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(Code_10km, year) 
-  
-  ttes_collones_sortantes <- c("year", "detect", 
-                               "Code_10km", "nb_annee_site", "X_10km", "Y_10km")
-  
-  collones_sortantes_opt <- c("famille_paysage_max", "clust_max", 
-                              "Indice_Diversite_m", "Densite_Cultures_m", 
-                              "Distance_EcotoneArbore_m", "Distance_Littoral_m",
-                              "Distance_Eau_m")
-  collones_sortantes_presentes <- intersect(collones_sortantes_opt, names(tab))
-  
-  tab <- tab %>%
-    dplyr::select(any_of(c(ttes_collones_sortantes, collones_sortantes_presentes))) %>%
-    dplyr::distinct(year, Code_10km, .keep_all = TRUE)
-  
-  tab <- tab%>%
-    dplyr::rename_with(~ case_when(
-      . == "Indice_Diversite_m" ~ "Ind_Diversite",
-      . == "Densite_Cultures_m" ~ "Dnst_Cultures",
-      . == "Distance_EcotoneArbore_m" ~ "Dist_Ecotone",
-      . == "Distance_Littoral_m" ~ "Dist_Littoral",
-      . == "Distance_Eau_m" ~ "Dist_Eau",
-      TRUE ~ .))%>%
-    dplyr::select(-nb_annee_site)
-  
-  return(tab)
+
+# convert list into array (https://stackoverflow.com/questions/37433509/convert-list-to-a-matrix-or-array)
+y <- array(unlist(y), dim = c(nrow(y[[1]]), ncol(y[[1]]), length(y)))
+dim(y)
+summary(y)
+range(y)
+
+new_y <- NULL
+for (i in 1:dim(y)[3]){ # loop over years
+  new_y <- cbind(new_y,apply(y[,1:12,i],1,sum))
 }
+new_y <- (new_y > 0) 
+y1 <- apply(new_y[,1:10],1,sum)
+y2 <- apply(new_y[,11:20],1,sum)
+y <- cbind(y1,y2)
+dim(y)
+summary(y)
+range(y)
 
-tab <- tab_site_occup(espece = 61714, bdd= Total)
-View(tab)
-
-tab_vide <- tab %>%
-  select(year, Code_10km)%>%
-  dplyr::arrange(Code_10km, year)
-
-output <- lapply(names(year),function(x){
-  res <- data.frame(VarName=Code_10km, 
-                    Level=levels(tab[,Code_10km]), 
-                    Number=1:nlevels(tab[,Code_10km]))
-  return(res)
-})
+y1

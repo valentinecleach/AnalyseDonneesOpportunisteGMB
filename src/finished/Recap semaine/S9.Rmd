@@ -17,6 +17,8 @@ output:
 
     -   [Citizen science indicates significant range recovery and defines new conservation priorities for Earth's most endangered pinniped in Greece](https://zslpublications.onlinelibrary.wiley.com/doi/10.1111/acv.12806)
 
+        -   Et le code associé : [https://oliviergimenez.github.io/monkseal-occupancy/https://oliviergimenez.github.io/monkseal-occupancy/](https://oliviergimenez.github.io/monkseal-occupancy/){.uri}
+
 -   Ref de Franck Simonnet :
 
     -   [Estimating Site Occupancy Rates When Detection Probabilities Are Less Than One](https://www.researchgate.net/publication/228821155_Estimating_Site_Occupancy_Rates_When_Detection_Probabilities_Are_Less_Than_One){.uri}
