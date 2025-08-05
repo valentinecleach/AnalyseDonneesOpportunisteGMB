@@ -315,7 +315,7 @@ ggplot() +
   scale_fill_gradient(low="white", high="orangered3") +
   theme_bw()
 
-
+####################################
 
 # grid <- grid %>% 
 #   filter(as.numeric(areakm2)>10) # Enlever les petits sites? Un problème ou pas?
@@ -380,9 +380,6 @@ for (i in 1:length(indyear)){
 
 # convert list into array (https://stackoverflow.com/questions/37433509/convert-list-to-a-matrix-or-array)
 y <- array(unlist(y), dim = c(nrow(y[[1]]), ncol(y[[1]]), length(y)))
-dim(y)
-summary(y)
-range(y)
 
 new_y <- NULL
 for (i in 1:dim(y)[3]){ # loop over years
@@ -396,4 +393,26 @@ dim(y)
 summary(y)
 range(y)
 
-y1
+#################################
+
+
+Lapins <- Total%>%
+  filter(cd_nom == 61714,
+         technique_observation == "Vu",
+         date > as.Date("2005-01-01"))%>%
+  select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
+  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation)
+
+t_lapins <- Lapins%>%
+  select(Code_10km, date)
+ 
+##
+View(t_lapins)
+
+##
+t_lapins <- Lapins %>%
+  dplyr::mutate(annee = lubridate::year(date))%>%
+  distinct(Code_10km, annee)%>%
+  select(Code_10km, annee)
+
+t_lapins <- 
