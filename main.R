@@ -14,6 +14,11 @@ library(ggplot2)
 wd <- set_wd()
 set.seed(12345)
 
+Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
+                     options = "ENCODING=UTF8")
+Total <- Total%>%
+  transform_Total()
+
 Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"), 
                      options = "ENCODING=UTF8")
 Total <- transform_Total()

@@ -13,10 +13,15 @@ output:
 wd <- set_wd()
 
 collision_faune_diro <- readr::read_csv(paste0(wd$data, "raw/collision_faune_diro.csv"))
+
 ```
 
 ```{r}
 diro <- collision_faune_diro %>%
+  dplyr::mutate(across(
+    c(espece, commentaire, commune),
+    ~stringi::stri_trans_general(., id = "Latin-ASCII")
+  ))%>%
   dplyr::mutate(
     geom_x = as.numeric(stringr::str_match(geom, "POINT \\(([^ ]+)")[,2]),
     geom_y = as.numeric(stringr::str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
@@ -29,12 +34,10 @@ diro_sf <- sf::st_as_sf(diro,
 
 diro_sf <- sf::st_transform(diro_sf, 
                         sf::st_crs(4326))
-
-
-#importation des cartes
 ```
 
 ```{r}
+#importation des cartes
 carte_bretagne_44 <- sf::st_read(paste0(wd$data,                                    "masques/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp"
                                     )) %>%
   sf::st_transform(2154)%>%
@@ -64,15 +67,15 @@ diro_sf <- diro_sf %>%
                           "reptile", "reptiles")))%>%
   dplyr::mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")),
                 espece = dplyr::if_else(commentaire == "Furet", 
-                          "mustélidé", espece, missing=espece),
-                espece = dplyr::if_else(startsWith(espece,"vison"), "mustélidé", espece, missing=espece),
+                          "mustelide", espece, missing=espece),
+                espece = dplyr::if_else(startsWith(espece,"vison"), "mustelide", espece, missing=espece),
                 espece = dplyr::if_else(espece %in% c("martre", "belette", "fouine",
-                                                      "hermine", "putois", "autre petit mustélidé"), 
-                                        "mustélidé", espece, missing = espece )
+                                                      "hermine", "putois", "autre petit mustelide"), 
+                                        "mustelide", espece, missing = espece )
         )%>% 
   dplyr::mutate(bdd_originale = "DIRO",
          technique_observation = "Vu",
-         etat_biologique = "Trouvé mort : impact routier")%>%
+         etat_biologique = "Trouve mort : impact routier")%>%
   dplyr::mutate(espece = as.factor(espece)) %>%
   dplyr::select(-date_maj, -annee, -mois, -commentaire, -grp_espece)
 
@@ -82,15 +85,15 @@ diro_sf <- diro_sf%>%
     espece == "blaireau" ~ 60636,
     espece == "cerf/biche" ~ 61000,
     espece == "chevreuil" ~ 61057,
-    espece == "écureuil" ~ 61153,
-    espece == "hérisson" ~ 60015,
+    espece == "ecureuil" ~ 61153,
+    espece == "herisson" ~ 60015,
         espece == "lapin" ~ 61714,
-        espece == "lièvre" ~ 61678,
+        espece == "lievre" ~ 61678,
         espece == "loutre" ~ 60630,
-        espece == "mustélidé" ~ 111,
+        espece == "mustelide" ~ 111,
         espece == "ragondin" ~ 61667,
         espece == "rat" ~ NA,
-        espece == "rat musqué" ~ 61448,
+        espece == "rat musque" ~ 61448,
         espece == "renard" ~ 60658,
         espece == "sanglier" ~ 60981,
     .default = NA
@@ -98,6 +101,8 @@ diro_sf <- diro_sf%>%
   dplyr::filter(!is.na(cd_nom_t))%>%
   dplyr::select(cd_nom_t, bdd_originale, espece, date, geom, geometry)
 
-sf::st_write(diro_sf, paste0(wd$data, "derived/diro.shp"))
+sf::st_write(diro_sf, 
+             paste0(wd$data, "derived/diro.shp"),
+             delete_dsn = TRUE)
 
 ```

@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2025-07-16" />
+<meta name="date" content="2025-08-06" />
 
 <title>Nettoyage des donnees opportunistes du GMB</title>
 
@@ -1466,7 +1466,7 @@ border-radius: 0px;
 
 
 <h1 class="title toc-ignore">Nettoyage des donnees opportunistes du GMB</h1>
-<h4 class="date">2025-07-16</h4>
+<h4 class="date">2025-08-06</h4>
 
 </div>
 
@@ -1479,11 +1479,11 @@ border-radius: 0px;
 ##   dat &lt;- vroom(...)
 ##   problems(dat)</code></pre>
 <pre><code>## Rows: 42939 Columns: 75
-## ── Column specification ──────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
-## chr  (44): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, cl...
-## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_...
-## lgl  (13): prof_min, prof_max, date_validation, comment_validation, preuve_numerique_u...
+## chr  (44): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, classe, ordre, famille, rang_t...
+## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_centroid_4326, y_centroid_43...
+## lgl  (13): prof_min, prof_max, date_validation, comment_validation, preuve_numerique_url, preuve_non_numerique, cd...
 ## dttm  (2): date_creation, date_modification
 ## date  (2): date_debut, date_fin
 ## time  (2): heure_debut, heure_fin
@@ -1498,11 +1498,11 @@ border-radius: 0px;
 ##   dat &lt;- vroom(...)
 ##   problems(dat)</code></pre>
 <pre><code>## Rows: 32494 Columns: 75
-## ── Column specification ──────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
-## chr  (44): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, cl...
-## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_...
-## lgl  (13): prof_min, prof_max, date_validation, comment_validation, preuve_numerique_u...
+## chr  (44): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, classe, ordre, famille, rang_t...
+## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_centroid_4326, y_centroid_43...
+## lgl  (13): prof_min, prof_max, date_validation, comment_validation, preuve_numerique_url, preuve_non_numerique, cd...
 ## dttm  (2): date_creation, date_modification
 ## date  (2): date_debut, date_fin
 ## time  (2): heure_debut, heure_fin
@@ -1513,11 +1513,11 @@ border-radius: 0px;
                                        delim = &quot;;&quot;, 
                                        escape_double = FALSE, trim_ws = TRUE)</code></pre>
 <pre><code>## Rows: 5673 Columns: 75
-## ── Column specification ──────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
-## chr  (44): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, cl...
-## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_...
-## lgl  (13): prof_min, prof_max, date_validation, comment_validation, preuve_numerique_u...
+## chr  (44): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, classe, ordre, famille, rang_t...
+## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_centroid_4326, y_centroid_43...
+## lgl  (13): prof_min, prof_max, date_validation, comment_validation, preuve_numerique_url, preuve_non_numerique, cd...
 ## dttm  (2): date_creation, date_modification
 ## date  (2): date_debut, date_fin
 ## time  (2): heure_debut, heure_fin
@@ -1528,7 +1528,174 @@ border-radius: 0px;
               data_original_35_56, 
               data_original_GeoRodents)
 
-GeoN &lt;- GeoN %&gt;%
+str(GeoN)</code></pre>
+<pre><code>## spc_tbl_ [81,106 × 75] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+##  $ id_synthese               : num [1:81106] 158398 158400 158401 158402 158404 ...
+##  $ date_debut                : Date[1:81106], format: &quot;2015-02-23&quot; &quot;2015-02-10&quot; &quot;2014-08-23&quot; &quot;2016-12-11&quot; ...
+##  $ date_fin                  : Date[1:81106], format: &quot;2015-02-23&quot; &quot;2015-02-10&quot; &quot;2014-08-23&quot; &quot;2016-12-11&quot; ...
+##  $ heure_debut               : &#39;hms&#39; num [1:81106] 00:00:00 00:00:00 00:00:00 00:00:00 ...
+##   ..- attr(*, &quot;units&quot;)= chr &quot;secs&quot;
+##  $ heure_fin                 : &#39;hms&#39; num [1:81106] 00:00:00 00:00:00 00:00:00 00:00:00 ...
+##   ..- attr(*, &quot;units&quot;)= chr &quot;secs&quot;
+##  $ cd_nom                    : num [1:81106] 60630 60630 60249 60630 60015 ...
+##  $ cd_ref                    : num [1:81106] 60630 60630 60249 60630 60015 ...
+##  $ nom_valide                : chr [1:81106] &quot;Lutra lutra (Linnaeus, 1758)&quot; &quot;Lutra lutra (Linnaeus, 1758)&quot; &quot;Talpa europaea Linnaeus, 1758&quot; &quot;Lutra lutra (Linnaeus, 1758)&quot; ...
+##  $ nom_vernaculaire          : chr [1:81106] &quot;Loutre d&#39;Europe, Loutre commune, Loutre&quot; &quot;Loutre d&#39;Europe, Loutre commune, Loutre&quot; &quot;Taupe d&#39;Europe&quot; &quot;Loutre d&#39;Europe, Loutre commune, Loutre&quot; ...
+##  $ nom_cite                  : chr [1:81106] &quot;Loutre d&#39;Europe =  &lt;i&gt; Lutra lutra (Linnaeus, 1758)&lt;/i&gt; - [ES - 60630]&quot; &quot;Loutre d&#39;Europe =  &lt;i&gt; Lutra lutra (Linnaeus, 1758)&lt;/i&gt; - [ES - 60630]&quot; &quot;Talpa europaea =  &lt;i&gt; Talpa europaea Linnaeus, 1758&lt;/i&gt; - [ES - 60249]&quot; &quot;Loutre d&#39;Europe =  &lt;i&gt; Lutra lutra (Linnaeus, 1758)&lt;/i&gt; - [ES - 60630]&quot; ...
+##  $ regne                     : chr [1:81106] &quot;Animalia&quot; &quot;Animalia&quot; &quot;Animalia&quot; &quot;Animalia&quot; ...
+##  $ group1_inpn               : chr [1:81106] &quot;Chordés&quot; &quot;Chordés&quot; &quot;Chordés&quot; &quot;Chordés&quot; ...
+##  $ group2_inpn               : chr [1:81106] &quot;Mammifères&quot; &quot;Mammifères&quot; &quot;Mammifères&quot; &quot;Mammifères&quot; ...
+##  $ classe                    : chr [1:81106] &quot;Mammalia&quot; &quot;Mammalia&quot; &quot;Mammalia&quot; &quot;Mammalia&quot; ...
+##  $ ordre                     : chr [1:81106] &quot;Carnivora&quot; &quot;Carnivora&quot; &quot;Eulipotyphla&quot; &quot;Carnivora&quot; ...
+##  $ famille                   : chr [1:81106] &quot;Mustelidae&quot; &quot;Mustelidae&quot; &quot;Talpidae&quot; &quot;Mustelidae&quot; ...
+##  $ rang_taxo                 : chr [1:81106] &quot;ES&quot; &quot;ES&quot; &quot;ES&quot; &quot;ES&quot; ...
+##  $ nombre_min                : num [1:81106] 1 1 1 1 1 1 1 1 1 1 ...
+##  $ nombre_max                : num [1:81106] 1 1 1 1 1 1 1 1 1 1 ...
+##  $ alti_min                  : num [1:81106] 196 91 179 144 69 186 122 198 84 56 ...
+##  $ alti_max                  : num [1:81106] 196 91 179 144 69 186 122 198 84 56 ...
+##  $ prof_min                  : logi [1:81106] NA NA NA NA NA NA ...
+##  $ prof_max                  : logi [1:81106] NA NA NA NA NA NA ...
+##  $ observateurs              : chr [1:81106] &quot;CARNET Mathurin&quot; &quot;DORRE Jimmy&quot; &quot;GRÉMILLET Xavier&quot; &quot;SAGORIN Patrick&quot; ...
+##  $ determinateur             : chr [1:81106] NA NA NA NA ...
+##  $ communes                  : chr [1:81106] &quot;Kergrist-Moëlou&quot; &quot;Plounévez-Moëdec&quot; &quot;Glomel&quot; &quot;Saint-Brandan&quot; ...
+##  $ geometrie_wkt_4326        : chr [1:81106] &quot;POINT(-3.359284367995138 48.248085649671225)&quot; &quot;POINT(-3.40001657356202 48.54691517878406)&quot; &quot;POINT(-3.357043860164062 48.22311450051031)&quot; &quot;POINT(-2.883498798457615 48.403576152653514)&quot; ...
+##  $ x_centroid_4326           : num [1:81106] -3.36 -3.4 -3.36 -2.88 -4.28 ...
+##  $ y_centroid_4326           : num [1:81106] 48.2 48.5 48.2 48.4 47.9 ...
+##  $ nom_lieu                  : chr [1:81106] NA NA NA NA ...
+##  $ comment_releve            : chr [1:81106] NA NA NA NA ...
+##  $ comment_occurrence        : chr [1:81106] &quot;[ N°GMB : 2015-04 ][ N° autopsie : LLU-GMB0176 ][ N°GMB : 2015-04 ][ N° autopsie : LLU-GMB0176 ][ N°GMB : 2015-&quot;| __truncated__ &quot;[ N°GMB : 2015-02 ][ N° autopsie : LLU-GMB0175 ][ N°GMB : 2015-02 ][ N° autopsie : LLU-GMB0175 ][ N°GMB : 2015-&quot;| __truncated__ NA &quot;[ N°GMB : 2016-24 ][ N° autopsie : LLU-GMB0177 ][ N°GMB : 2016-24 ][ N° autopsie : LLU-GMB0177 ][ N°GMB : 2016-&quot;| __truncated__ ...
+##  $ validateur                : chr [1:81106] &quot;Groupe Mammalogique Breton&quot; &quot;Groupe Mammalogique Breton&quot; &quot;Groupe Mammalogique Breton&quot; &quot;Groupe Mammalogique Breton&quot; ...
+##  $ niveau_validation         : chr [1:81106] &quot;Certain - très probable&quot; &quot;Certain - très probable&quot; &quot;Certain - très probable&quot; &quot;Certain - très probable&quot; ...
+##  $ date_validation           : logi [1:81106] NA NA NA NA NA NA ...
+##  $ comment_validation        : logi [1:81106] NA NA NA NA NA NA ...
+##  $ preuve_numerique_url      : logi [1:81106] NA NA NA NA NA NA ...
+##  $ preuve_non_numerique      : logi [1:81106] NA NA NA NA NA NA ...
+##  $ jdd_nom                   : chr [1:81106] &quot;Données opportunistes privées - trans. Inconnue&quot; &quot;Données opportunistes privées - trans. Inconnue&quot; &quot;Données opportunistes privées de GRÉMILLET Xavier&quot; &quot;Données opportunistes privées - trans. Inconnue&quot; ...
+##  $ jdd_uuid                  : chr [1:81106] &quot;be0ceb91-2219-478e-a59b-19064f8e6017&quot; &quot;be0ceb91-2219-478e-a59b-19064f8e6017&quot; &quot;2f4318cf-ae2b-4b42-b9a4-20b2193216ac&quot; &quot;be0ceb91-2219-478e-a59b-19064f8e6017&quot; ...
+##  $ jdd_id                    : num [1:81106] 46 46 19 46 47 47 46 50 47 52 ...
+##  $ ca_nom                    : chr [1:81106] &quot;Data_MamBZH_Opp&quot; &quot;Data_MamBZH_Opp&quot; &quot;Data_MamBZH_Opp&quot; &quot;Data_MamBZH_Opp&quot; ...
+##  $ ca_uuid                   : chr [1:81106] &quot;0d8b96b1-fc20-4a38-94fe-00cb565b2b77&quot; &quot;0d8b96b1-fc20-4a38-94fe-00cb565b2b77&quot; &quot;0d8b96b1-fc20-4a38-94fe-00cb565b2b77&quot; &quot;0d8b96b1-fc20-4a38-94fe-00cb565b2b77&quot; ...
+##  $ ca_id                     : num [1:81106] 3 3 3 3 3 3 3 3 3 3 ...
+##  $ cd_habref                 : logi [1:81106] NA NA NA NA NA NA ...
+##  $ cd_habitat                : logi [1:81106] NA NA NA NA NA NA ...
+##  $ nom_habitat               : logi [1:81106] NA NA NA NA NA NA ...
+##  $ precision_geographique    : logi [1:81106] NA NA NA NA NA NA ...
+##  $ nature_objet_geo          : chr [1:81106] &quot;Stationnel&quot; &quot;Stationnel&quot; &quot;Stationnel&quot; &quot;Stationnel&quot; ...
+##  $ type_regroupement         : chr [1:81106] &quot;OBS&quot; &quot;OBS&quot; &quot;OBS&quot; &quot;OBS&quot; ...
+##  $ methode_regroupement      : logi [1:81106] NA NA NA NA NA NA ...
+##  $ technique_observation     : chr [1:81106] &quot;Vu&quot; &quot;Vu&quot; &quot;Indices de présence divers&quot; &quot;Vu&quot; ...
+##  $ biologique_statut         : chr [1:81106] &quot;Non renseigné&quot; &quot;Non renseigné&quot; &quot;Non renseigné&quot; &quot;Non renseigné&quot; ...
+##  $ etat_biologique           : chr [1:81106] &quot;Trouvé mort : impact routier&quot; &quot;Trouvé mort : impact routier&quot; &quot;NSP&quot; &quot;Trouvé mort : impact routier&quot; ...
+##  $ biogeographique_statut    : chr [1:81106] &quot;Non renseigné&quot; &quot;Non renseigné&quot; &quot;Non renseigné&quot; &quot;Non renseigné&quot; ...
+##  $ naturalite                : chr [1:81106] &quot;Sauvage&quot; &quot;Sauvage&quot; &quot;Sauvage&quot; &quot;Sauvage&quot; ...
+##  $ preuve_existante          : chr [1:81106] &quot;Inconnu&quot; &quot;Inconnu&quot; &quot;Inconnu&quot; &quot;Inconnu&quot; ...
+##  $ niveau_precision_diffusion: logi [1:81106] NA NA NA NA NA NA ...
+##  $ stade_vie                 : chr [1:81106] &quot;Adulte&quot; &quot;Adulte&quot; &quot;Indéterminé&quot; &quot;Adulte&quot; ...
+##  $ sexe                      : chr [1:81106] &quot;Femelle&quot; &quot;Femelle&quot; &quot;Indéterminé&quot; &quot;Mâle&quot; ...
+##  $ objet_denombrement        : chr [1:81106] &quot;Ne Sait Pas&quot; &quot;Ne Sait Pas&quot; &quot;Ne Sait Pas&quot; &quot;Ne Sait Pas&quot; ...
+##  $ type_denombrement         : chr [1:81106] &quot;Ne sait pas&quot; &quot;Ne sait pas&quot; &quot;Ne sait pas&quot; &quot;Ne sait pas&quot; ...
+##  $ niveau_sensibilite        : chr [1:81106] &quot;Sensible - Diffusion à la Commune ou Znieff&quot; &quot;Sensible - Diffusion à la Commune ou Znieff&quot; &quot;Non sensible - Diffusion précise&quot; &quot;Sensible - Diffusion à la Commune ou Znieff&quot; ...
+##  $ statut_observation        : chr [1:81106] &quot;Présent&quot; &quot;Présent&quot; &quot;Présent&quot; &quot;Présent&quot; ...
+##  $ floutage_dee              : chr [1:81106] &quot;Non&quot; &quot;Non&quot; &quot;Non&quot; &quot;Non&quot; ...
+##  $ statut_source             : chr [1:81106] &quot;Terrain&quot; &quot;Terrain&quot; &quot;Terrain&quot; &quot;Terrain&quot; ...
+##  $ type_info_geo             : chr [1:81106] &quot;Géoréférencement&quot; &quot;Géoréférencement&quot; &quot;Géoréférencement&quot; &quot;Géoréférencement&quot; ...
+##  $ methode_determination     : chr [1:81106] &quot;Examen visuel des restes de l’individu&quot; &quot;Examen visuel des restes de l’individu&quot; &quot;Examen direct des traces ou indices de présence&quot; &quot;Examen visuel des restes de l’individu&quot; ...
+##  $ comportement              : chr [1:81106] &quot;Non renseigné&quot; &quot;Non renseigné&quot; &quot;Non renseigné&quot; &quot;Non renseigné&quot; ...
+##  $ reference_biblio          : logi [1:81106] NA NA NA NA NA NA ...
+##  $ id_origine                : num [1:81106] 308859 308861 308862 308863 308865 ...
+##  $ uuid_perm_sinp            : chr [1:81106] &quot;fbcbbca6-d752-4b72-8ac5-9e485e888186&quot; &quot;a546a21d-0ba6-4d37-ac7d-836ab08efdad&quot; &quot;90da67d1-39b1-4fa6-9fd8-11124482fcde&quot; &quot;576a6902-2c64-4d41-9e71-f803d8bf1ce7&quot; ...
+##  $ uuid_perm_grp_sinp        : chr [1:81106] &quot;cdfbb7c6-931a-45ac-ac49-683f897fcfba&quot; &quot;07503c47-b0d4-4d61-aca3-a5ad75ac818c&quot; &quot;d22e23b5-b538-4992-9e24-3952db997109&quot; &quot;d2b3dfb1-0f66-4ead-abd2-0e7214e9e3ff&quot; ...
+##  $ date_creation             : POSIXct[1:81106], format: &quot;2021-04-09 10:26:55&quot; &quot;2021-04-09 10:26:55&quot; &quot;2021-04-09 10:26:55&quot; &quot;2021-04-09 10:26:55&quot; ...
+##  $ date_modification         : POSIXct[1:81106], format: &quot;2023-05-17 11:47:56&quot; &quot;2023-05-17 11:47:56&quot; &quot;2023-05-17 11:07:20&quot; &quot;2023-05-17 11:47:56&quot; ...
+##  - attr(*, &quot;spec&quot;)=
+##   .. cols(
+##   ..   id_synthese = col_double(),
+##   ..   date_debut = col_date(format = &quot;&quot;),
+##   ..   date_fin = col_date(format = &quot;&quot;),
+##   ..   heure_debut = col_time(format = &quot;&quot;),
+##   ..   heure_fin = col_time(format = &quot;&quot;),
+##   ..   cd_nom = col_double(),
+##   ..   cd_ref = col_double(),
+##   ..   nom_valide = col_character(),
+##   ..   nom_vernaculaire = col_character(),
+##   ..   nom_cite = col_character(),
+##   ..   regne = col_character(),
+##   ..   group1_inpn = col_character(),
+##   ..   group2_inpn = col_character(),
+##   ..   classe = col_character(),
+##   ..   ordre = col_character(),
+##   ..   famille = col_character(),
+##   ..   rang_taxo = col_character(),
+##   ..   nombre_min = col_double(),
+##   ..   nombre_max = col_double(),
+##   ..   alti_min = col_double(),
+##   ..   alti_max = col_double(),
+##   ..   prof_min = col_logical(),
+##   ..   prof_max = col_logical(),
+##   ..   observateurs = col_character(),
+##   ..   determinateur = col_character(),
+##   ..   communes = col_character(),
+##   ..   geometrie_wkt_4326 = col_character(),
+##   ..   x_centroid_4326 = col_double(),
+##   ..   y_centroid_4326 = col_double(),
+##   ..   nom_lieu = col_character(),
+##   ..   comment_releve = col_character(),
+##   ..   comment_occurrence = col_character(),
+##   ..   validateur = col_character(),
+##   ..   niveau_validation = col_character(),
+##   ..   date_validation = col_logical(),
+##   ..   comment_validation = col_logical(),
+##   ..   preuve_numerique_url = col_logical(),
+##   ..   preuve_non_numerique = col_logical(),
+##   ..   jdd_nom = col_character(),
+##   ..   jdd_uuid = col_character(),
+##   ..   jdd_id = col_double(),
+##   ..   ca_nom = col_character(),
+##   ..   ca_uuid = col_character(),
+##   ..   ca_id = col_double(),
+##   ..   cd_habref = col_logical(),
+##   ..   cd_habitat = col_logical(),
+##   ..   nom_habitat = col_logical(),
+##   ..   precision_geographique = col_logical(),
+##   ..   nature_objet_geo = col_character(),
+##   ..   type_regroupement = col_character(),
+##   ..   methode_regroupement = col_logical(),
+##   ..   technique_observation = col_character(),
+##   ..   biologique_statut = col_character(),
+##   ..   etat_biologique = col_character(),
+##   ..   biogeographique_statut = col_character(),
+##   ..   naturalite = col_character(),
+##   ..   preuve_existante = col_character(),
+##   ..   niveau_precision_diffusion = col_logical(),
+##   ..   stade_vie = col_character(),
+##   ..   sexe = col_character(),
+##   ..   objet_denombrement = col_character(),
+##   ..   type_denombrement = col_character(),
+##   ..   niveau_sensibilite = col_character(),
+##   ..   statut_observation = col_character(),
+##   ..   floutage_dee = col_character(),
+##   ..   statut_source = col_character(),
+##   ..   type_info_geo = col_character(),
+##   ..   methode_determination = col_character(),
+##   ..   comportement = col_character(),
+##   ..   reference_biblio = col_logical(),
+##   ..   id_origine = col_double(),
+##   ..   uuid_perm_sinp = col_character(),
+##   ..   uuid_perm_grp_sinp = col_character(),
+##   ..   date_creation = col_datetime(format = &quot;&quot;),
+##   ..   date_modification = col_datetime(format = &quot;&quot;)
+##   .. )
+##  - attr(*, &quot;problems&quot;)=&lt;externalptr&gt;</code></pre>
+<pre class="r"><code>GeoN &lt;- GeoN %&gt;%
+  dplyr::mutate(across(
+    c(nom_valide,   nom_vernaculaire,
+         ordre,
+         observateurs,
+         comment_occurrence,
+         technique_observation,
+         etat_biologique),
+    ~stringi::stri_trans_general(., id = &quot;Latin-ASCII&quot;)
+  ))%&gt;%
   dplyr::filter( !niveau_validation %in% c(&quot;Douteux&quot;,&quot;Invalide&quot;))%&gt;%
   dplyr::mutate(
     # Vison
@@ -1538,7 +1705,7 @@ GeoN &lt;- GeoN %&gt;%
     cd_nom = ifelse(cd_nom==194944, 60704, cd_nom),
     # Ecureuil
     nom_vernaculaire = ifelse(cd_nom==197486, 
-                              &quot;Ãcureuil roux&quot;, 
+                              &quot;Ecureuil roux&quot;, 
                               nom_vernaculaire),
     cd_nom = ifelse(cd_nom==197486, 61153, cd_nom),
     # Martre
@@ -1548,34 +1715,31 @@ GeoN &lt;- GeoN %&gt;%
     cd_nom = ifelse(cd_nom==194481, 60658, cd_nom),
     # Rat
     nom_vernaculaire = ifelse(cd_nom==61585, 
-                              &quot;Rat surmulot, Surmulot, Rat d&#39;Ã©gout&quot;, 
+                              &quot;Rat surmulot, Surmulot, Rat d&#39;egout&quot;, 
                               nom_vernaculaire))%&gt;%
-  dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Core
-         !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d&#39;Europe
-         !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
-        !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%&gt;% # Carni Introduit
-# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal dor, Putois domestique
+  dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), 
+                # Rat Fisher et ecureuil de Core
+                !(cd_nom %in% c(60249,198197)), 
+                # Taupes et Taupe d&#39;Europe
+                !(cd_nom %in% c(99999004, 99999005, 99999006)), 
+                # NSP Carni
+                !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%&gt;% 
+                # Carni Introduit
+                # Carni introduit : 60831 Genette 
+                # Introduit : chien viverrin, Raton laveur, Chacal dore, Furet
   dplyr::mutate(nombre = ifelse(nombre_max != nombre_min, 
                          median(c(nombre_max,nombre_min)),
                          nombre_min)
   )%&gt;%
   dplyr::mutate(technique_observation = ifelse(
-    technique_observation %in% c(&quot;FÃ¨ces/Guano/Epreintes&quot;, 
-                                 &quot;Empreintes&quot;, &quot;CoulÃ©&quot;,
-                                 &quot;Galerie/terrier&quot;, 
-                                 &quot;Hutte (Castor, Rat musquÃ©)&quot;, &quot;Nid/GÃ®te&quot;,
-                                 &quot;Indices de prsence divers&quot;,
-                                 &quot;Restes de repas&quot;,
-                                 &quot;Empreintes et fÃ¨ces&quot;,
-                                 &quot;Restes dans pelote de rÃ©jection&quot;
-    ),
+    !(technique_observation %in% c(&quot;Autres&quot;, &quot;Entendu&quot;, &quot;Ultrasons&quot;, &quot;Vu&quot;)),
     &quot;Indices&quot;,
     ifelse(technique_observation %in% c(&quot;Entendu&quot;, &quot;Ultrasons&quot;), 
-           &quot;Entendu/Ultrasons&quot;,
+           &quot;Entendu&quot;,
            technique_observation)),
     technique_observation = ifelse(cd_nom == 60015, &quot;Vu&quot;, technique_observation))%&gt;%
   dplyr::mutate(etat_biologique = ifelse(etat_biologique == &quot;NSP&quot;, 
-                                  &quot;Non renseignÃ©&quot;, etat_biologique))%&gt;%
+                                  &quot;Non renseigne&quot;, etat_biologique))%&gt;%
   dplyr::filter(!jdd_nom %in% c(490,53))%&gt;% 
   # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
   # 53:  Donnes faunebretagne.org
@@ -1599,10 +1763,8 @@ GeoN &lt;- GeoN %&gt;%
          &quot;cd_nom&quot;,
          &quot;nom_valide&quot;,  &quot;nom_vernaculaire&quot;,
          &quot;ordre&quot;,
-         &quot;famille&quot;, &quot;rang_taxo&quot;,
          &quot;nombre&quot;,
-         &quot;observateurs&quot;,
-         &quot;communes&quot;,    
+         &quot;observateurs&quot;,    
          &quot;geometrie_wkt_4326&quot;,  
          &quot;x_centroid_4326&quot;,
          &quot;y_centroid_4326&quot;,
@@ -1615,11 +1777,11 @@ donnees_VisioNature_FB &lt;- readr::read_delim(gz_file,
                                             escape_double = FALSE,
                                             trim_ws = TRUE)</code></pre>
 <pre><code>## Rows: 82470 Columns: 77
-## ── Column specification ──────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
-## chr  (45): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, gr...
-## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_...
-## lgl  (14): prof_min, prof_max, determinateur, comment_releve, validateur, date_validat...
+## chr  (45): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, group3_inpn, classe, ordre, fa...
+## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_centroid_4326, y_centroid_43...
+## lgl  (14): prof_min, prof_max, determinateur, comment_releve, validateur, date_validation, comment_validation, pre...
 ## dttm  (2): date_creation, date_modification
 ## date  (2): date_debut, date_fin
 ## time  (2): heure_debut, heure_fin
@@ -1631,11 +1793,11 @@ donnees_VisioNature_FB &lt;- readr::read_delim(gz_file,
                           escape_double = FALSE, 
                           trim_ws = TRUE)</code></pre>
 <pre><code>## Rows: 11267 Columns: 77
-## ── Column specification ──────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
-## chr  (45): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, gr...
-## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_...
-## lgl  (14): prof_min, prof_max, determinateur, comment_releve, validateur, date_validat...
+## chr  (45): nom_valide, nom_vernaculaire, nom_cite, regne, group1_inpn, group2_inpn, group3_inpn, classe, ordre, fa...
+## dbl  (12): id_synthese, cd_nom, cd_ref, nombre_min, nombre_max, alti_min, alti_max, x_centroid_4326, y_centroid_43...
+## lgl  (14): prof_min, prof_max, determinateur, comment_releve, validateur, date_validation, comment_validation, pre...
 ## dttm  (2): date_creation, date_modification
 ## date  (2): date_debut, date_fin
 ## time  (2): heure_debut, heure_fin
@@ -1645,45 +1807,57 @@ donnees_VisioNature_FB &lt;- readr::read_delim(gz_file,
 <pre class="r"><code>VisioN_FB &lt;- rbind(donnees_VisioNature_FB, VN_Rodentia)
 
 VisioN_FB &lt;- VisioN_FB %&gt;%
+    dplyr::mutate(across(
+    c(nom_valide,   nom_vernaculaire,
+         ordre,
+         observateurs,
+         comment_occurrence,
+         technique_observation,
+         etat_biologique),
+    ~stringi::stri_trans_general(., id = &quot;Latin-ASCII&quot;)
+  ))%&gt;%
   dplyr::filter( !niveau_validation %in% c(&quot;Douteux&quot;,&quot;Invalide&quot;))%&gt;%
-  dplyr::filter(technique_observation != &quot;Restes dans pelote de rjection&quot;)%&gt;%
+  dplyr::filter(technique_observation != &quot;Restes dans pelote de rejection&quot;)%&gt;%
   dplyr::mutate(technique_observation = ifelse(
     !is.na(comment_occurrence) &amp; technique_observation == &quot;Inconnu&quot;,
     ifelse(any(grepl(&quot;TAUPINIERE&quot;, toupper(gsub(&quot;[[:punct:]]&quot;, 
                                                 &quot;&quot;, 
-                                                stri_trans_general(
-                                                  comment_occurrence, 
-                                                  &quot;Latin-ASCII&quot;)))),
+                                                  comment_occurrence))),
                grepl(&quot;EMPREINTES&quot;, toupper(gsub(&quot;:punct:]]&quot;,
                                                 &quot;&quot;,
-                                                stri_trans_general(
                                                   comment_occurrence, 
-                                                  &quot;Latin-ASCII&quot;)))),
+                                                  ))),
                grepl(&quot;TRACE&quot;, toupper(gsub(&quot;:punct:]]&quot;,
                                            &quot;&quot;,
-                                           stri_trans_general(
                                              comment_occurrence, 
-                                             &quot;Latin-ASCII&quot;))))),
+                                           )))),
            &quot;Indices&quot;,
            technique_observation),
     technique_observation))%&gt;%
   dplyr::mutate(technique_observation = ifelse(technique_observation==&quot;Entendu&quot;,
-                                        &quot;Entendu/Ultrasons&quot;,
+                                               &quot;Entendu&quot;,
                                         technique_observation),
          technique_observation = ifelse(cd_nom == 60015, &quot;Vu&quot;, technique_observation))%&gt;%
-  dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Core
-         !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d&#39;Europe
-         !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
-        !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%&gt;% # Carni Introduit
-# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal dor, Putois domestique
-  dplyr::mutate(technique_observation = ifelse(technique_observation == &quot;Inconnu&quot;, &quot;Vu&quot;, technique_observation))%&gt;%
-  dplyr::mutate(etat_biologique = ifelse(champs_additionnels %in% c(&quot;{&#39;death_cause&#39;: &#39;ROAD_VEHICLE&#39;}&quot;,
-                                                             &quot;{&#39;death_cause&#39;: &#39;OTHER_TRANSPORT&#39;}&quot;,
-                                                             &quot;{&#39;death_cause&#39;: &#39;UNKNOWN_TRANSPORT&#39;}&quot;),
-                                  &quot;TrouvÃ© mort : impact routier&quot;,
-                                  etat_biologique),
-         etat_biologique = ifelse(((champs_additionnels == &quot;{&#39;death_cause&#39;: &#39;UNKNOWN&#39;}&quot;) &amp; (etat_biologique == &quot;TrouvÃ© mort&quot;) &amp; grepl(&quot;ROUT&quot;, toupper(comment_occurrence))), 
-                                  &quot;TrouvÃ© mort : impact routier&quot;,
+  dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), 
+                # Rat Fisher et ecureil de Core
+                !(cd_nom %in% c(60249,198197)), 
+                # Taupes et Taupe d&#39;Europe
+                !(cd_nom %in% c(99999004, 99999005, 99999006)), 
+                # NSP Carni
+                !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%&gt;% 
+                # Carni Introduit
+                # Carni introduit : 60831 Genette 
+                # Introduit : chien viverrin, Raton laveur, Chacal dore, Putois domestique
+  dplyr::mutate(technique_observation = ifelse(technique_observation == &quot;Inconnu&quot;, 
+                                               &quot;Vu&quot;, technique_observation))%&gt;%
+  dplyr::mutate(etat_biologique = ifelse(champs_additionnels %in% c(
+    &quot;{&#39;death_cause&#39;: &#39;ROAD_VEHICLE&#39;}&quot;,
+    &quot;{&#39;death_cause&#39;: &#39;OTHER_TRANSPORT&#39;}&quot;,
+    &quot;{&#39;death_cause&#39;: &#39;UNKNOWN_TRANSPORT&#39;}&quot;),
+    &quot;Trouve mort : impact routier&quot;,
+    etat_biologique),
+    etat_biologique = ifelse(((champs_additionnels == &quot;{&#39;death_cause&#39;: &#39;UNKNOWN&#39;}&quot;) &amp; (etat_biologique == &quot;Trouve mort&quot;) &amp; grepl(&quot;ROUT&quot;, toupper(comment_occurrence))), 
+                                  &quot;Trouve mort : impact routier&quot;,
                                   etat_biologique)
          )%&gt;%
   dplyr::mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
@@ -1705,10 +1879,8 @@ VisioN_FB &lt;- VisioN_FB %&gt;%
          &quot;cd_nom&quot;,
          &quot;nom_valide&quot;, &quot;nom_vernaculaire&quot;,
          &quot;ordre&quot;,
-         &quot;famille&quot;, &quot;rang_taxo&quot;,
          &quot;nombre&quot;,
-         &quot;observateurs&quot;,
-         &quot;communes&quot;,    
+         &quot;observateurs&quot;,    
          &quot;geometrie_wkt_4326&quot;,  
          &quot;x_centroid_4326&quot;,
          &quot;y_centroid_4326&quot;,
@@ -1720,7 +1892,8 @@ Total &lt;- rbind(VisioN_FB, GeoN)
 
 Total &lt;- Total %&gt;%
   dplyr::mutate(observateurs = gsub(&quot;-&quot;, &quot; &quot;, observateurs), # enlever tirets
-         observateurs = make_clean_names(observateurs, allow_dupes = TRUE), # Accents
+         observateurs = janitor::make_clean_names(observateurs, 
+                                                  allow_dupes = TRUE), # Accents
          observateurs = toupper(observateurs),
          observateurs = ifelse(observateurs == &quot;NA&quot;, NA, observateurs)#majuscule
   )%&gt;%
@@ -1790,19 +1963,20 @@ que_bretagne &lt;- anti_join(total_bretagne_44,
 #   labs(title = &quot;Points en Bretagne (sauf dans le 44)&quot;)
 
 
-sf::st_write(que_bretagne, paste0(wd$data, &quot;derived/Total.shp&quot;))</code></pre>
-<pre><code>## Warning in abbreviate_shapefile_names(obj): Field names abbreviated for ESRI Shapefile
-## driver</code></pre>
-<pre><code>## Writing layer `Total&#39; to data source 
+sf::st_write(que_bretagne, 
+             paste0(wd$data, &quot;derived/Total.shp&quot;), 
+             layer_options = &quot;ENCODING=UTF-8&quot;,
+             delete_dsn = TRUE)</code></pre>
+<pre><code>## Warning in abbreviate_shapefile_names(obj): Field names abbreviated for ESRI Shapefile driver</code></pre>
+<pre><code>## Deleting source `/home/onyxia/work/AnalyseDonneesOpportunisteGMB/data/derived/Total.shp&#39; using driver `ESRI Shapefile&#39;
+## Writing layer `Total&#39; to data source 
 ##   `/home/onyxia/work/AnalyseDonneesOpportunisteGMB/data/derived/Total.shp&#39; using driver `ESRI Shapefile&#39;
-## Writing 160991 features with 17 fields and geometry type Point.</code></pre>
-<pre><code>## Warning in CPL_write_ogr(obj, dsn, layer, driver, as.character(dataset_options), : GDAL
-## Message 1: One or several characters couldn&#39;t be converted correctly from UTF-8 to
-## ISO-8859-1.  This warning will not be emitted anymore.</code></pre>
-<pre><code>## Warning in CPL_write_ogr(obj, dsn, layer, driver, as.character(dataset_options), : GDAL Message 1: Value &#39;Données récupérées lors d&#39;une animation auprès du &quot;&quot;grand-public&quot;&quot;.
-## visible d&#39;avril à juillet.
-## 1 portée tous les ans.
-## en octobre 2015 : &quot;&quot;on les voit descendre de la propriété privé / du bois vers notre jardin...&quot;&quot;. &quot;&quot;les renardeaux poussent des petits cris&quot;&quot;.&#39; of field cmmnt_c has been truncated to 254 characters.  This warning will not be emitted any more for that layer.</code></pre>
+## options:        ENCODING=UTF-8 
+## Writing 160754 features with 14 fields and geometry type Point.</code></pre>
+<pre><code>## Warning in CPL_write_ogr(obj, dsn, layer, driver, as.character(dataset_options), : GDAL Message 1: Value &#39;Donnees recuperees lors d&#39;une animation aupres du &quot;&quot;grand-public&quot;&quot;.
+## visible d&#39;avril a juillet.
+## 1 portee tous les ans.
+## en octobre 2015 : &quot;&quot;on les voit descendre de la propriete prive / du bois vers notre jardin...&quot;&quot;. &quot;&quot;les renardeaux poussent des petits cris&quot;&quot;.&#39; of field cmmnt_c has been truncated to 254 characters.  This warning will not be emitted any more for that layer.</code></pre>
 
 
 
