@@ -447,6 +447,8 @@ library(tidyr)
 #######  VARIABLES DES SITES  #############
 ###########################################
 
+# DEFINITION DE LA GRILLE EN REGION BRETAGNE CONTINENTALE 
+### -> Manque le buffer
 grille_10x10 <- sf::st_read(
   paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
 )
@@ -465,6 +467,7 @@ grille_10x10 <- grille_10x10 %>%
 grille_10x10 <- grille_10x10%>%
   dplyr::filter(sf::st_is(grille_10x10,c("POLYGON","MULTIPOLYGON")))
 
+# VARIABLES STRUCTURANTES
 var_noms <- c("Indice_Diversite_500m", "Densite_Cultures_500m", 
                "Distance_EcotoneArbore", "Distance_Littoral", "Distance_Eau")
 
@@ -477,6 +480,19 @@ for(var in var_noms) {
   grille_10x10[[var]] <- vals
 }
 
+# FAMILLES DE PAYSAGES
 famille_paysage <- sf::st_read(
   paste0(wd$data, "masques/famille_paysage/familles_paysages.shp")
 )
+famille_paysage <- famille_paysage %>%
+  dplyr::rename(Nom_paysage = NOM,
+                Famille_paysage = FAMILLE)%>%
+  dplyr::mutate_if(is.character,as.factor)%>%
+  dplyr::select(Nom_paysage, Famille_paysage)
+
+grille_10x10_variables <- grille_10x10 %>%
+  sf::st_join(famille_paysage)
+
+# AJOUTER CENTROID + TAILLE DE LA CELLULE
+
+summary(grille_10x10_variables)

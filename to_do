@@ -2,16 +2,11 @@ To do:
 
 Priorité
 
-- ajouter de l'autocorrélation dans les variables.
-   - pour chaque site, mettre la proportion de la dernière fois 
-   que le site a été sondé, et avant...
-
-Ajouter toutes les données DIR Ouest et Vu naturalistes a la BDD.
+- Ajouter centroid, buffer a la carte, taille du site en km^2.
+- Mettre sur l'autre bdd et voir si c'est okay?
+- Si okay, alors suite du modèle d'occupancy.
 
 - Créer des packages..
-
-- importer distances au littoral et distance a la présence d'eau.
-
 
 - faire des cartes avec a chaque année, oui ou non de détéction par espèce temoin.
 
@@ -19,12 +14,6 @@ Ajouter toutes les données DIR Ouest et Vu naturalistes a la BDD.
 
 
 - discuter du reste des unkown avec Franck
-
-MAX 1 semaine de plus sur les GLM, puis site occupancy.
-
-
-Relire cours de GLM : préparer fiche étape quoi regarder, différents modèles, etc...
-
 
 - DIRO 
     -> regarder si ceux ci sont similaire aux autres comme dans 
