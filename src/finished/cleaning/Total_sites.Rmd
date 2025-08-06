@@ -74,6 +74,5 @@ Total <- Total%>%
 sf::st_write(Total, paste0(wd$data, "derived/TotalComplet.shp"), 
              layer_options = "ENCODING=UTF-8",
              append=FALSE)
-
 ```
 

@@ -26,7 +26,17 @@ GeoN <- rbind(data_original_22_29,
               data_original_35_56, 
               data_original_GeoRodents)
 
+str(GeoN)
 GeoN <- GeoN %>%
+  dplyr::mutate(across(
+    c(nom_valide,	nom_vernaculaire,
+         ordre,
+         observateurs,
+         comment_occurrence,
+         technique_observation,
+         etat_biologique),
+    ~stringi::stri_trans_general(., id = "Latin-ASCII")
+  ))%>%
   dplyr::filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
   dplyr::mutate(
     # Vison
@@ -36,7 +46,7 @@ GeoN <- GeoN %>%
     cd_nom = ifelse(cd_nom==194944, 60704, cd_nom),
     # Ecureuil
     nom_vernaculaire = ifelse(cd_nom==197486, 
-                              "ÃÂcureuil roux", 
+                              "Ecureuil roux", 
                               nom_vernaculaire),
     cd_nom = ifelse(cd_nom==197486, 61153, cd_nom),
     # Martre
@@ -46,13 +56,18 @@ GeoN <- GeoN %>%
     cd_nom = ifelse(cd_nom==194481, 60658, cd_nom),
     # Rat
     nom_vernaculaire = ifelse(cd_nom==61585, 
-                              "Rat surmulot, Surmulot, Rat d'égout", 
+                              "Rat surmulot, Surmulot, Rat d'egout", 
                               nom_vernaculaire))%>%
-  dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Core
-         !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
-         !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
-        !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
-# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal dor, Putois domestique
+  dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), 
+                # Rat Fisher et ecureuil de Core
+                !(cd_nom %in% c(60249,198197)), 
+                # Taupes et Taupe d'Europe
+                !(cd_nom %in% c(99999004, 99999005, 99999006)), 
+                # NSP Carni
+                !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% 
+                # Carni Introduit
+                # Carni introduit : 60831 Genette 
+                # Introduit : chien viverrin, Raton laveur, Chacal dore, Furet
   dplyr::mutate(nombre = ifelse(nombre_max != nombre_min, 
                          median(c(nombre_max,nombre_min)),
                          nombre_min)
@@ -65,7 +80,7 @@ GeoN <- GeoN %>%
            technique_observation)),
     technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
   dplyr::mutate(etat_biologique = ifelse(etat_biologique == "NSP", 
-                                  "Non renseigné", etat_biologique))%>%
+                                  "Non renseigne", etat_biologique))%>%
   dplyr::filter(!jdd_nom %in% c(490,53))%>% 
   # 490: [visionature_opportunistic] Observations ponctuelles de Faune Bretagne
   # 53:  Donnes faunebretagne.org
@@ -115,25 +130,30 @@ VN_Rodentia <- readr::read_delim(paste0(wd$data, "raw/GN_Rodentia.csv"),
 VisioN_FB <- rbind(donnees_VisioNature_FB, VN_Rodentia)
 
 VisioN_FB <- VisioN_FB %>%
+    dplyr::mutate(across(
+    c(nom_valide,	nom_vernaculaire,
+         ordre,
+         observateurs,
+         comment_occurrence,
+         technique_observation,
+         etat_biologique),
+    ~stringi::stri_trans_general(., id = "Latin-ASCII")
+  ))%>%
   dplyr::filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
-  dplyr::filter(technique_observation != "Restes dans pelote de réjection")%>%
+  dplyr::filter(technique_observation != "Restes dans pelote de rejection")%>%
   dplyr::mutate(technique_observation = ifelse(
     !is.na(comment_occurrence) & technique_observation == "Inconnu",
     ifelse(any(grepl("TAUPINIERE", toupper(gsub("[[:punct:]]", 
                                                 "", 
-                                                stringi::stri_trans_general(
-                                                  comment_occurrence, 
-                                                  "Latin-ASCII")))),
+                                                  comment_occurrence))),
                grepl("EMPREINTES", toupper(gsub(":punct:]]",
                                                 "",
-                                                stringi::stri_trans_general(
                                                   comment_occurrence, 
-                                                  "Latin-ASCII")))),
+                                                  ))),
                grepl("TRACE", toupper(gsub(":punct:]]",
                                            "",
-                                           stringi::stri_trans_general(
                                              comment_occurrence, 
-                                             "Latin-ASCII"))))),
+                                           )))),
            "Indices",
            technique_observation),
     technique_observation))%>%
@@ -141,19 +161,26 @@ VisioN_FB <- VisioN_FB %>%
                                                "Entendu",
                                         technique_observation),
          technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
-  dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), # Rat Fisher et ecureil de Core
-         !(cd_nom %in% c(60249,198197)), # Taupes et Taupe d'Europe
-         !(cd_nom %in% c(99999004, 99999005, 99999006)), # NSP Carni
-        !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% # Carni Introduit
-# Carni introduit : 60831 # Genette : Introduit chien viverrin, Raton laveur, Chacal doré, Putois domestique
-  dplyr::mutate(technique_observation = ifelse(technique_observation == "Inconnu", "Vu", technique_observation))%>%
-  dplyr::mutate(etat_biologique = ifelse(champs_additionnels %in% c("{'death_cause': 'ROAD_VEHICLE'}",
-                                                             "{'death_cause': 'OTHER_TRANSPORT'}",
-                                                             "{'death_cause': 'UNKNOWN_TRANSPORT'}"),
-                                  "Trouvé mort : impact routier",
-                                  etat_biologique),
-         etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "Trouvé mort") & grepl("ROUT", toupper(comment_occurrence))), 
-                                  "Trouvé mort : impact routier",
+  dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), 
+                # Rat Fisher et ecureil de Core
+                !(cd_nom %in% c(60249,198197)), 
+                # Taupes et Taupe d'Europe
+                !(cd_nom %in% c(99999004, 99999005, 99999006)), 
+                # NSP Carni
+                !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))%>% 
+                # Carni Introduit
+                # Carni introduit : 60831 Genette 
+                # Introduit : chien viverrin, Raton laveur, Chacal dore, Putois domestique
+  dplyr::mutate(technique_observation = ifelse(technique_observation == "Inconnu", 
+                                               "Vu", technique_observation))%>%
+  dplyr::mutate(etat_biologique = ifelse(champs_additionnels %in% c(
+    "{'death_cause': 'ROAD_VEHICLE'}",
+    "{'death_cause': 'OTHER_TRANSPORT'}",
+    "{'death_cause': 'UNKNOWN_TRANSPORT'}"),
+    "Trouve mort : impact routier",
+    etat_biologique),
+    etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "Trouve mort") & grepl("ROUT", toupper(comment_occurrence))), 
+                                  "Trouve mort : impact routier",
                                   etat_biologique)
          )%>%
   dplyr::mutate(nombre = nombre_min, # nombre max = soit na soit nombre min
