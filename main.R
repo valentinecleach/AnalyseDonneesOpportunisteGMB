@@ -443,3 +443,40 @@ library(tidyr)
 # les espèces?
 
 
+###########################################
+#######  VARIABLES DES SITES  #############
+###########################################
+
+grille_10x10 <- sf::st_read(
+  paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
+)
+RegionBretagneConti <- sf::st_read(
+  paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
+)
+RegionBretagneConti <- RegionBretagneConti%>%
+  transforme_carte()
+  
+grille_10x10 <- grille_10x10 %>%
+  transforme_carte() %>%
+  sf::st_intersection(RegionBretagneConti)%>%
+  dplyr::arrange(CODE_10KM)%>%
+  dplyr::select(CODE_10KM)
+
+grille_10x10 <- grille_10x10%>%
+  dplyr::filter(sf::st_is(grille_10x10,c("POLYGON","MULTIPOLYGON")))
+
+var_noms <- c("Indice_Diversite_500m", "Densite_Cultures_500m", 
+               "Distance_EcotoneArbore", "Distance_Littoral", "Distance_Eau")
+
+for(var in var_noms) {
+  raster_path <- paste0(wd$data, "masques/VariablesStructurates/", var, ".tif")
+  rast <- terra::rast(raster_path)
+  terra::crs(rast) <- "EPSG:2154"
+  grille_10x10 <- sf::st_transform(grille_10x10, crs = "EPSG:2154")
+  vals <- exactextractr::exact_extract(rast, grille_10x10, 'mean')
+  grille_10x10[[var]] <- vals
+}
+
+famille_paysage <- sf::st_read(
+  paste0(wd$data, "masques/famille_paysage/familles_paysages.shp")
+)

@@ -66,3 +66,5 @@ Quand inclure DIRO? Ne pas inclure car seulement après 2015...? (enfin j'imagine
 Inclure le mois de détection? -\> souvent fait, et une partie du code déjà prêt juste a re-incorporer. Nécessaire ou intéressant pas sur.?
 
 Hypothèse de sites non continue -\> Continuous-space occupancy models? + compliqué et a étudier le truc après. Peut etre pas nécéssaire.
+
+Il y avais des problèmes dans les variables d'environnement, donc j'en ai profité pour aussi supprimer tous les accents, et refaire différamment les variables d'environnement.
