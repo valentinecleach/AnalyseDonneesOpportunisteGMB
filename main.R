@@ -1,7 +1,8 @@
 library(renv)
 renv::repair()
-
 loadedNamespaces()
+
+rm(list=setdiff(ls(), "Total"))
 
 options(encoding = 'UTF-8')
 source("init.R")
@@ -17,9 +18,9 @@ Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"),
                      options = "ENCODING=UTF8")
 Total <- transform_Total()
 
-
-
-rm(list=setdiff(ls(), "Total"))
+################################
+######## KNIT / RENDER #########
+################################
 
 #### Nettoyage de donnees ####
 # Total:
@@ -82,78 +83,14 @@ rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"),
                   output_file = paste0(wd$output, 
                                        "models/glm/Reg_Lin_ToutesDonnes.html"),
                   encoding="UTF-8")
+
 knitr::knit(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"))
 
-###############
-
-lines <- readLines(paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd", 
-                          encoding = "UTF-8"))
-cat(lines[1:10], sep = "\n")
-tools::file_test("-f", paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd"))
-file.info(paste0(wd$src, "finished/models/Reg_Lin_CollisionsRoutieres.Rmd"))$Encoding
-
-ggplot(grille_10Code_10km0) +
-  geom_sf(aes(fill = Densite_Cultures_500m)) +
-  theme_minimal()+
-  scale_fill_gradientn(colors = topo.colors(6))
-
-ggplot(grille_10Code_10km0) +
-  geom_sf(aes(fill = Distance_EcotoneArbore)) +
-  theme_minimal()+
-  scale_fill_gradientn(colors = topo.colors(6))
-
-ggplot(Total) +
-  geom_sf(aes(fill = Indice_Diversite)) +
-  theme_minimal()+
-  scale_fill_gradientn(colors = topo.colors(6))
-
-###############
-
-Total <- transform_Total(bdd = Total)
-sumoisary(Total)
-
-Donnes_Nat <- Total%>%
-  filter(technique_observation == "Vu")
-
-Donnes_Nat <- Donnes_Nat %>%
-  sf::st_drop_geometry()
-
-bdd_reg <- tab_glm(Donnes_Nat, 
-                   espece_interet = 61714,
-                   espece_benchmark = c(61667, 61057))
-
-sumoisary(bdd_reg)
-cor(bdd_reg[-c("clust_max", "famille_paysage_max", "Code_10km")])
-corrplot::corrplot(cor(bdd_reg[c(1:3,5:7,9:12)]))
-
-col <- colorRampPalette(c("#990000","#990000", 
-                          "#eeeeee",
-                          "#05600b","#05600b"))
-
-corrplot::corrplot(cor(subset(bdd_reg, select=-c(famille_paysage_max, Code_10km))),
-                   method="color", col=col(200),  
-                   order="hclust", 
-                   addCoef.col = "black", # Ajout du coefficient de correlation
-                   tl.col="black", tl.srt=45 # Rotation des etiquettes de textes
-)
-
-t <- bdd_reg %>% dplyr::select(-clust_max, -famille_paysage_max, )
-str((bdd_reg$Code_10km))
-
-car::vif(lm(data = bdd_reg, proportion_interet ~ year + Distance_EcotoneArbore_m + Indice_Diversite_m + X_10km + Y_10km+Densite_Cultures_m))
-# Des VIF correctes pour tous. On accepte toutes les propositions.
-
-bdd_reg[4]
-
-t <- bdd_reg %>% 
-  dplyr::select(-clust_max, -famille_paysage_max, -Code_10km)%>%
-  sf::st_drop_geometry()
-cor(t)
-str(t)
 
 
-###########
-
+################################
+######## Brouillons GLM ########
+################################
 bdd_reg <- tab_glm(Total_et_Diro, 
                    espece_interet = 61714,
                    espece_benchmark = 61667)
@@ -258,9 +195,9 @@ Kendall::MannKendall(bdd_reg2$proportion_interet)
 
 bdd_reg2$proportion_interet
 
-###############################
-### Step by step quoi faire ###
-###############################
+########################
+### Unkown key steps ###
+########################
 # Dans Bash
 ls ~/.ssh/id_ed25519.pub 
 ssh-keygen -t ed25519 -C "valentine.cleach@gmail.com"
@@ -278,18 +215,15 @@ git remote -v
 #####   BROUILLONS    #####
 ###########################
 
-install.packages("unmarked")
 library(unmarked)
 library(dplyr)
 library(sf)
 library(ggplot2)
 
-
-
 # Map des lapins
 
-grille_10Code_10km0 <- sf::st_read(
-  paste0(wd$data, "masques/Grille_10Code_10km0/Grille_10Code_10km0.shp")
+grille_10x10 <- sf::st_read(
+  paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
 )
 RegionBretagneConti <- sf::st_read(
   paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
@@ -298,34 +232,26 @@ RegionBretagneConti <- sf::st_read(
 tab <- Total %>%
   dplyr::filter(cd_nom == 61714)%>%
   transforme_carte()
-grille_10Code_10km0 <- grille_10Code_10km0%>%
+grille_10x10 <- grille_10x10%>%
   transforme_carte()
 RegionBretagneConti <- RegionBretagneConti%>%
   transforme_carte()
 
-grille_10Code_10km0$density <- lengths(sf::st_intersects(grille_10Code_10km0, 
+grille_10x10$density <- lengths(sf::st_intersects(grille_10x10, 
                                                   tab))
-grille_10Code_10km0 <- sf::st_intersection(grille_10Code_10km0, 
+grille_10x10 <- sf::st_intersection(grille_10x10, 
                                     RegionBretagneConti)
 
 ggplot() +
   geom_sf(data = RegionBretagneConti) + 
   labs(title = paste0(". Densite des observations du lapin de garenne en bretagne")) +
-  geom_sf(data = grille_10Code_10km0, aes(fill = density)) +
+  geom_sf(data = grille_10x10, aes(fill = density)) +
   scale_fill_gradient(low="white", high="orangered3") +
   theme_bw()
 
-###############################
-##### Méthode grenouilles #####
-###############################
-
-
-mois <- c('Jan', 'Fev', 'Mars', 'Avr', 'Mai', 'Juin', 
-        'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec') # extract month with data
-
-indyear <- c(2006:2015, 2015:2024) # define two periods
-
-ids <- unique(Total$Code_10km)
+####################
+###### Lapins ######
+####################
 
 Lapins <- Total%>%
   filter(cd_nom == 61714,
@@ -348,36 +274,42 @@ Lapins <- Total%>%
                           mois == 12 ~ "Dec"),
          year = lubridate::year(date))
 
-ind <- 1
 
-# Error: object 'mom_detections' not found
+###############################
+##### Méthode grenouilles #####
+###############################
+
+
+mois <- c('Jan', 'Fev', 'Mars', 'Avr', 'Mai', 'Juin', 
+        'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec') # extract month with data
+indyear <- c(2006:2015, 2015:2024) # define two periods
+ids <- unique(Total$Code_10km)
+detections <- list()
 for (k in 1:length(indyear)){
-  mom_detections[[k]] <- matrix(0,nrow=length(ids),ncol=length(mois))
+  detections[[k]] <- matrix(0,
+                            nrow=length(ids),
+                            ncol=length(mois))
   data <- filter(Lapins,
-                 year == indyear[k])
+                 year==indyear[k])
   ind <- 1
   for (i in mois){
     temp <- filter(data, mois==i)
-    utm_temp <- unique(temp$CODE_10KM)
+    utm_temp <- unique(temp$utm)
     for (j in utm_temp){
-      
-      # 1 if a sighting was made in square j in month i
-      mom_detections[[k]][ids==j,ind] <- 1
+      detections[[k]][ids==j,ind] <- 1
     }
     ind <- ind + 1
   }
 }
-mom_det <- do.call(cbind, mom_detections) # bind data from all year in columns
-summary(mom_det)
+det <- do.call(cbind, detections) # bind data from all year in columns
 # convert the occupancy dataset in a 3D array:
 y <- list()
 ind <- 0
 for (i in 1:length(indyear)){
   mask <- (ind + i):(ind + i + length(mois) - 1)
-  y[[i]] <- mom_det[,mask]
+  y[[i]] <- det[,mask]
   ind <- ind + length(mois) - 1
 }
-
 
 y <- array(unlist(y), 
            dim = c(nrow(y[[1]]), ncol(y[[1]]), length(y)))
@@ -399,26 +331,7 @@ range(y)
 ##### Methode 2 #####
 #####################
 
-Lapins <- Total%>%
-  filter(cd_nom == 61714,
-         technique_observation == "Vu",
-         date > as.Date("2005-01-01"))%>%
-#  select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
-  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation)
-
-t_lapins <- Lapins%>%
-  select(Code_10km, date)
- 
-##
-View(t_lapins)
-
-##
-t_lapins <- Lapins %>%
-  dplyr::mutate(annee = lubridate::year(date))%>%
-  distinct(Code_10km, annee)%>%
-  select(Code_10km, annee)
-
-str(t_lapins)
+## Matrice de detection
 
 t_lapins <- Lapins %>%
   sf::st_drop_geometry()%>%
@@ -434,34 +347,75 @@ t_lapins <- Lapins %>%
 
 t_lapins[,-1] <- ifelse(t_lapins[,-1]>0, 1, 0)
 
-# Detection matrix
 noms <- t_lapins$Code_10km
 t_lapins <- as.matrix(t_lapins[, -1])
 rownames(t_lapins) <- noms
 
+## Matrice des covariables du site 
 
 annees <- as.numeric(colnames(t_lapins))
 periodes_vector <- ifelse(annees < 2015, "periode1", "periode2")
 
 periodes_matrix <- matrix(rep(periodes_vector, each = nrow(t_lapins)), 
-                     nrow = nrow(t_lapins), 
-                     byrow = FALSE)
+                          nrow = nrow(t_lapins), 
+                          byrow = FALSE)
 colnames(periodes_matrix) <- colnames(t_lapins)
 rownames(periodes_matrix) <- rownames(t_lapins)
 
-# Convert to data.frame
 periodes_df <- as.data.frame(periodes_matrix)
+
+
+# Matrice des covariables des observations 
+obscovs
+
+t_lapins <- Lapins %>%
+  sf::st_drop_geometry()%>%
+  dplyr::mutate(annee = lubridate::year(date))%>%
+  dplyr::count(Code_10km, annee) %>%
+  tidyr::complete(Code_10km, 
+                  annee = tidyr::full_seq(annee, 1), 
+                  fill = list(n = 0)) %>%
+  tidyr::pivot_wider(names_from = annee, 
+                     values_from = n) %>%
+  dplyr::arrange(Code_10km)
+
+
+View(Lapins$Indice_Diversite)
+# Create a reference table with unique Code_10km and z
+site_info <- Lapins %>%
+  sf::st_drop_geometry() %>%
+  dplyr::select(Code_10km, 
+                Indice_Diversite,
+                Densite_Cultures,
+                Distance_Littoral,
+                Distance_EcotoneArbore,
+                Distance_Eau,
+                famille_paysage
+                ) %>%
+  dplyr::distinct()%>%
+  arrange(Code_10km)
+View(site_info)
+
+
+# Join the site descriptor to your t_lapins table
+t_lapins <- t_lapins %>%
+  dplyr::left_join(site_info, by = "Code_10km")
+
+View(t_lapins)
+
+# Modelisation
+
 View(periodes_df)
-
-
+View(site_info)
 umf <- unmarked::unmarkedFrameOccu(y = t_lapins, 
-                                   obsCovs = list(periode = periodes_df))
+                                   obsCovs = list(periode = periodes_df),
+                                   siteCovs = list(site_info$Indice_Diversite)
+                                   )
 
 
 # Null model (no effect of era)
 model_null <- unmarked::occu(~1 ~1, data = umf)
 
-unmarked::summary(model_null)
 # Model with detection depending on era
 model_era <- unmarked::occu(~periode ~1, data = umf)
 
@@ -469,12 +423,13 @@ model_era <- unmarked::occu(~periode ~1, data = umf)
 unmarked::summary(model_null)
 unmarked::summary(model_era)
 # Ici, on compare les 2 modèles a l'aide de l'AIC
-unmarked::modSel(unmarked::fitList(aucune_variable = model_null, deux_periodes = model_era))
+unmarked::modSel(unmarked::fitList(aucune_variable = model_null, 
+                                   deux_periodes = model_era))
 
 
-########################################
-################# EESSAIS ##############
-########################################
+#######################################
+################# ESSAIS ##############
+#######################################
 
 library(dplyr)
 library(tidyr)
