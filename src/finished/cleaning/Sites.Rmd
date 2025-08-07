@@ -1,15 +1,17 @@
 ---
-  title: "Ajout de variables de sites"
+title: "Ajout de variables de sites"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   bookdown::html_document2:
   toc: true
 toc_float: true
 ---
-  
 
-# DEFINITION DE LA GRILLE EN REGION BRETAGNE CONTINENTALE
+```{r}
+library(sf); library(dplyr); library(ggplot2)
+```
 
+## DEFINITION DE LA GRILLE EN REGION BRETAGNE CONTINENTALE
 
 ```{r}
 grille_10x10 <- sf::st_read(
@@ -19,24 +21,25 @@ RegionBretagneConti <- sf::st_read(
   paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
 )
 RegionBretagneConti <- RegionBretagneConti%>%
-  transforme_carte()%>%
-  sf::st_transform(2154)%>%
-  sf::st_buffer(dist = 200)%>%
+  transforme_carte() %>%
+  sf::st_transform(2154) %>%
+  sf::st_buffer(dist = 200) %>%
   transforme_carte()
 
 grille_10x10 <- grille_10x10 %>%
   transforme_carte() %>%
-  sf::st_intersection(RegionBretagneConti)%>%
-  dplyr::arrange(CODE_10KM)%>%
+  sf::st_intersection(RegionBretagneConti) %>%
+  dplyr::arrange(CODE_10KM) %>%
   dplyr::select(CODE_10KM)
 
-grille_10x10 <- grille_10x10%>%
+grille_10x10 <- grille_10x10 %>%
   dplyr::filter(sf::st_is(grille_10x10,c("POLYGON","MULTIPOLYGON")))
+
 ```
 
+## VARIABLES STRUCTURANTES
 
-# VARIABLES STRUCTURANTES
-```{r}
+```{r, echo=T, results='hide'}
 var_noms <- c("Indice_Diversite_500m", "Densite_Cultures_500m", 
               "Distance_EcotoneArbore", "Distance_Littoral", "Distance_Eau")
 
@@ -50,7 +53,8 @@ for(var in var_noms) {
 }
 ```
 
-Suppression car hors du territoire -> Ca nous corrige le problËme qu'on avait avec les individus dans la partie bluffÈ du 44.
+Suppression car hors du territoire -\> Ca nous corrige le probl√®me qu'on avait avec les individus dans la partie bluff√© du 44.
+
 ```{r}
 grille_10x10 <- grille_10x10%>%
   dplyr::filter(!is.na(Distance_Littoral))
@@ -68,7 +72,8 @@ for(var in var_noms) {
 }
 ```
 
-# FAMILLES DE PAYSAGES
+## FAMILLES DE PAYSAGES
+
 ```{r}
 famille_paysage <- sf::st_read(
   paste0(wd$data, "masques/famille_paysage/familles_paysages.shp")
@@ -80,37 +85,45 @@ famille_paysage <- famille_paysage %>%
   dplyr::select(Nom_paysage, Famille_paysage)
 
 grille_10x10 <- grille_10x10 %>%
-  sf::st_join(famille_paysage)
+  sf::st_join(famille_paysage)%>%
+  sf::st_make_valid()
 ```
 
+On a une case sans de valeurs, donc on lui attribut la valeur la plus fr√©quente parmi ses voisins.
+
 ```{r}
-grille_10x10%>%
+index <- sf::st_touches(grille_10x10, grille_10x10)
+
+attribut_val_voisine <- function(val, voisins) {
+    if (is.na(val)) {
+      val_voisins <- valeur[voisins]
+      val_voisins <- val_voisins[!is.na(val_voisins)]
+      if (length(val_voisins) == 0) {
+        return(NA)
+      } else {
+        return(Mode(val_voisins))
+      }
+    } else {
+      return(val)
+    }
+  }
+
+for (col in c("Famille_paysage", "Nom_paysage")) {
+  valeur <- grille_10x10[[col]]
+  nvx_valeur <- purrr::map2(valeur, index, attribut_val_voisine)
+  grille_10x10[[col]] <- factor(unlist(nvx_valeur), 
+                                levels = levels(valeur))
+}
+```
+
+
+```{r}
+grille_10x10 %>%
   ggplot() + geom_sf(aes(fill=Famille_paysage))
+```
 
-grille_10x10%>%
-  dplyr::filter(is.na(Famille_paysage))%>%
-  ggplot() + geom_sf(aes(fill=Famille_paysage))
+## TAILLE DE LA CELLULE
 
-grille_10x10%>%
-  dplyr::filter(is.na(Famille_paysage))%>%
-  select(CODE_10KM)
-
-grille_10x10_sNA <- grille_10x10%>%
-  dplyr::filter(!is.na(Famille_paysage))
-
-
-index <- st_touches(grille_10x10)
-output <- grille_10x10 %>% 
-  mutate_at(vars(all_of(c("Famille_paysage", "Nom_paysage"))),
-            list(~ifelse(is.na(.),
-                         apply(index, 1, function(i){Mode(.[i])}),
-                         .)
-                )
-            )```
-
-
-
-# TAILLE DE LA CELLULE
 ```{r}
 grille_10x10 <- grille_10x10 %>%
   sf::st_transform(2154) %>%
@@ -124,7 +137,8 @@ grille_10x10%>%
   ggplot()+geom_sf(aes(fill=aire_km2))
 ```
 
-# COORDONNEES DES CENTROIDS
+## COORDONNEES DES CENTROIDS
+
 ```{r}
 centroids <- sf::st_centroid(grille_10x10)
 centroid_coords <- sf::st_coordinates(centroids)
@@ -139,25 +153,39 @@ grille_10x10_centroids <- grille_10x10 %>%
 grille_10x10 <- grille_10x10 %>%
   dplyr::left_join(
     as.data.frame(grille_10x10_centroids),
-    by = "CODE_10KM"
+    by = "CODE_10KM",
+    relationship = "many-to-many"
   )
+
+grille_10x10%>%
+  dplyr::rename(Code_10km = CODE_10KM, 
+                Ind_Diversite = Indice_Diversite_500m,
+                Dnst_Cultures = Densite_Cultures_500m,
+                Dist_EcotoneArbore = Distance_EcotoneArbore,
+                Dist_Littoral = Distance_Littoral,
+                Dist_Eau = Distance_Eau)
 ```
 
+## EXPORTS
 
-# Exports
-Export sous forme shapefile 
+```{r}
+summary(grille_10x10)
+```
+
+Export sous forme shapefile
+
 ```{r}
 grille_10x10%>%
-  dplyr::select(-geometry.y)%>%
+  dplyr::select(-geometry.y, -geometry.x)%>%
   sf::st_write(paste0(wd$data, "derived/VariablesSite.shp"), 
                delete_dsn = TRUE)
 ```
 
 Export sous forme csv
+
 ```{r}
 grille_10x10%>%
   dplyr::select(-geometry.y)%>%
   sf::st_drop_geometry()%>%
   utils::write.csv(paste0(wd$data, "derived/VariablesSite.csv"))
 ```
-

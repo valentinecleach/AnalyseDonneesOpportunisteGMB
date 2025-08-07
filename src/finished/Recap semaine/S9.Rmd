@@ -70,3 +70,5 @@ Hypothèse de sites non continue -\> Continuous-space occupancy models? + compliq
 Il y avais des problèmes dans les variables d'environnement, donc j'en ai profité pour aussi supprimer tous les accents, et refaire différamment les variables d'environnement.
 
 Suppression de 11 sites qui ont une aire strictement inférieur a 2km\^2. Répartition assez aléatoire (nord, sud et est de la map).
+
+Voir le nettoyage sur ce Rmd:

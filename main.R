@@ -41,6 +41,10 @@ rmarkdown::render(paste0(wd$src, "finished/cleaning/Total_sites.Rmd"),
                   output_file = paste0(wd$output, "cleaning/Total_sites.html"),
                   encoding="UTF-8")
 
+rmarkdown::render(paste0(wd$src, "finished/cleaning/Sites.Rmd"), 
+                  output_file = paste0(wd$output, "cleaning/Sites.html"),
+                  encoding="UTF-8")
+
 #### Stats Desc ####
 rmarkdown::render(paste0(wd$src, "finished/stats_desc/Repartitions.Rmd"), 
                   output_file = paste0(wd$output, "stats_desc/Repartitions.html"),
