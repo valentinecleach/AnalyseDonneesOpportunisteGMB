@@ -51,7 +51,7 @@ Faudrait il enlever les petits sites? Ils peuvent etre intéressant (surtout c'es
 
 Aussi, avant de continuer, faudrait tout passer en sans accents... Il etait temps (:
 
-En etudiant le lapin de garenne avec 2 periodes:
+En étudiant le lapin de garenne avec 2 periodes:
 
 -   2005 - 2014
 
@@ -68,3 +68,5 @@ Inclure le mois de détection? -\> souvent fait, et une partie du code déjà prêt 
 Hypothèse de sites non continue -\> Continuous-space occupancy models? + compliqué et a étudier le truc après. Peut etre pas nécéssaire.
 
 Il y avais des problèmes dans les variables d'environnement, donc j'en ai profité pour aussi supprimer tous les accents, et refaire différamment les variables d'environnement.
+
+Suppression de 11 sites qui ont une aire strictement inférieur a 2km\^2. Répartition assez aléatoire (nord, sud et est de la map).

@@ -2,7 +2,7 @@ To do:
 
 Priorité
 
-- Ajouter centroid, buffer a la carte, taille du site en km^2.
+- Ajouter centroid.
 - Mettre sur l'autre bdd et voir si c'est okay?
 - Si okay, alors suite du modèle d'occupancy.
 

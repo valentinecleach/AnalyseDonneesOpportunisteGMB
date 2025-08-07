@@ -447,8 +447,7 @@ library(tidyr)
 #######  VARIABLES DES SITES  #############
 ###########################################
 
-# DEFINITION DE LA GRILLE EN REGION BRETAGNE CONTINENTALE 
-### -> Manque le buffer
+# DEFINITION DE LA GRILLE EN REGION BRETAGNE CONTINENTALE
 grille_10x10 <- sf::st_read(
   paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
 )
@@ -456,8 +455,11 @@ RegionBretagneConti <- sf::st_read(
   paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
 )
 RegionBretagneConti <- RegionBretagneConti%>%
+  transforme_carte()%>%
+  sf::st_transform(2154)%>%
+  sf::st_buffer(dist = 200)%>%
   transforme_carte()
-  
+
 grille_10x10 <- grille_10x10 %>%
   transforme_carte() %>%
   sf::st_intersection(RegionBretagneConti)%>%
@@ -480,6 +482,9 @@ for(var in var_noms) {
   grille_10x10[[var]] <- vals
 }
 
+grille_10x10 <- grille_10x10%>%
+  dplyr::filter(!is.na(Distance_Littoral))
+
 # FAMILLES DE PAYSAGES
 famille_paysage <- sf::st_read(
   paste0(wd$data, "masques/famille_paysage/familles_paysages.shp")
@@ -493,6 +498,34 @@ famille_paysage <- famille_paysage %>%
 grille_10x10_variables <- grille_10x10 %>%
   sf::st_join(famille_paysage)
 
-# AJOUTER CENTROID + TAILLE DE LA CELLULE
+# TAILLE DE LA CELLULE
+grille_10x10 <- grille_10x10 %>%
+  sf::st_transform(2154) %>%
+  dplyr::mutate(aire_km2 = as.numeric(sf::st_area(grille_10x10)/1000000)) %>%
+  transforme_carte()%>%
+  dplyr::filter(aire_km2 > 2)
 
-summary(grille_10x10_variables)
+# COORDONNEES DES CENTROIDS
+centroids <- sf::st_centroid(grille_10x10)
+centroid_coords <- sf::st_coordinates(centroids)
+
+grille_10x10_centroids <- grille_10x10 %>%
+  dplyr::mutate(
+    X_10km = centroid_coords[, "X"],
+    Y_10km = centroid_coords[, "Y"]
+  ) %>%
+  dplyr::select(CODE_10KM, X_10km, Y_10km)
+
+grille_10x10 <- grille_10x10 %>%
+  dplyr::left_join(
+    as.data.frame(grille_10x10_centroids),
+    by = "CODE_10KM"
+  )
+
+# FINALITE
+grille_10x10 <- grille_10x10%>%
+  sf::st_drop_geometry()%>%
+  dplyr::select(-geometry.y)
+
+Total %>%
+  
