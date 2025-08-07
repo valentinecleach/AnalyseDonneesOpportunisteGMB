@@ -527,5 +527,3 @@ grille_10x10 <- grille_10x10%>%
   sf::st_drop_geometry()%>%
   dplyr::select(-geometry.y)
 
-Total %>%
-  
