@@ -71,4 +71,4 @@ Il y avais des problèmes dans les variables d'environnement, donc j'en ai profit
 
 Suppression de 11 sites qui ont une aire strictement inférieur a 2km\^2. Répartition assez aléatoire (nord, sud et est de la map).
 
-Voir le nettoyage sur ce Rmd:
+Voir le nettoyage sur ce Rmd: <https://rpubs.com/valentine_cleach/variables_site>
