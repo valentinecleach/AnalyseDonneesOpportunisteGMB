@@ -21,6 +21,9 @@ Total <- Total%>%
 
 VariablesSite <- sf::st_read(paste0(wd$data, "derived/VariablesSite.shp"),
                              options = "ENCODING=UTF8")
+VariablesSite <- VariablesSite%>%
+  transform_VarSites()
+str(VariablesSite)
 
 Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"), 
                      options = "ENCODING=UTF8")
@@ -266,9 +269,7 @@ ggplot() +
 ####################
 
 Lapins <- Total%>%
-  sf::st_join(VariablesSite)
-str(Lapins)
-Lapins <- Lapins %>%
+  sf::st_join(VariablesSite)%>%
   rename(Code_10km = CODE_10,
          Famille_paysage = Fmll_py,
          Nom_paysage = Nm_pysg,
@@ -276,9 +277,7 @@ Lapins <- Lapins %>%
          Dist_Littoral = Dstnc_L,
          Dist_EcotoneArbore = Dstn_EA,
          Dnst_Culture = D_C_500,
-         Ind_Diversite = I_D_500)
-
-Lapins <- Total%>%
+         Ind_Diversite = I_D_500)%>%
   filter(cd_nom == 61714,
          technique_observation == "Vu",
          date > as.Date("2005-01-01"))%>%
@@ -298,7 +297,6 @@ Lapins <- Total%>%
                           mois == 11 ~ "Nov",
                           mois == 12 ~ "Dec"),
          year = lubridate::year(date))
-
 
 ###############################
 ##### Méthode grenouilles #####
@@ -376,7 +374,7 @@ noms <- t_lapins$Code_10km
 t_lapins <- as.matrix(t_lapins[, -1])
 rownames(t_lapins) <- noms
 
-## Matrice des covariables du site 
+## Matrice des covariables des observations 
 
 annees <- as.numeric(colnames(t_lapins))
 periodes_vector <- ifelse(annees < 2015, "periode1", "periode2")
@@ -389,38 +387,32 @@ rownames(periodes_matrix) <- rownames(t_lapins)
 
 periodes_df <- as.data.frame(periodes_matrix)
 
+# Matrice des covariables du site 
 
-# Matrice des covariables des observations 
-obscovs
-
-t_lapins <- Lapins %>%
-  sf::st_drop_geometry()%>%
-  dplyr::mutate(annee = lubridate::year(date))%>%
-  dplyr::count(Code_10km, annee) %>%
-  tidyr::complete(Code_10km, 
-                  annee = tidyr::full_seq(annee, 1), 
-                  fill = list(n = 0)) %>%
-  tidyr::pivot_wider(names_from = annee, 
-                     values_from = n) %>%
-  dplyr::arrange(Code_10km)
-
-
-View(Lapins$Indice_Diversite)
-# Create a reference table with unique Code_10km and z
 site_info <- Lapins %>%
   sf::st_drop_geometry() %>%
+  dplyr::mutate(annee = lubridate::year(date)) %>%
   dplyr::select(Code_10km, 
-                Indice_Diversite,
-                Densite_Cultures,
-                Distance_Littoral,
-                Distance_EcotoneArbore,
-                Distance_Eau,
-                famille_paysage
-                ) %>%
-  dplyr::distinct()%>%
-  arrange(Code_10km)
-View(site_info)
+                Ind_Diversite, 
+                Dnst_Culture,
+                Dist_Littoral,
+                Dist_EcotoneArbore,
+                Dist_Eau,
+                Famille_paysage
+  ) %>%
+  dplyr::distinct(Code_10km, 
+                  Ind_Diversite, 
+                  Dnst_Culture,
+                  Dist_Littoral,
+                  Dist_EcotoneArbore,
+                  Dist_Eau,
+                  Famille_paysage)%>%
+  dplyr::arrange(Code_10km)
 
+noms <- site_info$Code_10km               # noms is a vector of codes
+rownames(site_info) <- noms               # Each row gets its code as rowname
+
+View(site_info)
 
 # Join the site descriptor to your t_lapins table
 t_lapins <- t_lapins %>%
@@ -428,13 +420,14 @@ t_lapins <- t_lapins %>%
 
 View(t_lapins)
 
+
 # Modelisation
 
 View(periodes_df)
 View(site_info)
-umf <- unmarked::unmarkedFrameOccu(y = t_lapins, 
+umf <- ?unmarked::unmarkedFrameOccu(y = t_lapins, 
                                    obsCovs = list(periode = periodes_df),
-                                   siteCovs = list(site_info$Indice_Diversite)
+                                   siteCovs = site_info)
                                    )
 
 
@@ -462,4 +455,11 @@ library(tidyr)
 ### Ajouter les variables de site -> On devrait pouvoir les garder pour toutes 
 # les espèces?
 
+
+t_lapins <- Lapins %>%
+  sf::st_drop_geometry() %>%
+  dplyr::mutate(annee = lubridate::year(date)) %>%
+  dplyr::select(Code_10km, Ind_Diversite, Dnst_Culture) %>%
+  dplyr::distinct(Code_10km,Ind_Diversite, Dnst_Culture)%>%
+  dplyr::arrange(Code_10km)
 
