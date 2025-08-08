@@ -1,6 +1,6 @@
 ---
 title: "Semaine 9"
-date: "04/08 - .../08"
+date: "04/08 - 08/08"
 output:
   bookdown::html_document2:
     toc: true
@@ -9,7 +9,7 @@ output:
 
 # Modèles d'occupancy
 
-## Bibliographie 
+## Bibliographie
 
 -   Ref de Simon Lacombe :
 

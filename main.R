@@ -100,6 +100,10 @@ rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"),
 
 knitr::knit(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"))
 
+rmarkdown::render(paste0(wd$src, "finished/models/OccupancyLapin.Rmd"),
+                  output_file = paste0(wd$output, 
+                                       "models/OccupancyLapin.html"),
+                  encoding="UTF-8")
 
 
 ################################
@@ -416,18 +420,14 @@ View(periodes_df)
 View(site_info)
 umf <- unmarked::unmarkedFrameOccu(y = t_lapins, 
                                    obsCovs = list(periode = periodes_df),
-                                   siteCovs = site_info)
+                                   siteCovs = site_info
                                    )
-
-
+                                   
 # Null model (no effect of era)
 model_null <- unmarked::occu(~1 ~1, data = umf)
-
-# Model with detection depending on era
 model_era <- unmarked::occu(~periode ~1, data = umf)
 model_eau <- unmarked::occu(~periode ~Dist_Eau, data = umf)
 
-# Regards des modèles
 unmarked::summary(model_null)
 unmarked::summary(model_era)
 unmarked::summary(model_eau)
@@ -441,18 +441,3 @@ unmarked::modSel(unmarked::fitList(aucune_variable = model_null,
 #######################################
 ################# ESSAIS ##############
 #######################################
-
-library(dplyr)
-library(tidyr)
-
-### Ajouter les variables de site -> On devrait pouvoir les garder pour toutes 
-# les espèces?
-
-
-t_lapins <- Lapins %>%
-  sf::st_drop_geometry() %>%
-  dplyr::mutate(annee = lubridate::year(date)) %>%
-  dplyr::select(Code_10km, Ind_Diversite, Dnst_Culture) %>%
-  dplyr::distinct(Code_10km,Ind_Diversite, Dnst_Culture)%>%
-  dplyr::arrange(Code_10km)
-
