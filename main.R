@@ -23,7 +23,6 @@ VariablesSite <- sf::st_read(paste0(wd$data, "derived/VariablesSite.shp"),
                              options = "ENCODING=UTF8")
 VariablesSite <- VariablesSite%>%
   transform_VarSites()
-str(VariablesSite)
 
 Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"), 
                      options = "ENCODING=UTF8")
@@ -264,39 +263,7 @@ ggplot() +
   scale_fill_gradient(low="white", high="orangered3") +
   theme_bw()
 
-####################
-###### Lapins ######
-####################
 
-Lapins <- Total%>%
-  sf::st_join(VariablesSite)%>%
-  rename(Code_10km = CODE_10,
-         Famille_paysage = Fmll_py,
-         Nom_paysage = Nm_pysg,
-         Dist_Eau = Dstnc_E,
-         Dist_Littoral = Dstnc_L,
-         Dist_EcotoneArbore = Dstn_EA,
-         Dnst_Culture = D_C_500,
-         Ind_Diversite = I_D_500)%>%
-  filter(cd_nom == 61714,
-         technique_observation == "Vu",
-         date > as.Date("2005-01-01"))%>%
-  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
-  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation)%>%
-  mutate(mois = lubridate::month(date),
-         mois = case_when(mois == 1 ~ "Jan", 
-                          mois == 2 ~ "Fev",
-                          mois == 3 ~ "Mars",
-                          mois == 4 ~ "Avr",
-                          mois == 5 ~ "Mai",
-                          mois == 6 ~ "Juin",
-                          mois == 7 ~ "Juil",
-                          mois == 8 ~ "Aout",
-                          mois == 9 ~ "Sept",
-                          mois == 10 ~ "Oct",
-                          mois == 11 ~ "Nov",
-                          mois == 12 ~ "Dec"),
-         year = lubridate::year(date))
 
 ###############################
 ##### Méthode grenouilles #####
@@ -304,7 +271,7 @@ Lapins <- Total%>%
 
 
 mois <- c('Jan', 'Fev', 'Mars', 'Avr', 'Mai', 'Juin', 
-        'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec') # extract month with data
+          'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec') # extract month with data
 indyear <- c(2006:2015, 2015:2024) # define two periods
 ids <- unique(Total$Code_10km)
 detections <- list()
@@ -350,9 +317,42 @@ dim(y)
 summary(y)
 range(y)
 
-#####################
-##### Methode 2 #####
-#####################
+
+####################
+###### Lapins ######
+####################
+
+Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
+                     options = "ENCODING=UTF8")
+Total <- Total%>%
+  transform_Total()
+
+VariablesSite <- sf::st_read(paste0(wd$data, "derived/VariablesSite.shp"),
+                             options = "ENCODING=UTF8")
+VariablesSite <- VariablesSite%>%
+  transform_VarSites()
+
+Lapins <- Total%>%
+  sf::st_join(VariablesSite)%>%
+  filter(cd_nom == 61714,
+         technique_observation == "Vu",
+         date > as.Date("2005-01-01"))%>%
+  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
+  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation)%>%
+  mutate(mois = lubridate::month(date),
+         mois = case_when(mois == 1 ~ "Jan", 
+                          mois == 2 ~ "Fev",
+                          mois == 3 ~ "Mars",
+                          mois == 4 ~ "Avr",
+                          mois == 5 ~ "Mai",
+                          mois == 6 ~ "Juin",
+                          mois == 7 ~ "Juil",
+                          mois == 8 ~ "Aout",
+                          mois == 9 ~ "Sept",
+                          mois == 10 ~ "Oct",
+                          mois == 11 ~ "Nov",
+                          mois == 12 ~ "Dec"),
+         year = lubridate::year(date))
 
 ## Matrice de detection
 
@@ -366,7 +366,8 @@ t_lapins <- Lapins %>%
                   fill = list(n = 0)) %>%
   tidyr::pivot_wider(names_from = annee, 
                      values_from = n) %>%
-  dplyr::arrange(Code_10km)
+  dplyr::arrange(Code_10km) %>%
+  filter(!is.na(Code_10km))
 
 t_lapins[,-1] <- ifelse(t_lapins[,-1]>0, 1, 0)
 
@@ -374,7 +375,8 @@ noms <- t_lapins$Code_10km
 t_lapins <- as.matrix(t_lapins[, -1])
 rownames(t_lapins) <- noms
 
-## Matrice des covariables des observations 
+
+## Matrice des covariables des observations (periode et mois) 
 
 annees <- as.numeric(colnames(t_lapins))
 periodes_vector <- ifelse(annees < 2015, "periode1", "periode2")
@@ -387,32 +389,19 @@ rownames(periodes_matrix) <- rownames(t_lapins)
 
 periodes_df <- as.data.frame(periodes_matrix)
 
-# Matrice des covariables du site 
 
-site_info <- Lapins %>%
-  sf::st_drop_geometry() %>%
-  dplyr::mutate(annee = lubridate::year(date)) %>%
-  dplyr::select(Code_10km, 
-                Ind_Diversite, 
-                Dnst_Culture,
-                Dist_Littoral,
-                Dist_EcotoneArbore,
-                Dist_Eau,
-                Famille_paysage
-  ) %>%
-  dplyr::distinct(Code_10km, 
-                  Ind_Diversite, 
-                  Dnst_Culture,
-                  Dist_Littoral,
-                  Dist_EcotoneArbore,
-                  Dist_Eau,
-                  Famille_paysage)%>%
+# Matrice des covariables du site (Dist_Eau, etc..)
+
+site_info <- VariablesSite%>%
   dplyr::arrange(Code_10km)
+  
 
-noms <- site_info$Code_10km               # noms is a vector of codes
-rownames(site_info) <- noms               # Each row gets its code as rowname
+noms <- site_info$Code_10km
+rownames(site_info) <- noms
 
-View(site_info)
+site_info <- site_info%>%
+  dplyr::select(-Code_10km)%>%
+  sf::st_drop_geometry()
 
 # Join the site descriptor to your t_lapins table
 t_lapins <- t_lapins %>%
@@ -425,7 +414,7 @@ View(t_lapins)
 
 View(periodes_df)
 View(site_info)
-umf <- ?unmarked::unmarkedFrameOccu(y = t_lapins, 
+umf <- unmarked::unmarkedFrameOccu(y = t_lapins, 
                                    obsCovs = list(periode = periodes_df),
                                    siteCovs = site_info)
                                    )
@@ -436,13 +425,17 @@ model_null <- unmarked::occu(~1 ~1, data = umf)
 
 # Model with detection depending on era
 model_era <- unmarked::occu(~periode ~1, data = umf)
+model_eau <- unmarked::occu(~periode ~Dist_Eau, data = umf)
 
 # Regards des modèles
 unmarked::summary(model_null)
 unmarked::summary(model_era)
+unmarked::summary(model_eau)
+
 # Ici, on compare les 2 modèles a l'aide de l'AIC
 unmarked::modSel(unmarked::fitList(aucune_variable = model_null, 
-                                   deux_periodes = model_era))
+                                   deux_periodes = model_era,
+                                   dp_et_eau = model_eau))
 
 
 #######################################

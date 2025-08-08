@@ -9,17 +9,20 @@ output:
 
 # Modèles d'occupancy
 
-## Bibliographie -\> but : lire + recap d'ici demain soir, max mercredi soir.
+## Bibliographie 
 
 -   Ref de Simon Lacombe :
 
     -   [Occupancy Modeling, Morgan Byrne, James Golde](https://kevintshoemaker.github.io/NRES-746/Occupancy.html)
 
+        -   unmarked::occu mais aussi bayesien avec Just Another Gibbs Sampler.
+
     -   [Citizen science indicates significant range recovery and defines new conservation priorities for Earth's most endangered pinniped in Greece](https://zslpublications.onlinelibrary.wiley.com/doi/10.1111/acv.12806)
 
-        -   Et le code associé : [https://oliviergimenez.github.io/monkseal-occupancy/https://oliviergimenez.github.io/monkseal-occupancy/](https://oliviergimenez.github.io/monkseal-occupancy/){.uri}
+        -   Et le code associé : [https://oliviergimenez.github.io/monkseal-occupancy/https://oliviergimenez.github.io/monkseal-occupancy/](https://oliviergimenez.github.io/monkseal-occupancy/){.uri} ( N'utilise pas la fction occu mais fait un modèle de bayésien avec Gibbs mais pas même que au dessus (Bayesian inference using Gibbs sampling) )
+        -   interessant pour leurs choix
 
--   Ref de Franck Simonnet :
+-   Ref de Franck Simonnet (pas encore bien lu):
 
     -   [Estimating Site Occupancy Rates When Detection Probabilities Are Less Than One](https://www.researchgate.net/publication/228821155_Estimating_Site_Occupancy_Rates_When_Detection_Probabilities_Are_Less_Than_One){.uri}
 
@@ -27,9 +30,7 @@ output:
 
 -   Autres références :
 
-    -   ??
-
-    -   Déjà un article de lu sur le sujet le mois dernier a retrouver aussi ?
+    -   Déjà un article de lu sur le sujet le mois dernier a relire : <https://docs.google.com/document/d/1noZm3QprMJMsYErZo8bSeARPTEVTstCk0HPS-MLO-V0/edit?tab=t.0> ( ils utilisaient JAGS et ca marchait bien de mémoire)
 
     -   reference du truc github de occupancy modeling. Présente les hypothèses et les problèmes si les hypothèses ne sont pas vérifiés. <https://pubs.usgs.gov/fs/2005/3096/fs20053096.pdf>
 
@@ -41,11 +42,7 @@ output:
 
         -   Tests + puissance : <https://cran.r-project.org/web/packages/unmarked/vignettes/powerAnalysis.html>
 
-    -   
-
-## Debut de modelisation -\> **but : Au moins un modèle qui marche avec méthode fréquentiste. Cool si semaine pro je fais pareil mais bayesien (?)**
-
-## 
+## Debut de modelisation -\> **but : Au moins un modèle qui marche avec méthode fréquentiste. Cool si semaine pro je fais pareil mais un modele bayesien (?)**
 
 Faudrait il enlever les petits sites? Ils peuvent etre intéressant (surtout c'est vers la cote souvent et bcp de lapins par là), mais rends + compliqué de trouver une espèce a cet endroit là precisement.
 
