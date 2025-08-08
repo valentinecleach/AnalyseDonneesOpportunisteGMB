@@ -61,6 +61,37 @@ transform_Total <- function(bdd = Total){
   return(bdd)
 }
 
+
+#' Corrige les noms et les mets en factor
+#'
+#' @param 
+#' @param 
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+#' 
+transform_VarSites <- function(bdd = VariablesSite){
+  bdd <- bdd %>%
+    dplyr::mutate_at(c(if('Fmll_py' %in% names(.)) 'Fmll_py',
+                       if('Nm_pysg' %in% names(.)) 'Nm_pysg',
+                       if('Cd_10km' %in% names(.)) 'Cd_10km'),
+                     as.factor) %>%
+    dplyr::rename_with(
+      ~ case_when(
+        . == "Ind_Dvr" ~ "Ind_Diversite",
+        . == "Cd_10km" ~ "Code_10km",
+        . == "Dnst_Cl" ~ "Dnst_Cultures ",
+        . == "Dst_EcA" ~ "Dist_EcotoneArbore",
+        . == "Dst_Ltt" ~ "Dist_Littoral",
+        . == "Dist_Ea" ~ "Dist_Eau",
+        . == "Fmll_py" ~ "Famille_paysage",
+        . == "Nm_pysg" ~ "Nom_paysage",
+        TRUE ~ .))
+  
+  return(bdd)
+}
 #' Change les CRS de la carte pour ce qu'on veuilles
 #'
 #' @param carte La carte a modifier

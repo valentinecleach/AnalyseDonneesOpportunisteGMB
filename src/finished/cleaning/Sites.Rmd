@@ -53,7 +53,7 @@ for(var in var_noms) {
 }
 ```
 
-Suppression car hors du territoire -\> Ca nous corrige le problÃ¨me qu'on avait avec les individus dans la partie bluffÃ© du 44.
+Suppression car hors du territoire -\> Ca nous corrige le problème qu'on avait avec les individus dans la partie bluffée du 44.
 
 ```{r}
 grille_10x10 <- grille_10x10%>%
@@ -74,6 +74,7 @@ for(var in var_noms) {
 
 ## FAMILLES DE PAYSAGES
 
+On choisis la famille la plus fréquente dans la cellule?
 ```{r}
 famille_paysage <- sf::st_read(
   paste0(wd$data, "masques/famille_paysage/familles_paysages.shp")
@@ -84,9 +85,18 @@ famille_paysage <- famille_paysage %>%
   dplyr::mutate_if(is.character,as.factor)%>%
   dplyr::select(Nom_paysage, Famille_paysage)
 
+jointure <- sf::st_join(grille_10x10, famille_paysage, left = FALSE)
+
+mode_cellule <- jointure %>%
+  sf::st_drop_geometry() %>%  
+  dplyr::group_by(CODE_10KM) %>%   
+  dplyr::summarise(
+    Famille_paysage = Mode(Famille_paysage),
+    Nom_paysage = Mode(Nom_paysage)
+    )
+
 grille_10x10 <- grille_10x10 %>%
-  sf::st_join(famille_paysage)%>%
-  sf::st_make_valid()
+  dplyr::left_join(mode_cellule, by = "CODE_10KM")
 ```
 
 On a une case sans de valeurs, donc on lui attribut la valeur la plus frÃ©quente parmi ses voisins.
@@ -157,7 +167,7 @@ grille_10x10 <- grille_10x10 %>%
     relationship = "many-to-many"
   )
 
-grille_10x10%>%
+grille_10x10 <- grille_10x10%>%
   dplyr::rename(Code_10km = CODE_10KM, 
                 Ind_Diversite = Indice_Diversite_500m,
                 Dnst_Cultures = Densite_Cultures_500m,

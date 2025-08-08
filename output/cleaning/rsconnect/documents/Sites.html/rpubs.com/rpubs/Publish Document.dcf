@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/1334806/bae5b499b7fa44b08d98625f6cfd6e01
+bundleId: https://api.rpubs.com/api/v1/document/1334806/bae5b499b7fa44b08d98625f6cfd6e01
+url: http://rpubs.com/valentine_cleach/1334806
+version: 1
