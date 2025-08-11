@@ -367,7 +367,7 @@ Lapins <- Total%>%
 
 ## Matrice de detection
 
-t_lapins <- Lapins %>%
+detection <- Lapins %>%
   sf::st_drop_geometry()%>%
   dplyr::mutate(annee = lubridate::year(date))%>%
   dplyr::select(Code_10km, annee)%>%
@@ -380,26 +380,27 @@ t_lapins <- Lapins %>%
   dplyr::arrange(Code_10km) %>%
   filter(!is.na(Code_10km))
 
-t_lapins[,-1] <- ifelse(t_lapins[,-1]>0, 1, 0)
+detection[,-1] <- ifelse(detection[,-1]>0, 1, 0)
 
-noms <- t_lapins$Code_10km
-t_lapins <- as.matrix(t_lapins[, -1])
-rownames(t_lapins) <- noms
-
-
+noms <- detection$Code_10km
+detection_matrice <- as.matrix(detection[, -1])
+rownames(detection_matrice) <- noms
+View(detection)
+View(detection_matrice)
 ## Matrice des covariables des observations (periode et mois) 
 
-annees <- as.numeric(colnames(t_lapins))
+annees <- as.numeric(colnames(detection_matrice))
 periodes_vector <- ifelse(annees < 2015, "periode1", "periode2")
 
-periodes_matrix <- matrix(rep(periodes_vector, each = nrow(t_lapins)), 
-                          nrow = nrow(t_lapins), 
+periodes_matrice <- matrix(rep(periodes_vector, each = nrow(detection)), 
+                          nrow = nrow(detection), 
                           byrow = FALSE)
-colnames(periodes_matrix) <- colnames(t_lapins)
-rownames(periodes_matrix) <- rownames(t_lapins)
+colnames(periodes_matrice) <- colnames(detection_matrice)
+rownames(periodes_matrice) <- rownames(detection_matrice)
 
-periodes_df <- as.data.frame(periodes_matrix)
+periodes_df <- as.data.frame(periodes_matrice)
 
+View(periodes_matrice)
 
 # Matrice des covariables du site (Dist_Eau, etc..)
 
@@ -415,10 +416,10 @@ site_info <- site_info%>%
   sf::st_drop_geometry()
 
 # Join the site descriptor to your t_lapins table
-t_lapins <- t_lapins %>%
+detection <- detection %>%
   dplyr::left_join(site_info, by = "Code_10km")
 
-View(t_lapins)
+View(detection)
 
 
 # Modelisation

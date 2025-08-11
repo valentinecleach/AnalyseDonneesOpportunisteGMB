@@ -34,26 +34,13 @@ Lapins <- Total%>%
          date > as.Date("2005-01-01"))%>%
   # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
   select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation)%>%
-  mutate(mois = lubridate::month(date),
-         mois = case_when(mois == 1 ~ "Jan", 
-                          mois == 2 ~ "Fev",
-                          mois == 3 ~ "Mars",
-                          mois == 4 ~ "Avr",
-                          mois == 5 ~ "Mai",
-                          mois == 6 ~ "Juin",
-                          mois == 7 ~ "Juil",
-                          mois == 8 ~ "Aout",
-                          mois == 9 ~ "Sept",
-                          mois == 10 ~ "Oct",
-                          mois == 11 ~ "Nov",
-                          mois == 12 ~ "Dec"),
-         year = lubridate::year(date))
+  mutate(year = lubridate::year(date))
 ```
 
 ## Creation de la base de donnee Detection - Non Detection
 
 ```{r}
-t_lapins <- Lapins %>%
+detection_df <- Lapins %>%
   sf::st_drop_geometry()%>%
   dplyr::mutate(annee = lubridate::year(date))%>%
   dplyr::select(Code_10km, annee)%>%
@@ -66,35 +53,37 @@ t_lapins <- Lapins %>%
   dplyr::arrange(Code_10km) %>%
   filter(!is.na(Code_10km))
 
-t_lapins[,-1] <- ifelse(t_lapins[,-1]>0, 1, 0)
+detection_df[,-1] <- ifelse(detection_df[,-1]>0, 1, 0)
 
-noms <- t_lapins$Code_10km
-t_lapins <- as.matrix(t_lapins[, -1])
-rownames(t_lapins) <- noms
+noms <- detection_df$Code_10km
+detection_matrice <- as.matrix(detection_df[, -1])
+rownames(detection_matrice) <- noms
 ```
 
 Observation des 10 premiers sites pour verifier
 ```{r}
-head(t_lapins)
+head(detection_matrice)
+head(detection_df)
 ```
 
 ## Covariables de observations
 On separe les observations en 2 periodes de 10 ans : Avant 2015 et Apres 2015
 ```{r}
-annees <- as.numeric(colnames(t_lapins))
+annees <- as.numeric(colnames(detection_matrice))
 periodes_vector <- ifelse(annees < 2015, "periode1", "periode2")
 
-periodes_matrix <- matrix(rep(periodes_vector, each = nrow(t_lapins)), 
-                          nrow = nrow(t_lapins), 
+periodes_matrice <- matrix(rep(periodes_vector, each = nrow(detection_df)), 
+                          nrow = nrow(detection_df), 
                           byrow = FALSE)
-colnames(periodes_matrix) <- colnames(t_lapins)
-rownames(periodes_matrix) <- rownames(t_lapins)
+colnames(periodes_matrice) <- colnames(detection_matrice)
+rownames(periodes_matrice) <- rownames(detection_matrice)
 
-periodes_df <- as.data.frame(periodes_matrix)
+periodes_df <- as.data.frame(periodes_matrice)
 ```
 
 ```{r}
 head(periodes_df)
+head(periodes_matrice)
 ```
 
 
@@ -118,15 +107,21 @@ head(site_info)
 
 ## Implementation du Model
 ```{r}
-head(t_lapins)
+head(detection_df)
 ```
 
 Mise sous format pour la modélisation
 ```{r}
-umf <- unmarked::unmarkedFrameOccu(y = t_lapins, 
+dim(detection_matrice)
+dim(periodes_df)
+dim(site_info)
+
+umf <- unmarked::unmarkedFrameOccu(y = detection_matrice, 
                                    obsCovs = list(periode = periodes_df),
                                    siteCovs = site_info
                                    )
+colnames(siteCovs(umf))[colnames(siteCovs(umf)) == "Dnst_Cultures "] <- "Dnst_Cultures"
+
 ```
 
 ```{r}
@@ -153,13 +148,27 @@ unmarked::summary(model_periodes)
 # model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
 # unmarked::summary(model_eau)
 
-boxplot(siteCovs(umf)$Dist_Eau, main = "Dist_Eau") 
+siteCovs(umf)$Dist_Eau_scaled <- scale(siteCovs(umf)$Dist_Eau, center = T, scale=F)
+
+model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
+head(siteCovs(umf)$Dnst_Cultures)
+names(siteCovs(umf))
+
+model_eau <- unmarked::occu(~1 ~ Dnst_Cultures, data = umf)
+
+siteCovs(umf)$Ind_Diversite
+
+boxplot(VariablesSite$Dist_Eau, main = "Dist_Eau") # pas ok
+boxplot(VariablesSite$Ind_Diversite, main = "Ind_Diversite") # ok
+boxplot(siteCovs(umf)$Dnst_Cultures, main = "Dnst_Cultures")  # ok
+boxplot(VariablesSite$Dist_EcotoneArbore, main = "Dist_EcotoneArbore") # pas ok 
+boxplot(VariablesSite$Dist_Littoral, main = "Dist_Littoral") # ok
 ```
 
 On a des gros outliers... Ce qui créer des soucis pour le model.
-On peux centrer reduire.
+On peux les centrer reduire, comme le fait l'article (ourses).
 ```{r}
-siteCovs(umf)$Dist_Eau_scaled <- scale(siteCovs(umf)$Dist_Eau)
+siteCovs(umf)$Dist_Eau_scaled <- scale(siteCovs(umf)$Dist_Eau, center = FALSE, scale=TRUE)
 boxplot(siteCovs(umf)$Dist_Eau_scaled, main = "Dist_Eau_scaled") 
 ```
 
@@ -194,3 +203,4 @@ unmarked::modSel(unmarked::fitList(dp_et_eau = model_eau_periode,
 
 
 Sur 2 périodes, il y a une augementation des lapins. Peut être car en 2005 a 2010, on a peu de données. D'ou l'idée de créer 3 périodes.
+ 
