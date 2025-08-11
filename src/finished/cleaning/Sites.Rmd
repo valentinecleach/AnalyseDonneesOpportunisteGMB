@@ -138,8 +138,24 @@ grille_10x10 %>%
 grille_10x10 <- grille_10x10 %>%
   sf::st_transform(2154) %>%
   dplyr::mutate(aire_km2 = as.numeric(sf::st_area(grille_10x10)/1000000)) %>%
-  transforme_carte()%>%
-  dplyr::filter(aire_km2 > 2)
+  transforme_carte()
+
+
+grille_10x10 %>%
+  dplyr::filter(aire_km2 < 10)%>%
+  ggplot()+geom_sf(aes(fill = aire_km2))+theme_bw()+
+  labs(title = "Sites avec une aire strictement inférieur a 10km^2")
+
+grille_10x10 %>%
+  dplyr::filter(aire_km2 < 10)%>%
+  count()
+
+22/339
+# Suppression d'environ 6% des sites, réparti aléatoirement sur la bordure de la bretagne. 
+
+grille_10x10 <- grille_10x10 %>%
+  dplyr::filter(aire_km2 >= 10)
+
 ```
 
 ```{r}
@@ -199,3 +215,4 @@ grille_10x10%>%
   sf::st_drop_geometry()%>%
   utils::write.csv(paste0(wd$data, "derived/VariablesSite.csv"))
 ```
+ 
