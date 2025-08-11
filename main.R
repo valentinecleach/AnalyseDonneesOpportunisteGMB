@@ -105,6 +105,13 @@ rmarkdown::render(paste0(wd$src, "finished/models/OccupancyLapin.Rmd"),
                                        "models/OccupancyLapin.html"),
                   encoding="UTF-8")
 
+#### Recap Semaines ####
+
+rmarkdown::render(paste0(wd$src, "finished/Recap semaine/S9.Rmd"),
+                  output_file = paste0(wd$output, 
+                                       "recap/S9.html"),
+                  encoding="UTF-8")
+
 
 ################################
 ######## Brouillons GLM ########

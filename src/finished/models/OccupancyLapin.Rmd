@@ -150,38 +150,46 @@ unmarked::summary(model_periodes)
 ```
 
 ```{r}
-model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
-unmarked::summary(model_eau)
+# model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
+# unmarked::summary(model_eau)
 
 boxplot(siteCovs(umf)$Dist_Eau, main = "Dist_Eau") 
-# On a des gros outliers... Ce qui créer des soucis pour le model.
+```
 
+On a des gros outliers... Ce qui créer des soucis pour le model.
+On peux centrer reduire.
+```{r}
 siteCovs(umf)$Dist_Eau_scaled <- scale(siteCovs(umf)$Dist_Eau)
-model <- occu(~1 ~ Dist_Eau_scaled, data = umf)
-unmarked::summary(model)
+boxplot(siteCovs(umf)$Dist_Eau_scaled, main = "Dist_Eau_scaled") 
+```
+
+
+```{r}
+model_eau <- occu(~1 ~ Dist_Eau_scaled, data = umf)
+unmarked::summary(model_eau)
 ```
 
 Un avec une covariance de site et une d'observation.
 ```{r}
-model_eau <- unmarked::occu(~periode ~Dist_Eau, data = umf)
-unmarked::summary(model_eau)
+model_eau_periode <- unmarked::occu(~periode ~Dist_Eau_scaled, data = umf)
+unmarked::summary(model_eau_periode)
 ```
 
 Comparaison des modeles uniquement base sur l'AIC
+(On peut pas comparer les deux parce que centrer reduire l'eau change les données
+de la base de donnée sur lequel on a fait les 2 modeles d'avant. A changer.)
 ```{r}
 unmarked::modSel(unmarked::fitList(aucune_variable = model_null, 
-                                   deux_periodes = model_era,
-                                   dp_et_eau = model_eau))
+                                   deux_periodes = model_era))
+unmarked::modSel(unmarked::fitList(dp_et_eau = model_eau_periode,
+                                   eau = model_eau))
 ```
 
 
 ## Tests d'hypotheses
 ```{r}
 
-toutesdonnees <- cbind(t_lapins, site_info, periodes_df)
-
-head(toutesdonnees)
-car::vif(lm(Dist_Eau ~ periode, data = toutesdonnees))
+#car::vif(lm(Dist_Eau ~ periode, data = toutesdonnees))
 ```
 
 

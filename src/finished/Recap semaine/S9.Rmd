@@ -20,7 +20,7 @@ output:
     -   [Citizen science indicates significant range recovery and defines new conservation priorities for Earth's most endangered pinniped in Greece](https://zslpublications.onlinelibrary.wiley.com/doi/10.1111/acv.12806)
 
         -   Et le code associé : [https://oliviergimenez.github.io/monkseal-occupancy/https://oliviergimenez.github.io/monkseal-occupancy/](https://oliviergimenez.github.io/monkseal-occupancy/){.uri} ( N'utilise pas la fction occu mais fait un modèle de bayésien avec Gibbs mais pas même que au dessus (Bayesian inference using Gibbs sampling) )
-        -   interessant pour leurs choix
+        -   interessant pour les choix qu'ils ont fait.
 
 -   Ref de Franck Simonnet (pas encore bien lu):
 
@@ -30,11 +30,11 @@ output:
 
 -   Autres références :
 
-    -   Déjà un article de lu sur le sujet le mois dernier a relire : <https://docs.google.com/document/d/1noZm3QprMJMsYErZo8bSeARPTEVTstCk0HPS-MLO-V0/edit?tab=t.0> ( ils utilisaient JAGS et ca marchait bien de mémoire)
+    -   Article sur le sujet que j'avais lu le mois dernier à relire : [https://docs.google.com/document/d/1noZm3QprMJMsYErZo8bSeARPTEVTstCk0HPS-MLO-V0/edit?tab=t.0](#0){.uri} ( ils utilisaient JAGS et ca marchait bien de mémoire)
 
-    -   reference du truc github de occupancy modeling. Présente les hypothèses et les problèmes si les hypothèses ne sont pas vérifiés. <https://pubs.usgs.gov/fs/2005/3096/fs20053096.pdf>
+    -   Occupancy modeling. Présente les hypothèses et les problèmes si les hypothèses ne sont pas vérifiés. [https://pubs.usgs.gov/fs/2005/3096/fs](https://pubs.usgs.gov/fs/2005/3096/fs20053096.pdf){.uri} [20053096.pdf](https://pubs.usgs.gov/fs/2005/3096/fs20053096.pdf){.uri}
 
-    -   autres ex d'utilisation du package.
+    -   Exemples d'utilisation du package.
 
         -   <https://cran.r-project.org/web/packages/unmarked/vignettes/occuComm.html>
 
@@ -42,11 +42,17 @@ output:
 
         -   Tests + puissance : <https://cran.r-project.org/web/packages/unmarked/vignettes/powerAnalysis.html>
 
-## Debut de modelisation -\> **but : Au moins un modèle qui marche avec méthode fréquentiste. Cool si semaine pro je fais pareil mais un modele bayesien (?)**
+## Debut de modelisation
 
-Faudrait il enlever les petits sites? Ils peuvent etre intéressant (surtout c'est vers la cote souvent et bcp de lapins par là), mais rends + compliqué de trouver une espèce a cet endroit là precisement.
+Cette semaine,
 
-Aussi, avant de continuer, faudrait tout passer en sans accents... Il etait temps (:
+-   Il y avais des problèmes dans les variables d'environnement, donc j'en ai profité pour aussi supprimer tous les accents.
+
+-   J'ai donc également recalculé les variables d'environnement [https://rpubs.com/valentine_cleach/variables_site](#0){.uri}
+
+-   j'ai supprimé 11 sites avec une aire strictement inférieur a 2km\^2. Répartition assez aléatoire (nord, sud et est de la map) donc ca passait je trouve, et dans le 2e article (sur le phoque) c'est un choix qu'ils ont fait afin de ne pas avoir de sites ou il y a trop peu de chances d'être visité plusieurs fois.
+
+-   J'ai lu les articles et leur code pour commencer a implementer un modèle de site occupancy (d'abord sur le lapin) voir ci dessous ou sur [ce lien](https://rpubs.com/valentine_cleach/occupancylapindegarenne)
 
 En étudiant le lapin de garenne avec 2 periodes:
 
@@ -54,18 +60,20 @@ En étudiant le lapin de garenne avec 2 periodes:
 
 -   2015-2024
 
-Nous avons une augementation significative du lapin... (Je crois, même si je ne comprends pas encore tt a fait ce modèle). Je n'ai pas encore inclue de variables d'environnement etc, juste les dates.
+Nous avons une augementation significative du lapin, sans implémenter des variables d'environnement.
 
-En regardant il y a très peu de sites présent de 2005 a 2010 (peu d'observations et peu d'observateurs). Essayer de faire 2010 - 2015 puis 2019 - 2024 et on ca permet de mettre notre hypothèse que les individus ne peuvent pas varier au sein d'une periode. Ou alors mettre 3 periodes, de 4 ou 5 ans? pour include 2015-2019?
+En regardant il y a très peu de sites présent de 2005 a 2010 (peu d'observations et peu d'observateurs). Essayer de faire 2010 - 2015 puis 2019 - 2024 et on ca permet de mettre notre hypothèse que les individus ne peuvent pas varier au sein d'une periode. (article sur les phoques ou le fact sheet *Occupancy models to study wildlife*). Ou alors mettre 3 periodes, de 4 ou 5 ans? pour include 2015-2019? Essayer.
 
-Quand inclure DIRO? Ne pas inclure car seulement après 2015...? (enfin j'imagine)
+Ne pas inclure car seulement après 2014 / 2015 donc pour ce modèle ca ne marcherait surement pas car on veut comparer. Il y aura probablement une fausse augementation des sites ou les individus sont detectés.
 
-Inclure le mois de détection? -\> souvent fait, et une partie du code déjà prêt juste a re-incorporer. Nécessaire ou intéressant pas sur.?
+Inclure le mois de détection? -\> souvent fait, et une partie du code déjà prêt juste a re-incorporer. Pas sur que ca sera très intéressant, mais ca doit pas être trop compliqué ?
 
 Hypothèse de sites non continue -\> Continuous-space occupancy models? + compliqué et a étudier le truc après. Peut etre pas nécéssaire.
 
-Il y avais des problèmes dans les variables d'environnement, donc j'en ai profité pour aussi supprimer tous les accents, et refaire différamment les variables d'environnement.
+### But semaine pro:
 
-Suppression de 11 sites qui ont une aire strictement inférieur a 2km\^2. Répartition assez aléatoire (nord, sud et est de la map).
+-   Lire plus la biblio.
 
-Voir le nettoyage sur ce Rmd: <https://rpubs.com/valentine_cleach/variables_site>
+-   Avoir des modèles qui marchent (tests okay, significatif et bien) au moins le lapin, si possible les autres espèces. Voir ce que ca fait de centrer reduire par ex etc. Trouver cmt savoir quelles variables sont les + intéressantes.
+
+-   Si du temps, faire avec JAGS, on a le code déjà donc juste a ajouter nos variables, et laisser tourner la nuit...
