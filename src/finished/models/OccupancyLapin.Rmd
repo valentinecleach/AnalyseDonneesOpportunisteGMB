@@ -12,6 +12,10 @@ output:
 library(dplyr);library(ggplot2);library(sf);library(unmarked)
 ```
 
+Fonctions -> A mettre dans les dossiers de fonctions apres
+```{r}
+```
+
 ## Importation des bases de donnees
 ```{r}
 Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
@@ -90,6 +94,7 @@ head(periodes_matrice)
 ## Covariables de site
 ```{r}
 site_info <- VariablesSite%>%
+  sf::st_drop_geometry()%>%
   dplyr::arrange(Code_10km)
 
 noms <- site_info$Code_10km
@@ -97,7 +102,11 @@ rownames(site_info) <- noms
 
 site_info <- site_info%>%
   dplyr::select(-Code_10km)%>%
-  sf::st_drop_geometry()
+  dplyr::rename(Dnst_Cultures = `Dnst_Cultures `)%>%
+  dplyr::mutate(across(where(is.numeric), 
+                       scale))
+head(site_info)
+summary(site_info)
 ```
 
 ```{r}
@@ -116,11 +125,18 @@ dim(detection_matrice)
 dim(periodes_df)
 dim(site_info)
 
+
 umf <- unmarked::unmarkedFrameOccu(y = detection_matrice, 
                                    obsCovs = list(periode = periodes_df),
                                    siteCovs = site_info
                                    )
-colnames(siteCovs(umf))[colnames(siteCovs(umf)) == "Dnst_Cultures "] <- "Dnst_Cultures"
+
+summary(umf)
+unmarked::plot(umf, main="Detection/Non Detection de lapins sur les sites depuis 2005")
+
+
+ colnames(siteCovs(umf))[colnames(siteCovs(umf)) == "Dnst_Cultures "] <- "Dnst_Cultures"
+ colnames(siteCovs(umf))[colnames(siteCovs(umf)) == "Dnst_Cultures "] <- "Dnst_Cultures"
 
 ```
 
@@ -136,7 +152,23 @@ Un modele nul, on l'ont ne regarde que ...
 ```{r}
 model_null <- unmarked::occu(~1 ~1, data = umf)
 unmarked::summary(model_null)
+
+
+backTransform(model_null, type="state")
+backTransform(model_null, type="det")
+
+
+confint(backTransform(model_null, type="state"))
+confint(backTransform(model_null, type="det"))
+
+coef(model_null)
 ```
+En transformant, on a donc 
+- La probabilité qu'un site est occupé par un ou plusieurs lapins est de 0,97. (En considérent toute la période 2005-2025)
+- La probabilité qu'on detecte un lapin est de 0,37
+
+On a également les intervalles de confiances qui sont assez serrés autour de ces valeurs a 95%.
+
 
 Un modele avec la periode en covariance
 ```{r}
@@ -148,7 +180,8 @@ unmarked::summary(model_periodes)
 # model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
 # unmarked::summary(model_eau)
 
-siteCovs(umf)$Dist_Eau_scaled <- scale(siteCovs(umf)$Dist_Eau, center = T, scale=F)
+siteCovs(umf)$Dist_Eau_scaled <- scale(siteCovs(umf)$Dist_Eau, 
+                                       center = T, scale=F)
 
 model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
 head(siteCovs(umf)$Dnst_Cultures)
