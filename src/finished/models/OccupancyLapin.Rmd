@@ -5,18 +5,25 @@ output:
   bookdown::html_document2:
     toc: true
     toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ## Intallation des packages
+
 ```{r}
 library(dplyr);library(ggplot2);library(sf);library(unmarked)
+theme_set(theme_light(base_size = 16))
 ```
 
-Fonctions -> A mettre dans les dossiers de fonctions apres
+Fonctions -\> A mettre dans les dossiers de fonctions apres
+
 ```{r}
 ```
 
 ## Importation des bases de donnees
+
 ```{r}
 Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
                      options = "ENCODING=UTF8")
@@ -28,7 +35,6 @@ VariablesSite <- sf::st_read(paste0(wd$data, "derived/VariablesSite.shp"),
 VariablesSite <- VariablesSite%>%
   transform_VarSites()
 ```
-
 
 ```{r}
 Lapins <- Total%>%
@@ -65,13 +71,17 @@ rownames(detection_matrice) <- noms
 ```
 
 Observation des 10 premiers sites pour verifier
+
 ```{r}
 head(detection_matrice)
 head(detection_df)
 ```
 
 ## Covariables de observations
-On separe les observations en 2 periodes de 10 ans : Avant 2015 et Apres 2015
+
+On separe les observations en 2 periodes de 10 ans : Avant 2015 et Apres
+2015
+
 ```{r}
 annees <- as.numeric(colnames(detection_matrice))
 periodes_vector <- ifelse(annees < 2015, "periode1", "periode2")
@@ -90,8 +100,8 @@ head(periodes_df)
 head(periodes_matrice)
 ```
 
-
 ## Covariables de site
+
 ```{r}
 site_info <- VariablesSite%>%
   sf::st_drop_geometry()%>%
@@ -112,13 +122,14 @@ head(site_info)
 summary(site_info)
 ```
 
-
 ## Implementation du Model
+
 ```{r}
 head(detection_df)
 ```
 
 Mise sous format pour la modélisation
+
 ```{r}
 dim(detection_matrice)
 dim(periodes_df)
@@ -143,11 +154,12 @@ unmarked::plot(umf, main="Detection/Non Detection de lapins sur les sites depuis
 head(umf); summary(umf)
 ```
 
-
 ## Resultats
-Ici on regarde 3 modeles seulement (car pb de colinearite?) pour l'instant. D'autres se rajouteront evidamment.
 
-Un modele nul, on l'ont ne regarde que ...
+### Modeles d'occupation à une seule saison
+
+Un model de base sans variables
+
 ```{r}
 model_null <- unmarked::occu(~1 ~1, data = umf)
 unmarked::summary(model_null)
@@ -162,12 +174,13 @@ confint(backTransform(model_null, type="det"))
 
 coef(model_null)
 ```
-En transformant, on a donc 
-- La probabilité qu'un site est occupé par un ou plusieurs lapins est de 0,97. (En considérent toute la période 2005-2025)
-- La probabilité qu'on detecte un lapin est de 0,37
 
-On a également les intervalles de confiances qui sont assez serrés autour de ces valeurs a 95%.
+En transformant, on a donc - La probabilité qu'un site est occupé par un
+ou plusieurs lapins est de 0,97. (En considérent toute la période
+2005-2025) - La probabilité qu'on detecte un lapin est de 0,37
 
+On a également les intervalles de confiances qui sont assez serrés
+autour de ces valeurs a 95%.
 
 ```{r}
 model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
@@ -188,8 +201,9 @@ plot(grid_dist_eau,
      xlab = "forest cover", 
      ylab = "estimated occupancy prob")
 ```
-On voit la relation entre la couverture et la probabilité d'occupancy. Légèrement décroissante et très légèrement concave.
- 
+
+On voit la relation entre la couverture et la probabilité d'occupancy.
+Légerement décroissante et tres légerement concave.
 
 Comparaison dce plusieurs models
 
@@ -207,54 +221,62 @@ fmList <- unmarked::fitList('{psi, p}' = model_null,
 
 unmarked::modSel(fmList)
 ```
- 
+
+### Modeles d'occupation à une plusieurs saison
+
+Sites are closed within seasons but can change across seasons due to
+colonisation/extinction events (Markov Chain model)
+
+Peut etre colonisé ou pas colonisé (faire matrice dans mon livrable
+stat). graphique?
+
+Ici pas de fausses positives.
+
+on a psi : prop occupation p: prop detection gamma : prob de
+colonisation epsilon : probabilité d'extinction
+
+On suppose comme dans MC que hop cest hyper rapide, instantané meme
+qu'on soit extinct ou colonisé entre les sites. Au sein du même site, on
+n'as pas ces fluctuations.
+
+(changer le highlight tango, theme dans le --- en haut)
+
+On va mapper aussi. -\> remettre le sf
+
+dim )
+
 ```{r}
-model_eau <- unmarked::occu(~1 ~ Dnst_Cultures, data = umf)
-
-
-boxplot(VariablesSite$Dist_Eau, main = "Dist_Eau") # pas ok
-boxplot(VariablesSite$Ind_Diversite, main = "Ind_Diversite") # ok
-boxplot(siteCovs(umf)$Dnst_Cultures, main = "Dnst_Cultures")  # ok
-boxplot(VariablesSite$Dist_EcotoneArbore, main = "Dist_EcotoneArbore") # pas ok 
-boxplot(VariablesSite$Dist_Littoral, main = "Dist_Littoral") # ok
+dim(detection_df)
+dim(site_info)
+year <- matrix(rep(c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21'),nrow(detection_df)), 
+               nrow = nrow(detection_df), 
+               ncol = 21, 
+               byrow = TRUE)
+head(year)
+dim(year)
 ```
 
-On a des gros outliers... Ce qui créer des soucis pour le model.
-On peux les centrer reduire, comme le fait l'article (ourses).
-```{r}
-siteCovs(umf)$Dist_Eau_scaled <- scale(siteCovs(umf)$Dist_Eau, center = FALSE, scale=TRUE)
-boxplot(siteCovs(umf)$Dist_Eau_scaled, main = "Dist_Eau_scaled") 
-```
-
+On a une matrice du nombre d'années qui nous dit que c'est la 1ere année
+de l'étude, 2e etc.
 
 ```{r}
-model_eau <- occu(~1 ~ Dist_Eau_scaled, data = umf)
-unmarked::summary(model_eau)
+trendyear <- matrix(rep(1:23,nrow(detection_df)), 
+                    nrow=nrow(detection_df),
+                    ncol=23, 
+                    byrow=TRUE)
+head(trendyear)
 ```
 
-Un avec une covariance de site et une d'observation.
-```{r}
-model_eau_periode <- unmarked::occu(~periode ~Dist_Eau_scaled, data = umf)
-unmarked::summary(model_eau_periode)
-```
+Variable numerique pas (continue) avant c'est qualitative.
 
-Comparaison des modeles uniquement base sur l'AIC
-(On peut pas comparer les deux parce que centrer reduire l'eau change les données
-de la base de donnée sur lequel on a fait les 2 modeles d'avant. A changer.)
-```{r}
-unmarked::modSel(unmarked::fitList(aucune_variable = model_null, 
-                                   deux_periodes = model_era))
-unmarked::modSel(unmarked::fitList(dp_et_eau = model_eau_periode,
-                                   eau = model_eau))
-```
-
+### Modeles d'occupation avec des fausses positives
 
 ## Tests d'hypotheses
+
 ```{r}
 
 #car::vif(lm(Dist_Eau ~ periode, data = toutesdonnees))
 ```
 
-
-Sur 2 périodes, il y a une augementation des lapins. Peut être car en 2005 a 2010, on a peu de données. D'ou l'idée de créer 3 périodes.
- 
+Sur 2 périodes, il y a une augementation des lapins. Peut être car en
+2005 a 2010, on a peu de données. D'ou l'idée de créer 3 périodes.
