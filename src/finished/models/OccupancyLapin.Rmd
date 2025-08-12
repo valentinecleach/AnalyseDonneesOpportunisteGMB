@@ -77,29 +77,6 @@ head(detection_matrice)
 head(detection_df)
 ```
 
-## Covariables de observations
-
-On separe les observations en 2 periodes de 10 ans : Avant 2015 et Apres
-2015
-
-```{r}
-annees <- as.numeric(colnames(detection_matrice))
-periodes_vector <- ifelse(annees < 2015, "periode1", "periode2")
-
-periodes_matrice <- matrix(rep(periodes_vector, each = nrow(detection_df)), 
-                          nrow = nrow(detection_df), 
-                          byrow = FALSE)
-colnames(periodes_matrice) <- colnames(detection_matrice)
-rownames(periodes_matrice) <- rownames(detection_matrice)
-
-periodes_df <- as.data.frame(periodes_matrice)
-```
-
-```{r}
-head(periodes_df)
-head(periodes_matrice)
-```
-
 ## Covariables de site
 
 ```{r}
@@ -205,7 +182,7 @@ plot(grid_dist_eau,
 On voit la relation entre la couverture et la probabilité d'occupancy.
 Légerement décroissante et tres légerement concave.
 
-Comparaison dce plusieurs models
+Comparaison de plusieurs models
 
 ```{r}
 model_null <- unmarked::occu(~1 ~ 1, data = umf)
@@ -222,7 +199,7 @@ fmList <- unmarked::fitList('{psi, p}' = model_null,
 unmarked::modSel(fmList)
 ```
 
-### Modeles d'occupation à une plusieurs saison
+### Modeles d'occupation à plusieurs saisons
 
 Sites are closed within seasons but can change across seasons due to
 colonisation/extinction events (Markov Chain model)
@@ -245,29 +222,113 @@ On va mapper aussi. -\> remettre le sf
 
 dim )
 
+On separe les observations en 2 periodes de 10 ans : Avant 2015 et Apres
+2015
+
 ```{r}
-dim(detection_df)
-dim(site_info)
-year <- matrix(rep(c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21'),nrow(detection_df)), 
-               nrow = nrow(detection_df), 
-               ncol = 21, 
-               byrow = TRUE)
-head(year)
-dim(year)
+annees <- as.numeric(colnames(detection_matrice)) 
+quali_periodes_vector <- ifelse(annees < 2015, "periode1", "periode2")  
+quali_periodes_matrice <- matrix(rep(quali_periodes_vector, 
+                                     each = nrow(detection_df)),
+                           nrow = nrow(detection_df),
+                           byrow = FALSE) 
+colnames(quali_periodes_matrice) <- colnames(detection_matrice) 
+rownames(quali_periodes_matrice) <- rownames(detection_matrice)  
+quali_periodes_df <- as.data.frame(quali_periodes_matrice)
+```
+
+```{r}
+head(quali_periodes_matrice)
+dim(quali_periodes_matrice)
 ```
 
 On a une matrice du nombre d'années qui nous dit que c'est la 1ere année
 de l'étude, 2e etc.
 
 ```{r}
-trendyear <- matrix(rep(1:23,nrow(detection_df)), 
-                    nrow=nrow(detection_df),
-                    ncol=23, 
-                    byrow=TRUE)
-head(trendyear)
+annees <- as.numeric(colnames(detection_matrice)) 
+quanti_periodes_vector <- ifelse(annees < 2015, 1, 2)  
+quanti_periodes_matrice <- matrix(rep(quanti_periodes_vector, 
+                               each = nrow(detection_df)),
+                           nrow = nrow(detection_df),
+                           byrow = FALSE) 
+colnames(quanti_periodes_matrice) <- colnames(detection_matrice) 
+rownames(quanti_periodes_matrice) <- rownames(detection_matrice)  
+quanti_periodes_df <- as.data.frame(quanti_periodes_matrice)
+```
+
+```{r}
+head(quanti_periodes_matrice)
+dim(quanti_periodes_matrice)
 ```
 
 Variable numerique pas (continue) avant c'est qualitative.
+
+```{r}
+yearly_site_covs <- list(
+  quanti_periodes = quanti_periodes_matrice,
+  quali_periodes = quali_periodes_matrice
+)
+```
+
+```{r}
+umf <- unmarked::unmarkedMultFrame(y = detection_matrice,
+                                   siteCovs = site_info,
+                                   yearlySiteCovs = yearly_site_covs,
+                                   numPrimary = 21)
+
+summary(umf)
+```
+
+```{r}
+fm0 <- colext(
+  psiformula = ~ 1,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1)
+  ) 
+summary(fm0)
+```
+
+colonisation
+
+```{r}
+unmarked::backTransform(fm0, type="col")
+```
+
+extinction
+
+```{r}
+unmarked::backTransform(fm0, type="ext")
+```
+
+initial occupancy
+
+```{r}
+unmarked::backTransform(fm0, type="psi")
+unmarked::backTransform(fm0, type="det")
+```
+
+Model
+
+On essaye plusieurs sans la variance, puis selon l'AIC, on calcule l'AIC
+a la fin avec le modèle qu'on a choisi.
+
+```{r}
+fm0 <- colext(
+  psiformula = ~ 1,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+summary(fm0)
+coef(fm0)
+backTransform(fm0, type="ext")
+```
 
 ### Modeles d'occupation avec des fausses positives
 
