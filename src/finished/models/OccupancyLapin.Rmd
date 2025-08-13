@@ -486,7 +486,7 @@ backTransform(fm0, type="ext")
 ```
 
 | Variables | AIC |
-|------------------------------------|------------------------------------|
+|----|----|
 | psiformula = \~ 1, gammaformula = \~ 1, \# colonization epsilonformula = \~ quali_periodes, \# extinction pformula = \~ 1, \# detection |  |
 |  |  |
 |  |  |
