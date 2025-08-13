@@ -24,7 +24,7 @@ output:
 
 -   Ref de Franck Simonnet (pas encore bien lu):
 
-    -   [Estimating Site Occupancy Rates When Detection Probabilities Are Less Than One](https://www.researchgate.net/publication/228821155_Estimating_Site_Occupancy_Rates_When_Detection_Probabilities_Are_Less_Than_One){.uri} -> Lu
+    -   [Estimating Site Occupancy Rates When Detection Probabilities Are Less Than One](https://www.researchgate.net/publication/228821155_Estimating_Site_Occupancy_Rates_When_Detection_Probabilities_Are_Less_Than_One){.uri} -\> Lu
 
     -   [Journal of Biogeography Journal of Biogeography Free Access Predicting species distributions from checklist data using site-occupancy models](https://onlinelibrary.wiley.com/doi/10.1111/j.1365-2699.2010.02345.x)
 
@@ -42,20 +42,15 @@ output:
 
         -   Tests + puissance : <https://cran.r-project.org/web/packages/unmarked/vignettes/powerAnalysis.html>
 
-https://www.youtube.com/watch?v=rpjVrFI_dr8&t=577s
-+ livre qui est top
+<https://www.youtube.com/watch?v=rpjVrFI_dr8&t=577s> + livre qui est top
 
 ## Debut de modelisation
 
 Cette semaine,
 
-En étudiant le lapin de garenne avec 2 periodes:
--   2005 - 2014
--   2015-2024
-
+En étudiant le lapin de garenne avec 2 periodes: - 2005 - 2014 - 2015-2024
 
 En regardant il y a très peu de sites présent de 2005 a 2010 (peu d'observations et peu d'observateurs). Essayer de faire 2010 - 2015 puis 2019 - 2024 et on ca permet de mettre notre hypothèse que les individus ne peuvent pas varier au sein d'une periode. (article sur les phoques ou le fact sheet *Occupancy models to study wildlife*). Ou alors mettre 3 periodes, de 4 ou 5 ans? pour include 2015-2019? Essayer.
-
 
 Chapter 12 du livre explique comment choisir bien les espèces.
 
@@ -68,7 +63,11 @@ Hypothèse de sites non continue -\> Continuous-space occupancy models? + compliq
 -   Lire plus la biblio.
 
 -   Avoir un qui marchent au moins le lapin, si possible les autres espèces.
-  - tests
-  - significativité
-  - coherence
-  - bien expliqué
+
+-   tests
+
+-   significativité
+
+-   coherence
+
+-   bien expliqué

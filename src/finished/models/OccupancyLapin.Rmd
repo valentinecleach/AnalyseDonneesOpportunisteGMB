@@ -37,13 +37,13 @@ VariablesSite <- VariablesSite%>%
 ```
 
 ```{r}
-Lapins <- Total%>%
-  sf::st_join(VariablesSite)%>%
+Lapins <- Total %>%
+  sf::st_join(VariablesSite) %>%
   filter(cd_nom == 61714,
          technique_observation == "Vu",
-         date > as.Date("2005-01-01"))%>%
+         date >= as.Date("2005-01-01")) %>%
   # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
-  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation)%>%
+  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
   mutate(year = lubridate::year(date))
 ```
 
@@ -51,9 +51,9 @@ Lapins <- Total%>%
 
 ```{r}
 detection_df <- Lapins %>%
-  sf::st_drop_geometry()%>%
-  dplyr::mutate(annee = lubridate::year(date))%>%
-  dplyr::select(Code_10km, annee)%>%
+  sf::st_drop_geometry() %>%
+  dplyr::mutate(annee = lubridate::year(date)) %>%
+  dplyr::select(Code_10km, annee) %>%
   dplyr::count(Code_10km, annee) %>%
   tidyr::complete(Code_10km, 
                   annee = tidyr::full_seq(annee, 1), 
@@ -80,19 +80,106 @@ head(detection_df)
 ## Covariables de site
 
 ```{r}
-site_info <- VariablesSite%>%
-  sf::st_drop_geometry()%>%
+site_info <- VariablesSite %>%
+  sf::st_drop_geometry() %>%
   dplyr::arrange(Code_10km)
 
 noms <- site_info$Code_10km
 rownames(site_info) <- noms
 
-site_info <- site_info%>%
-  dplyr::select(-Code_10km)%>%
+site_info <- site_info %>%
+  dplyr::select(-Code_10km) %>%
   dplyr::rename(Dnst_Cultures = `Dnst_Cultures `)%>%
   dplyr::mutate(across(where(is.numeric), 
                        scale))
+
+cor(site_info$Ind_Diversite, site_info$Dnst_Cultures)
+cor(site_info$Ind_Diversite, site_info$Dist_EcotoneArbore)
+cor(site_info$Ind_Diversite, site_info$Dist_Littoral)
+cor(site_info$Ind_Diversite, site_info$Dist_Eau)
+cor(site_info$Ind_Diversite, site_info$X_10km)
+cor(site_info$Ind_Diversite, site_info$Y_10km)
+
+cor(site_info$Dnst_Cultures, site_info$Dist_EcotoneArbore)
+cor(site_info$Dnst_Cultures, site_info$Dist_Littoral)
+cor(site_info$Dnst_Cultures, site_info$Dist_Eau)
+cor(site_info$Dnst_Cultures, site_info$X_10km)
+cor(site_info$Dnst_Cultures, site_info$Y_10km)
+
+cor(site_info$Dist_EcotoneArbore, site_info$Dist_Littoral)
+cor(site_info$Dist_EcotoneArbore, site_info$Dist_Eau)
+cor(site_info$Dist_EcotoneArbore, site_info$X_10km)
+cor(site_info$Dist_EcotoneArbore, site_info$Y_10km)
+
+cor(site_info$Dist_Littoral, site_info$Dist_Eau)
+cor(site_info$Dist_Littoral, site_info$X_10km)
+cor(site_info$Dist_Littoral, site_info$Y_10km)
+
+cor(site_info$Dist_Eau, site_info$X_10km)
+cor(site_info$Dist_Eau, site_info$Y_10km)
+
+cor(site_info$X_10km, site_info$Y_10km)
+
+
+plot(site_info$Ind_Diversite, site_info$Dnst_Cultures)
+plot(site_info$Ind_Diversite, site_info$Dist_EcotoneArbore)
+plot(site_info$Ind_Diversite, site_info$Dist_Littoral)
+plot(site_info$Ind_Diversite, site_info$Dist_Eau)
+plot(site_info$Ind_Diversite, site_info$X_10km)
+plot(site_info$Ind_Diversite, site_info$Y_10km)
+
+plot(site_info$Dnst_Cultures, site_info$Dist_EcotoneArbore)
+plot(site_info$Dnst_Cultures, site_info$Dist_Littoral)
+plot(site_info$Dnst_Cultures, site_info$Dist_Eau)
+plot(site_info$Dnst_Cultures, site_info$X_10km)
+plot(site_info$Dnst_Cultures, site_info$Y_10km)
+
+plot(site_info$Dist_EcotoneArbore, site_info$Dist_Littoral)
+plot(site_info$Dist_EcotoneArbore, site_info$Dist_Eau)
+plot(site_info$Dist_EcotoneArbore, site_info$X_10km)
+plot(site_info$Dist_EcotoneArbore, site_info$Y_10km)
+
+plot(site_info$Dist_Littoral, site_info$Dist_Eau)
+plot(site_info$Dist_Littoral, site_info$X_10km)
+plot(site_info$Dist_Littoral, site_info$Y_10km)
+
+plot(site_info$Dist_Eau, site_info$X_10km)
+plot(site_info$Dist_Eau, site_info$Y_10km)
+
+plot(site_info$X_10km, site_info$Y_10km)
+
+site_info %>%
+  select_if(is.numeric) %>%
+  cor() %>%
+  corrplot::corrplot(method = "number")
+
+?cor
+6+5+4+3+2+1
 ```
+
+| Variable 1 | Variable 2 | Coefficient de corrélation de Pearson |   |
+|----|----|----|----|
+| Ind_Diversite | Densite culture | -0.70 | X |
+|  | Dist Ecotone Arbore | -0.01 |  |
+|  | Dist Littoral | -0.49 |  |
+|  | Dist Eau | 0.42 |  |
+|  | X | -0.38 |  |
+|  | Y | -0.40 |  |
+| Densite culture | Dist Ecotone Arbore | -0.01 |  |
+|  | Dist Littoral | 0.33 |  |
+|  | Dist Eau | -0.13 |  |
+|  | X | 0.31 |  |
+|  | Y | 0.28 |  |
+| Dist Ecotone Arbore | Dist Littoral | -0.09 |  |
+|  | Dist Eau | 0.15 |  |
+|  | X | -0.19 |  |
+|  | Y | 0.07 |  |
+| Dist Littoral | Dist Eau | -0.11 |  |
+|  | X | 0.61 | X |
+|  | Y | -0.25 |  |
+| Dist Eau | X | -0.15 |  |
+|  | Y | 0.30 |  |
+| X | Y | -0.16 |  |
 
 ```{r}
 head(site_info)
@@ -105,30 +192,73 @@ summary(site_info)
 head(detection_df)
 ```
 
-Mise sous format pour la modélisation
+Mise sous format pour la modelisation
 
 ```{r}
 dim(detection_matrice)
 dim(periodes_df)
 dim(site_info)
 
-
 umf <- unmarked::unmarkedFrameOccu(y = detection_matrice, 
                                    obsCovs = list(periode = periodes_df),
                                    siteCovs = site_info
                                    )
 
-summary(umf)
 unmarked::plot(umf, main="Detection/Non Detection de lapins sur les sites depuis 2005")
-
-
- colnames(siteCovs(umf))[colnames(siteCovs(umf)) == "Dnst_Cultures "] <- "Dnst_Cultures"
- colnames(siteCovs(umf))[colnames(siteCovs(umf)) == "Dnst_Cultures "] <- "Dnst_Cultures"
-
 ```
 
 ```{r}
 head(umf); summary(umf)
+```
+
+On voit bien qu'on a tres peu de sites avant 2005, tres probablement car
+on a tres peu de donnees dans l'ensemble, non pas a cause d'une non
+detection mais parce que les sites n'ont pas ete visites.
+
+On retirera ensuite les annees [2005 - 2009]. J'ai longtemps hesite
+entre garder 2009, ou 2025. Les 2 ont peu de donnees par rapport aux
+reste (2025 ca je n'ai pas l'annee entiere, et 2009 car c'est tôt). Les
+deux participerait a augementer la probabilite de detection.
+
+Cependant, pour garder quelque chose de plus jolie avec des saisons de 5
+ans, j'ai garde 2025.
+
+```{r}
+Lapins <- Total %>%
+  sf::st_join(VariablesSite) %>%
+  filter(cd_nom == 61714,
+         technique_observation == "Vu",
+         date >= as.Date("2010-01-01"),
+         date < as.Date("2025-01-01")) %>%
+  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
+  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
+  mutate(year = lubridate::year(date))
+
+detection_df <- Lapins %>%
+  sf::st_drop_geometry() %>%
+  dplyr::mutate(annee = lubridate::year(date)) %>%
+  dplyr::select(Code_10km, annee) %>%
+  dplyr::count(Code_10km, annee) %>%
+  tidyr::complete(Code_10km, 
+                  annee = tidyr::full_seq(annee, 1), 
+                  fill = list(n = 0)) %>%
+  tidyr::pivot_wider(names_from = annee, 
+                     values_from = n) %>%
+  dplyr::arrange(Code_10km) %>%
+  filter(!is.na(Code_10km))
+
+detection_df[,-1] <- ifelse(detection_df[,-1]>0, 1, 0)
+
+noms <- detection_df$Code_10km
+detection_matrice <- as.matrix(detection_df[, -1])
+rownames(detection_matrice) <- noms
+View(detection_matrice)
+
+umf <- unmarked::unmarkedFrameOccu(y = detection_matrice, 
+                                   siteCovs = site_info
+                                   )
+
+unmarked::plot(umf, main="Detection/Non Detection de lapins sur les sites de 2010 a 2025")
 ```
 
 ## Resultats
@@ -152,11 +282,11 @@ confint(backTransform(model_null, type="det"))
 coef(model_null)
 ```
 
-En transformant, on a donc - La probabilité qu'un site est occupé par un
-ou plusieurs lapins est de 0,97. (En considérent toute la période
-2005-2025) - La probabilité qu'on detecte un lapin est de 0,37
+En transformant, on a donc - La probabilite qu'un site est occupe par un
+ou plusieurs lapins est de 0,97. (En considerent toute la periode
+2005-2025) - La probabilite qu'on detecte un lapin est de 0,37
 
-On a également les intervalles de confiances qui sont assez serrés
+On a egalement les intervalles de confiances qui sont assez serres
 autour de ces valeurs a 95%.
 
 ```{r}
@@ -165,22 +295,46 @@ unmarked::summary(model_eau)
 ```
 
 ```{r}
-grid_dist_eau <- seq(min(site_info$Dist_Eau),
-            max(site_info$Dist_Eau),
-            length=50)
-coef(model_eau)
-occ_pred <- plogis(coef(model_eau)[1]+coef(model_eau)[2]*grid_dist_eau)
+colnames(site_info)
 
-plot(grid_dist_eau,
-     occ_pred, 
-     type = "l", 
-     lwd = 3, 
-     xlab = "forest cover", 
-     ylab = "estimated occupancy prob")
+noms_site_info <- c("Ind_Diversite", "Dnst_Cultures", "Dist_EcotoneArbore", "Dist_Littoral",
+                    "Dist_Eau", "air_km2", "X_10km", "Y_10km")
+
+for (i in noms_site_info) {
+  formule <- as.formula(paste("~1 ~", i))
+  
+  model <- unmarked::occu(formule, data = umf)
+  
+  grid <- seq(min(site_info[[i]], na.rm=TRUE),
+              max(site_info[[i]], na.rm=TRUE),
+              length=50)
+  
+  occ_pred <- plogis(coef(model)[1] + coef(model)[2] * grid)
+  
+  # Plot
+  plot(grid,
+       occ_pred, 
+       type = "l", 
+       lwd = 3, 
+       xlab = i, 
+       ylab = "Probabilite d'occupation estimée")
+}
+
 ```
 
-On voit la relation entre la couverture et la probabilité d'occupancy.
-Légerement décroissante et tres légerement concave.
+On voit la relation entre la couverture et la probabilite d'occupancy.
+Legerement decroissante et tres legerement concave.
+
+```{r}
+
+
+cor.test(site_info$Ind_Diversite, site_info$Dnst_Cultures)
+
+
+noms_site_info <- c("Ind_Diversite", "Dnst_Cultures", "Dist_EcotoneArbore", "Dist_Littoral",
+                    "Dist_Eau", "air_km2", "X_10km", "Y_10km")
+
+```
 
 Comparaison de plusieurs models
 
@@ -204,16 +358,16 @@ unmarked::modSel(fmList)
 Sites are closed within seasons but can change across seasons due to
 colonisation/extinction events (Markov Chain model)
 
-Peut etre colonisé ou pas colonisé (faire matrice dans mon livrable
+Peut etre colonise ou pas colonise (faire matrice dans mon livrable
 stat). graphique?
 
 Ici pas de fausses positives.
 
 on a psi : prop occupation p: prop detection gamma : prob de
-colonisation epsilon : probabilité d'extinction
+colonisation epsilon : probabilite d'extinction
 
-On suppose comme dans MC que hop cest hyper rapide, instantané meme
-qu'on soit extinct ou colonisé entre les sites. Au sein du même site, on
+On suppose comme dans MC que hop cest hyper rapide, instantane meme
+qu'on soit extinct ou colonise entre les sites. Au sein du même site, on
 n'as pas ces fluctuations.
 
 (changer le highlight tango, theme dans le --- en haut)
@@ -242,8 +396,8 @@ head(quali_periodes_matrice)
 dim(quali_periodes_matrice)
 ```
 
-On a une matrice du nombre d'années qui nous dit que c'est la 1ere année
-de l'étude, 2e etc.
+On a une matrice du nombre d'annees qui nous dit que c'est la 1ere annee
+de l'etude, 2e etc.
 
 ```{r}
 annees <- as.numeric(colnames(detection_matrice)) 
@@ -314,7 +468,7 @@ unmarked::backTransform(fm0, type="det")
 Model
 
 On essaye plusieurs sans la variance, puis selon l'AIC, on calcule l'AIC
-a la fin avec le modèle qu'on a choisi.
+a la fin avec le modele qu'on a choisi.
 
 ```{r}
 fm0 <- colext(
@@ -328,7 +482,23 @@ fm0 <- colext(
 summary(fm0)
 coef(fm0)
 backTransform(fm0, type="ext")
+
 ```
+
+| Variables | AIC |
+|------------------------------------|------------------------------------|
+| psiformula = \~ 1, gammaformula = \~ 1, \# colonization epsilonformula = \~ quali_periodes, \# extinction pformula = \~ 1, \# detection |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+
+: AIC de differents modeles
 
 ### Modeles d'occupation avec des fausses positives
 
@@ -336,8 +506,8 @@ backTransform(fm0, type="ext")
 
 ```{r}
 
-#car::vif(lm(Dist_Eau ~ periode, data = toutesdonnees))
+# car::vif(lm(Dist_Eau ~ periode, data = toutesdonnees))
 ```
 
-Sur 2 périodes, il y a une augementation des lapins. Peut être car en
-2005 a 2010, on a peu de données. D'ou l'idée de créer 3 périodes.
+Sur 2 periodes, il y a une augementation des lapins. Peut être car en
+2005 a 2010, on a peu de donnees. D'ou l'idee de creer 3 periodes.
