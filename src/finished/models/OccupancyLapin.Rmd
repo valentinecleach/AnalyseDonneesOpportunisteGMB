@@ -425,17 +425,202 @@ coef(fm0)
 ```
 
 Maintenant, on ajoute les variables de sites, et on regarde pour
-l'instant uniquement l'AIC, afin de faire un tri rapide.
+l'instant uniquement l'AIC, afin de faire un tri rapide. On fait une
+elimination forwards manuelle.
 
 ```{r}
-# fmList <- unmarked::fitList('{psi, p}' = model_null,
-#                   '{psi(dist_eau), p}' = model_eau,
-  #                 '{psi(dist_littoral), p}' = model_litt,
-    #               '{psi(dist_littoral + dist_eau), p}' = model_litt_eau)
+
+fm0 <- unmarked::colext(
+  psiformula = ~ 1,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm1 <- unmarked::colext(
+  psiformula = ~ Y_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm2 <- unmarked::colext(
+  psiformula = ~ X_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm3 <- unmarked::colext(
+  psiformula = ~ Dist_Eau,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm4 <- unmarked::colext(
+  psiformula = ~ Dist_Littoral,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm5 <- unmarked::colext(
+  psiformula = ~ Dist_EcotoneArbore,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+
+fm6 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+
+fm7 <- unmarked::colext(
+  psiformula = ~ Ind_Diversite,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+
+fmList <- unmarked::fitList(fm1, fm3, fm4, fm5, fm6, fm7)
+unmarked::modSel(fmList)
+
 ```
 
+Ici on garde la variable de fm6 (Dnst_Cultures), et on ajoute les
+autres.
+
 ```{r}
-# unmarked::modSel(fmList)
+fm0 <- fm6 
+
+fm1 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm2 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + X_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm3 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Eau,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm4 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm5 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_EcotoneArbore,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm6 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+
+fmList <- unmarked::fitList(fm0, fm1, fm3, fm4, fm5, fm6)
+unmarked::modSel(fmList)
+
+```
+
+On continue ensuite avec $\text{Dnst_Cultures} + \text{Dist_Littoral}$.
+
+```{r}
+fm0 <- fm4 
+
+fm1 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral + Y_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm2 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral + X_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm3 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_Eau,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm5 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+
+fmList <- unmarked::fitList(fm0, fm1, fm3, fm4, fm5)
+unmarked::modSel(fmList)
+
 ```
 
 On fait de meme avec les variables en quantitatif.
@@ -453,6 +638,17 @@ fm0 <- unmarked::colext(
 
 ```{r}
 summary(fm0)
+
+unmarked::backTransform(fm0, type="col")
+
+coef_ext <- coef(fm0, type = "ext")
+
+plogis(coef_ext[1])
+plogis(coef_ext[2])
+plogis(coef_ext[3])
+
+unmarked::backTransform(fm0, type="psi")
+unmarked::backTransform(fm0, type="det")
 ```
 
 ### Modeles d'occupation avec des fausses positives
