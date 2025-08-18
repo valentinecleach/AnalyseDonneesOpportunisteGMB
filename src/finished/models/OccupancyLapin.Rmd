@@ -34,12 +34,12 @@ VariablesSite <- VariablesSite%>%
 ```{r}
 Lapins <- Total %>%
   sf::st_join(VariablesSite) %>%
-  filter(cd_nom == 61714,
-         technique_observation == "Vu",
-         date >= as.Date("2005-01-01")) %>%
+  dplyr::filter(cd_nom == 61714,
+                technique_observation == "Vu",
+                date >= as.Date("2005-01-01")) %>%
   # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
-  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
-  mutate(year = lubridate::year(date))
+  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
+  dplyr::mutate(year = lubridate::year(date))
 ```
 
 ## Creation de la base de donnee Detection - Non Detection
@@ -56,7 +56,7 @@ detection_df <- Lapins %>%
   tidyr::pivot_wider(names_from = annee, 
                      values_from = n) %>%
   dplyr::arrange(Code_10km) %>%
-  filter(!is.na(Code_10km))
+  dplyr::filter(!is.na(Code_10km))
 
 detection_df[,-1] <- ifelse(detection_df[,-1]>0, 1, 0)
 
@@ -121,7 +121,6 @@ Mise sous format pour la modelisation
 
 ```{r}
 umf <- unmarked::unmarkedFrameOccu(y = detection_matrice, 
-                                   obsCovs = list(periode = periodes_df),
                                    siteCovs = site_info
                                    )
 ```
@@ -136,7 +135,7 @@ a tres peu de donnees dans l'ensemble, sur toutes les especes.
 
 On retirera ensuite les annees [2005 - 2009]. J'ai longtemps hesite
 entre garder 2009, ou 2025. Les 2 ont peu de donnees par rapport aux
-reste (2025 ca je n'ai pas l'annee entiere, et 2009 car c'est tôt). Les
+reste (2025 ca je n'ai pas l'annee entiere, et 2009 car c'est tÃ´t). Les
 deux participerait a augementer la probabilite de detection.
 
 Cependant, pour garder quelque chose de plus jolie avec des saisons de 5
@@ -145,13 +144,13 @@ ans, j'ai garde 2025.
 ```{r}
 Lapins <- Total %>%
   sf::st_join(VariablesSite) %>%
-  filter(cd_nom == 61714,
-         technique_observation == "Vu",
-         date >= as.Date("2010-01-01"),
-         date < as.Date("2025-01-01")) %>%
+  dplyr::filter(cd_nom == 61714,
+                technique_observation == "Vu",
+                date >= as.Date("2010-01-01"),
+                date < as.Date("2025-01-01")) %>%
   # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
-  select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
-  mutate(year = lubridate::year(date))
+  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
+  dplyr::mutate(year = lubridate::year(date))
 
 detection_df <- Lapins %>%
   sf::st_drop_geometry() %>%
@@ -164,7 +163,7 @@ detection_df <- Lapins %>%
   tidyr::pivot_wider(names_from = annee, 
                      values_from = n) %>%
   dplyr::arrange(Code_10km) %>%
-  filter(!is.na(Code_10km))
+  dplyr::filter(!is.na(Code_10km))
 
 detection_df[,-1] <- ifelse(detection_df[,-1]>0, 1, 0)
 
@@ -253,9 +252,9 @@ model_litt_eau <- unmarked::occu(~1 ~ Dist_Littoral + Dist_Eau,
                                  data = umf)
 
 fmList <- unmarked::fitList('{psi, p}' = model_null,
-                  '{psi(dist_eau), p}' = model_eau,
-                  '{psi(dist_littoral), p}' = model_litt,
-                  '{psi(dist_littoral + dist_eau), p}' = model_litt_eau)
+                            '{psi(dist_eau), p}' = model_eau,
+                            '{psi(dist_littoral), p}' = model_litt,
+                            '{psi(dist_littoral + dist_eau), p}' = model_litt_eau)
 
 unmarked::modSel(fmList)
 ```
@@ -267,9 +266,9 @@ suivants comme c'est ce qui nous interesse.
 
 ### Modeles d'occupation a plusieurs saisons
 
-Au sein d'une saison, les lapins sont soit présent soit absent mais ne
+Au sein d'une saison, les lapins sont soit prÃ©sent soit absent mais ne
 changent pas. Entre les saisons, les lapins peuvent coloniser un site
-(ie: il étiaent pas là avant et mtn ils le sont), ou disparaitre =
+(ie: il Ã©tiaent pas lÃ  avant et mtn ils le sont), ou disparaitre =
 extinction locale. C'est une chaine de Marcov.
 
 Ici on suppose, qu'il n'y a pas de faux positif.
@@ -278,7 +277,7 @@ On a
 
 -   psi $\psi$ : prob occupation
 
--   p: prob detection
+-   p $p$ : prob detection
 
 -   gamma $\gamma$ : prob de colonisation
 
@@ -331,7 +330,7 @@ site_covs_periodes <- list(
 ```
 
 On a les periodes sous la forme qualitiative et quantitative, pour
-tester les 2 façons.
+tester les 2 faÃ§ons.
 
 ```{r}
 detections_per_year = colSums(detection_matrice)
@@ -339,7 +338,7 @@ detections_per_year = colSums(detection_matrice)
 print(detections_per_year)
 ```
 
-On a bcp de detections sur toutes les années en vrai..
+On a bcp de detections sur toutes les annÃ©es en vrai..
 
 ```{r}
 umf <- unmarked::unmarkedMultFrame(y = detection_matrice,
@@ -376,7 +375,7 @@ unmarked::backTransform(fm0, type="ext")
 ```
 
 Ona une probabilite d'extinction de $0,17$, donc comme $0.17<0.27$, les
-lapins devraient être sur de plus en plus du territoire.
+lapins devraient Ãªtre sur de plus en plus du territoire.
 
 ```{r}
 unmarked::backTransform(fm0, type="psi")
@@ -387,7 +386,7 @@ La probabilite d'etre present sur un territoire initialement, donc avant
 toute colonisation/extinction, est de $0,44$ et celle de detection est
 $0,77$.
 
-### Periodes qualitatives.
+#### Periodes qualitatives.
 
 On essaye plusieurs sans la variance, puis selon l'AIC, on calcule l'AIC
 a la fin avec le modele qu'on a choisi.
@@ -415,9 +414,9 @@ unmarked::backTransform(fm0, type="psi")
 unmarked::backTransform(fm0, type="det")
 ```
 
-Encore a travailler la compréhension du truc...
+Encore a travailler la comprÃ©hension du truc...
 
--   Probabilité de
+-   ProbabilitÃ© de
 
 ```{r}
 summary(fm0)
@@ -618,10 +617,81 @@ fm5 <- unmarked::colext(
   se = FALSE)
 
 
-fmList <- unmarked::fitList(fm0, fm1, fm3, fm4, fm5)
+fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5)
 unmarked::modSel(fmList)
 
 ```
+
+Maintenant, on garde le modÃ¨le fm5 c'est a dire les variables \$
+\\text{Dnst_Cultures} + \\text{Dist_Littoral} +
+\text{Dist\_EcotoneArbore}\$. Il nous reste plus beaucoup de variables,
+comme elles sont correlÃ©s entre elles.
+
+```{r}
+fm0 <- fm5
+
+fm1 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore + Y_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fm2 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore + Dist_Eau,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ quali_periodes, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
+
+fmList <- unmarked::fitList(fm0, fm1, fm2)
+unmarked::modSel(fmList)
+```
+
+Maintenant, on remarque que le modÃ¨le sans variables supplÃ©mentaires est
+celui dont l'AIC est le plus faible, donc on peut se permettre de
+s'arrÃªter.\
+
+On regarde ce modÃ¨le avec la variance incluse:
+
+```{r}
+fm <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
+  pformula = ~ 1, 
+  gammaformula =  ~ 1,
+  epsilonformula = ~ quali_periodes,
+  data = umf, 
+  control = list(trace = 1),
+  se = TRUE)
+
+summary(fm)
+```
+
+```{r}
+unmarked::backTransform(fm, type="col")
+```
+
+```{r}
+coef_ext <- coef(fm, type = "ext")
+
+plogis(coef_ext[1]); plogis(coef_ext[2]); plogis(coef_ext[3])
+```
+
+```{r}
+coef_psi <- coef(fm, type = "psi")
+
+plogis(coef_psi[1]); plogis(coef_psi[2]); plogis(coef_psi[3]); plogis(coef_psi[4])
+```
+
+```{r}
+unmarked::backTransform(fm, type="det")
+```
+
+Significatif sauf Dist_EcotoneArbore.
 
 #### Periodes quantitatif.
 
@@ -647,7 +717,6 @@ coef_ext <- coef(fm0, type = "ext")
 
 plogis(coef_ext[1])
 plogis(coef_ext[2])
-plogis(coef_ext[3])
 
 unmarked::backTransform(fm0, type="psi")
 unmarked::backTransform(fm0, type="det")
@@ -663,22 +732,20 @@ forcement, mais aurait pu etre utile avec les donnees diro.
 
 ## Tests d'hypotheses
 
-Hypothèses:
+HypothÃ¨ses:
 
- 1. occupancy status at each unit does not change over the survey
-season; i.e.,
-units are ???closed??? to changes in occupancy -\> probablement pas mais bon
-2. the probability of occupancy is constant across units, or differences
-in occu
-pancy probability are modeled using covariates -\>
-3. the probability of detection is constant across all units and surveys
-or is a
-function of unit-survey covariates; there is no unmodeled heterogeneity
-in
-detection probabilities -\>
-4. detection of species and detection histories at each location are
-independent -\> non
-5. species are correctly identified; i.e., no false positives -\> okay
+1.  occupancy status at each unit does not change over the survey
+    season; i.e., units are â€˜closedâ€™ to changes in occupancy -\>
+    probablement pas mais bon
+2.  the probability of occupancy is constant across units, or
+    differences in occu pancy probability are modeled using covariates
+    -\>
+3.  the probability of detection is constant across all units and
+    surveys or is a function of unit-survey covariates; there is no
+    unmodeled heterogeneity in detection probabilities -\>
+4.  detection of species and detection histories at each location are
+    independent -\> non
+5.  species are correctly identified; i.e., no false positives -\> okay
 
 ```{r}
 
