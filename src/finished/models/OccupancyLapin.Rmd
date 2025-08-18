@@ -698,14 +698,19 @@ Significatif sauf Dist_EcotoneArbore.
 On fait de meme avec les variables en quantitatif.
 
 ```{r}
-fm0 <- unmarked::colext(
-  psiformula = ~ 1,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quanti_periodes, # extinction
-  pformula = ~ 1,  # detection
-  data = umf, # data
+fm_quali <- fm
+
+fm_quanti <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
+  pformula = ~ 1, 
+  gammaformula =  ~ 1,
+  epsilonformula = ~ quanti_periodes,
+  data = umf, 
   control = list(trace = 1),
-  se = FALSE)
+  se = TRUE)
+
+fmList <- unmarked::fitList(fm_quali, fm_quanti)
+unmarked::modSel(fmList)
 ```
 
 ```{r}
