@@ -1,6 +1,6 @@
 ---
-title: "Semaine 9"
-date: "04/08 - 08/08"
+title: "Semaine 10"
+date: "11/08 - 14/08"
 output:
   bookdown::html_document2:
     toc: true
@@ -15,22 +15,17 @@ output:
 
     -   [Occupancy Modeling, Morgan Byrne, James Golde](https://kevintshoemaker.github.io/NRES-746/Occupancy.html)
 
-        -   unmarked::occu mais aussi bayesien avec Just Another Gibbs Sampler.
-
     -   [Citizen science indicates significant range recovery and defines new conservation priorities for Earth's most endangered pinniped in Greece](https://zslpublications.onlinelibrary.wiley.com/doi/10.1111/acv.12806)
 
-        -   Et le code associé : [https://oliviergimenez.github.io/monkseal-occupancy/https://oliviergimenez.github.io/monkseal-occupancy/](https://oliviergimenez.github.io/monkseal-occupancy/){.uri} ( N'utilise pas la fction occu mais fait un modèle de bayésien avec Gibbs mais pas même que au dessus (Bayesian inference using Gibbs sampling) )
-        -   interessant pour les choix qu'ils ont fait.
+        -   Et le code associé : [https://oliviergimenez.github.io/monkseal-occupancy/https://oliviergimenez.github.io/monkseal-occupancy/](https://oliviergimenez.github.io/monkseal-occupancy/){.uri}
 
--   Ref de Franck Simonnet (pas encore bien lu):
+-   Ref de Franck Simonnet:
 
-    -   [Estimating Site Occupancy Rates When Detection Probabilities Are Less Than One](https://www.researchgate.net/publication/228821155_Estimating_Site_Occupancy_Rates_When_Detection_Probabilities_Are_Less_Than_One){.uri} -\> Lu
+    -   [Estimating Site Occupancy Rates When Detection Probabilities Are Less Than One](https://www.researchgate.net/publication/228821155_Estimating_Site_Occupancy_Rates_When_Detection_Probabilities_Are_Less_Than_One){.uri}
 
     -   [Journal of Biogeography Journal of Biogeography Free Access Predicting species distributions from checklist data using site-occupancy models](https://onlinelibrary.wiley.com/doi/10.1111/j.1365-2699.2010.02345.x)
 
 -   Autres références :
-
-    -   Article sur le sujet que j'avais lu le mois dernier à relire : [https://docs.google.com/document/d/1noZm3QprMJMsYErZo8bSeARPTEVTstCk0HPS-MLO-V0/edit?tab=t.0](#0){.uri} ( ils utilisaient JAGS et ca marchait bien de mémoire)
 
     -   Occupancy modeling. Présente les hypothèses et les problèmes si les hypothèses ne sont pas vérifiés. [https://pubs.usgs.gov/fs/2005/3096/fs](https://pubs.usgs.gov/fs/2005/3096/fs20053096.pdf){.uri} [20053096.pdf](https://pubs.usgs.gov/fs/2005/3096/fs20053096.pdf){.uri}
 
@@ -42,32 +37,28 @@ output:
 
         -   Tests + puissance : <https://cran.r-project.org/web/packages/unmarked/vignettes/powerAnalysis.html>
 
-<https://www.youtube.com/watch?v=rpjVrFI_dr8&t=577s> + livre qui est top
+Livre super:
 
-## Debut de modelisation
+-   Darryl I. MacKenzie and James D. Nichols and J. Andrew Royle and Kenneth H. Pollock and Larissa L. Bailey and James E. Hines, Occupancy Estimation and Modeling (Second Edition)}
 
-Cette semaine,
+-   Video sur l'implémentation de unmarked. <https://www.youtube.com/watch?v=rpjVrFI_dr8&t=577s>
 
-En étudiant le lapin de garenne avec 2 periodes: - 2005 - 2014 - 2015-2024
+## Suite modélisation
 
-En regardant il y a très peu de sites présent de 2005 a 2010 (peu d'observations et peu d'observateurs). Essayer de faire 2010 - 2015 puis 2019 - 2024 et on ca permet de mettre notre hypothèse que les individus ne peuvent pas varier au sein d'une periode. (article sur les phoques ou le fact sheet *Occupancy models to study wildlife*). Ou alors mettre 3 periodes, de 4 ou 5 ans? pour include 2015-2019? Essayer.
+J'ai fait 3 périodes 2010-2014, 2015-2019, 2020-2024. Pour l'instant j'ai gardé les 3 periodes, sans laisser de periode ou les colonisation/extinction locaux ont lieu mais ca a lair okay quand même
 
-Chapter 12 du livre explique comment choisir bien les espèces.
+Je n'ai pas inclu DIRO car seulement après 2014 / 2015 donc pour ce modèle ca ne marcherait surement pas car on veut comparer. Il y aura probablement une fausse augementation des sites ou les individus sont detectés.
 
-Ne pas inclure DIRO car seulement après 2014 / 2015 donc pour ce modèle ca ne marcherait surement pas car on veut comparer. Il y aura probablement une fausse augementation des sites ou les individus sont detectés.
+On a des modèles qui sembles okay pour le lapin. J'ai commencé la procédure stepwise forward manuellement pour trouver le modèle optimal selon l'AIC, mais dure a dire quelque chose sans tests pour valider le modèle je trouves. On a quand même une assez forte probabilité d'extinction locale du lapin qui semble etre coherent peut etre donc ca ressure sur le modèle. Ca serait intéressant au retour de discuter des variable intéressantes, et non pas de faire du overfitting a juste mettre plein de variables partout qui n'ont pas de sens forcément (par exemple pour la probabilité de detection ou extinction ou qqe chose.)
 
-Hypothèse de sites non continue -\> Continuous-space occupancy models? + compliqué et a étudier le truc après. Peut etre pas nécéssaire.
+## Semaine qui arrive :
 
-### Cette semaine:
+-   tests, significativité, coherence -\> livre *Kenneth P. Burnham David R. Anderson Model Selection and Multimodel Inference* apparament il explique les tests qu'on peut faire dans notre cas, mais il fait plus de 500 pages, et en feuilletant je vois pas vraiment vraiment. A plus chercher, peut etre bien contacter qqun de l'ecole.
 
--   Lire plus la biblio.
+-   Bien commencer le rapport de stage et bien expliquer ce qui se passe mais dure sans savoir si les tests sont okay... -\> priorité.
 
--   Avoir un qui marchent au moins le lapin, si possible les autres espèces.
+-   voir ce qu'il disait avec la transformation des pelottes de chouettes effraies.
 
--   tests
+-   faire le brouillon pour les autres espèces comme ca plus qu'a tourner et analyser.
 
--   significativité
-
--   coherence
-
--   bien expliqué
+Faut vraiment que je me dépèche...

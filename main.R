@@ -100,6 +100,10 @@ rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"),
 
 knitr::knit(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"))
 
+##### occupancy #####
+(changer le highlight tango, theme dans le --- en haut)
+
+
 rmarkdown::render(paste0(wd$src, "finished/models/OccupancyLapin.Rmd"),
                   output_file = paste0(wd$output, 
                                        "models/OccupancyLapin.html"),

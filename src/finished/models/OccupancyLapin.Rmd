@@ -387,7 +387,7 @@ La probabilite d'etre present sur un territoire initialement, donc avant
 toute colonisation/extinction, est de $0,44$ et celle de detection est
 $0,77$.
 
-Model
+### Periodes qualitatives.
 
 On essaye plusieurs sans la variance, puis selon l'AIC, on calcule l'AIC
 a la fin avec le modele qu'on a choisi.
@@ -510,8 +510,8 @@ unmarked::modSel(fmList)
 
 ```
 
-Ici on garde la variable de fm6 (Dnst_Cultures), et on ajoute les
-autres.
+Ici on garde la variable de fm6 (\$ \\text{Dnst_Cultures} \$), et on
+ajoute les autres.
 
 ```{r}
 fm0 <- fm6 
@@ -623,6 +623,8 @@ unmarked::modSel(fmList)
 
 ```
 
+#### Periodes quantitatif.
+
 On fait de meme avec les variables en quantitatif.
 
 ```{r}
@@ -660,6 +662,23 @@ Etant donnee que nous avons garde les donnes bien, ca nous concerne pas
 forcement, mais aurait pu etre utile avec les donnees diro.
 
 ## Tests d'hypotheses
+
+Hypothèses:
+
+ 1. occupancy status at each unit does not change over the survey
+season; i.e.,
+units are ???closed??? to changes in occupancy -\> probablement pas mais bon
+2. the probability of occupancy is constant across units, or differences
+in occu
+pancy probability are modeled using covariates -\>
+3. the probability of detection is constant across all units and surveys
+or is a
+function of unit-survey covariates; there is no unmodeled heterogeneity
+in
+detection probabilities -\>
+4. detection of species and detection histories at each location are
+independent -\> non
+5. species are correctly identified; i.e., no false positives -\> okay
 
 ```{r}
 
