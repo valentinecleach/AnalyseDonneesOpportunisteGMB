@@ -333,3 +333,8 @@ summary(y)
 range(y)
 
 
+
+fm_test <- unmarked::occu(~ 1 ~ 1, data = umf)
+AICcmodavg::mb.gof.test(fm_test, nsim=5)
+# 11H38
+

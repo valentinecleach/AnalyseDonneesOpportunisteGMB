@@ -652,8 +652,8 @@ fmList <- unmarked::fitList(fm0, fm1, fm2)
 unmarked::modSel(fmList)
 ```
 
-Maintenant, on remarque que le modèle sans variables supplémentaires est
-celui dont l'AIC est le plus faible, donc on peut se permettre de
+Maintenant, on remarque que le modèle sans variables supplémentaires
+est celui dont l'AIC est le plus faible, donc on peut se permettre de
 s'arrêter.\
 
 On regarde ce modèle avec la variance incluse:
@@ -752,6 +752,30 @@ Hypothèses:
     independent -\> non
 5.  species are correctly identified; i.e., no false positives -\> okay
 
+On va commencer par un goodness of fit test
+
 ```{r}
+install.packages("AICcmodavg")
+library(AICcmodavg)
+
+AICcmodavg::mb.gof.test(fm_quanti, nsim = 5)
+
+
+fm_quanti <- unmarked::colext(
+  psiformula = ~ 1,
+  pformula = ~ 1, 
+  gammaformula =  ~ 1,
+  epsilonformula = ~ quanti_periodes,
+  data = umf, 
+  control = list(trace = 1),
+  se = TRUE)
+AICcmodavg::mb.gof.test(fm_quanti, nsim = 5)
+class(fm_quanti)
+
+fm_test <- unmarked::occu(~ 1 ~ 1, data = umf)
+AICcmodavg::mb.gof.test(fm_test, nsim=5)
+
 
 ```
+
+11h35 : lancement du test sans rien.\
