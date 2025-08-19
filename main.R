@@ -335,6 +335,47 @@ range(y)
 
 
 fm_test <- unmarked::occu(~ 1 ~ 1, data = umf)
-AICcmodavg::mb.gof.test(fm_test, nsim=5)
-# 11H38
+?AICcmodavg::mb.gof.test(fm_test, nsim=5)
+# Le modele n'est pas bien mais au moins le code tourne.
 
+umf <- unmarked::unmarkedMultFrame(y = detection_matrice,
+                                   siteCovs = site_info,
+                                   yearlySiteCovs = site_covs_periodes,
+                                   numPrimary = 15)
+
+fm0 <- unmarked::colext(
+  psiformula = ~ 1,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1))
+AICcmodavg::mb.gof.test(fm0, nsim=5)
+
+
+chisq
+View(detection_matrice)
+
+install.packages('RPresence',repo='https://www.mbr-pwrc.usgs.gov/mbrCRAN')
+
+learnr::run_tutorial(
+  
+  name = "single_season",
+  
+  package = "occupancyTuts"
+  
+)
+
+
+y <- unmarked::getY(umf)
+y[is.na(y)] <- "."
+site_covs <- as.data.frame(unmarked::siteCovs(umf)) # Optional
+data_out <- cbind(y, site_covs) # or just y
+View(y)
+write.csv(data_out, "presence_input.csv")
+
+write.csv(y, "detection_presence.csv")
+write.table(site_covs, "site_covs.txt",
+            sep = "\t", row.names = FALSE, col.names = FALSE, 
+            quote = FALSE)
+View(site_covs)
