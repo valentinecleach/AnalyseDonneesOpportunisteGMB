@@ -330,7 +330,7 @@ site_covs_periodes <- list(
 ```
 
 On a les periodes sous la forme qualitiative et quantitative, pour
-tester les 2 faÃ§ons.
+tester les 2 facons.
 
 ```{r}
 detections_per_year = colSums(detection_matrice)
@@ -341,10 +341,63 @@ print(detections_per_year)
 On a bcp de detections sur toutes les annÃ©es en vrai..
 
 ```{r}
+dim(quanti_periodes_matrice); dim(quali_periodes_matrice)
+
+dim(detection_matrice)
+site_covs_periodes <- list(
+  quanti_periodes = quanti_periodes_matrice,
+  quali_periodes = quali_periodes_matrice
+)
+
+M <- nrow(detection_matrice)
+numPrimary <- 3
+
+# Example: labeling each season (block)
+season_labels <- matrix(
+  c("2010-2014", "2015-2019", "2020-2024"),
+  nrow = M, ncol = numPrimary, byrow = TRUE
+)
+
+View(season_labels)
+
+umf <- unmarkedMultFrame(
+  y = detection_matrice,
+  siteCovs = site_info,
+  yearlySiteCovs = list(season = season_labels),
+  numPrimary = numPrimary
+)
+
+fm <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
+  pformula = ~ 1, 
+  gammaformula =  ~ season,
+  epsilonformula = ~ season,
+  data = umf, 
+  control = list(trace = 1),
+  se = TRUE)
+
+fm
+unmarked::backTransform(fm, type="col")
+
+coef_col <- coef(fm, type = "col")
+
+plogis(coef_col[1])
+plogis(coef_col[2])
+
+coef_ext <- coef(fm, type = "ext")
+
+plogis(coef_ext[1])
+plogis(coef_ext[2])
+
+unmarked::backTransform(fm, type="psi")
+unmarked::backTransform(fm, type="det")
+
+
 umf <- unmarked::unmarkedMultFrame(y = detection_matrice,
                                    siteCovs = site_info,
                                    yearlySiteCovs = site_covs_periodes,
-                                   numPrimary = 15)
+                                   numPrimary = 3)
+?unmarkedM
 
 summary(umf)
 ```
@@ -709,6 +762,7 @@ fm_quanti <- unmarked::colext(
   control = list(trace = 1),
   se = TRUE)
 
+
 fmList <- unmarked::fitList(fm_quali, fm_quanti)
 unmarked::modSel(fmList)
 ```
@@ -760,22 +814,22 @@ library(AICcmodavg)
 
 AICcmodavg::mb.gof.test(fm_quanti, nsim = 5)
 
+gof <- suppressWarnings(parboot(fm_quanti, statistic=SSE, nsim=30))
+gof
+plot(gof)
+```
+H_0: le modèle est adequat, vs H_1 : non H_0. 
+pvalue > 0.05 -> On ne peut pas rejeter l'hypothèse nulle ie on ne peut pas dire que le modele est inadequat.
+pvalue <0.05 -> On rejette l'hypothese nulle: Le modele n'est pas adéquat.
 
-fm_quanti <- unmarked::colext(
-  psiformula = ~ 1,
-  pformula = ~ 1, 
-  gammaformula =  ~ 1,
-  epsilonformula = ~ quanti_periodes,
-  data = umf, 
-  control = list(trace = 1),
-  se = TRUE)
-AICcmodavg::mb.gof.test(fm_quanti, nsim = 5)
-class(fm_quanti)
-
-fm_test <- unmarked::occu(~ 1 ~ 1, data = umf)
-AICcmodavg::mb.gof.test(fm_test, nsim=5)
-
-
+On a p-value = 0.1935484 > 0.05. On ne rejette pas encore le modele
+```{r}
+library(AICcmodavg)
+mb_test <- suppressWarnings(mb.gof.test(fm_quanti, nsim=30))
 ```
 
-11h35 : lancement du test sans rien.\
+```{r}
+head(fm_quanti@data@y)
+install.packages("AICcmodavg")
+```
+
