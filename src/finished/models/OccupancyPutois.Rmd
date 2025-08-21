@@ -225,53 +225,6 @@ umf <- unmarkedMultFrame(
                         quanti = quanti_periodes),
   numPrimary = numPrimary
 )
-
-View(detection_matrice)
-fm <- unmarked::colext(
-  psiformula = ~ 1,
-  pformula = ~ 1, 
-  gammaformula =  ~ quali,
-  epsilonformula = ~ quali,
-  data = umf, 
-  control = list(trace = 1),
-  se = TRUE)
-
-
-coef_col <- coef(fm, type = "col")
-
-plogis(coef_col[1])
-plogis(coef_col[2])
-plogis(coef_col[3])
-plogis(coef_col[4])
-
-
-coef_ext <- coef(fm, type = "ext")
-
-plogis(coef_ext[1])
-plogis(coef_ext[2])
-plogis(coef_ext[3])
-plogis(coef_ext[4])
-
-
-coef_psi <- coef(fm, type = "psi")
-
-plogis(coef_psi[1])
-
-unmarked::backTransform(fm, type="det")
-
-summary(umf)
-```
-
-```{r}
-fm0 <- colext(
-  psiformula = ~ 1,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ 1,  # detection
-  data = umf, # data
-  control = list(trace = 1)
-  ) 
-summary(fm0)
 ```
 
 
@@ -280,29 +233,11 @@ summary(fm0)
 On essaye plusieurs sans la variance, puis selon l'AIC, on calcule l'AIC
 a la fin avec le modele qu'on a choisi.
 
-```{r}
+```{r, include=FALSE}
 fm0 <- unmarked::colext(
   psiformula = ~ 1,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
-  pformula = ~ 1,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-
-```
-
-
-Maintenant, on ajoute les variables de sites, et on regarde pour
-l'instant uniquement l'AIC, afin de faire un tri rapide. On fait une
-elimination forwards manuelle.
-
-```{r}
-fm0 <- unmarked::colext(
-  psiformula = ~ 1,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -310,8 +245,8 @@ fm0 <- unmarked::colext(
 
 fm1 <- unmarked::colext(
   psiformula = ~ Y_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -319,8 +254,8 @@ fm1 <- unmarked::colext(
 
 fm2 <- unmarked::colext(
   psiformula = ~ X_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -328,8 +263,8 @@ fm2 <- unmarked::colext(
 
 fm3 <- unmarked::colext(
   psiformula = ~ Dist_Eau,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -337,8 +272,8 @@ fm3 <- unmarked::colext(
 
 fm4 <- unmarked::colext(
   psiformula = ~ Dist_Littoral,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -346,8 +281,8 @@ fm4 <- unmarked::colext(
 
 fm5 <- unmarked::colext(
   psiformula = ~ Dist_EcotoneArbore,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -356,8 +291,8 @@ fm5 <- unmarked::colext(
 
 fm6 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -366,173 +301,142 @@ fm6 <- unmarked::colext(
 
 fm7 <- unmarked::colext(
   psiformula = ~ Ind_Diversite,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
+```
 
 
-fmList <- unmarked::fitList(fm1, fm3, fm4, fm5, fm6, fm7)
+```{r}
+fmList <- unmarked::fitList(fm0, fm1, fm3, fm4, fm5, fm6, fm7)
 unmarked::modSel(fmList)
 ```
 
-Ici on garde la variable de ?? (\$ \\text{??} \$), et on
+Ici on garde la variable de fm1 (\$ \\text{Y_10km} \$), et on
 ajoute les autres.
 
-```{r}
-fm0 <- fm6 
+```{r, include=FALSE}
+fm0 <- fm1
 
 fm1 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Y_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  psiformula = ~ Y_10km + X_10km,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
 fm2 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + X_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  psiformula = ~ Y_10km + Dist_Eau,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
 fm3 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Eau,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  psiformula = ~ Y_10km + Dist_Littoral,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
 fm4 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  psiformula = ~ Y_10km + Dist_EcotoneArbore,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
 fm5 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_EcotoneArbore,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  psiformula = ~ Y_10km + Dnst_Cultures,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
 fm6 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  psiformula = ~ Y_10km + Ind_Diversite,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
-
-
-fmList <- unmarked::fitList(fm0, fm1, fm3, fm4, fm5, fm6)
-unmarked::modSel(fmList)
-
 ```
 
-On continue ensuite avec $\text{Dnst_Cultures} + \text{Dist_Littoral}$.
 
 ```{r}
-fm0 <- fm4 
+fmList <- unmarked::fitList(fm0, fm1, fm3, fm4, fm5, fm6)
+unmarked::modSel(fmList)
+```
+
+Il n'a a que fm1 avec $\delta AIC < 2$ donc on continue pareil:
+
+```{r}
+fm0 <- fm1
 
 fm1 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Y_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  psiformula = ~ Y_10km + X_10km + Dist_Eau,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
 fm2 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + X_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  psiformula = ~ Y_10km + X_10km + Dist_EcotoneArbore,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
 fm3 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_Eau,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  psiformula = ~ Y_10km + X_10km + Dnst_Cultures,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
-fm5 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+fm4 <- unmarked::colext(
+  psiformula = ~ Y_10km + X_10km + Ind_Diversite,     # initial occupancy
+  gammaformula =  ~ quali,  # colonization
+  epsilonformula = ~ quali, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
-
-
-fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5)
-unmarked::modSel(fmList)
-
 ```
-
-Maintenant, on garde le modele fm5 c'est a dire les variables \$
-\\text{Dnst_Cultures} + \\text{Dist_Littoral} +
-\text{Dist\_EcotoneArbore}\$. Il nous reste plus beaucoup de variables,
-comme elles sont correles entre elles.
 
 ```{r}
-fm0 <- fm5
-
-fm1 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore + Y_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
-  pformula = ~ 1,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-fm2 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore + Dist_Eau,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
-  pformula = ~ 1,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-fmList <- unmarked::fitList(fm0, fm1, fm2)
+fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4)
 unmarked::modSel(fmList)
 ```
 
-Maintenant, on remarque que le modele sans variables supplementaires
-est celui dont l'AIC est le plus faible, donc on peut se permettre de
-s'arreter.\
 
-On regarde ce modele avec la variance incluse:
-
+On s'arrête ici car fm0 a le + petit AIC. On va calculer le résultats des tests pour les 4 premiers car ce sont ceux ci
 ```{r}
 fm <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
   pformula = ~ 1, 
-  gammaformula =  ~ 1,
-  epsilonformula = ~ quali_periodes,
+  gammaformula =  ~ quali,
+  epsilonformula = ~ quali,
   data = umf, 
   control = list(trace = 1),
   se = TRUE)
@@ -540,19 +444,22 @@ fm <- unmarked::colext(
 summary(fm)
 ```
 
+Significativité des variables?
+
+Analyse des résultats:
+
 ```{r}
-unmarked::backTransform(fm, type="col")
+coef_col <- coef(fm0, type = "col")
+plogis(coef_col[1]); plogis(coef_col[2]);plogis(coef_col[3]); plogis(coef_col[4])
 ```
 
 ```{r}
-coef_ext <- coef(fm, type = "ext")
-
-plogis(coef_ext[1]); plogis(coef_ext[2]); plogis(coef_ext[3])
+coef_ext <- coef(fm0, type = "ext")
+plogis(coef_ext[1]); plogis(coef_ext[2]);plogis(coef_ext[3]); plogis(coef_ext[4])
 ```
 
 ```{r}
 coef_psi <- coef(fm, type = "psi")
-
 plogis(coef_psi[1]); plogis(coef_psi[2]); plogis(coef_psi[3]); plogis(coef_psi[4])
 ```
 
@@ -560,7 +467,6 @@ plogis(coef_psi[1]); plogis(coef_psi[2]); plogis(coef_psi[3]); plogis(coef_psi[4
 unmarked::backTransform(fm, type="det")
 ```
 
-Significatif sauf Dist_EcotoneArbore.
 
 #### Periodes quantitatif.
 
@@ -572,33 +478,37 @@ fm_quali <- fm
 fm_quanti <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
   pformula = ~ 1, 
-  gammaformula =  ~ 1,
-  epsilonformula = ~ quanti_periodes,
+  gammaformula =  ~ quali,
+  epsilonformula = ~ quali,
   data = umf, 
   control = list(trace = 1),
   se = TRUE)
-
 
 fmList <- unmarked::fitList(fm_quali, fm_quanti)
 unmarked::modSel(fmList)
 ```
 
+Significativité des variables?
+
+Analyse des résultats:
+
 ```{r}
-summary(fm0)
-
-unmarked::backTransform(fm0, type="col")
-
-coef_ext <- coef(fm0, type = "ext")
-
-plogis(coef_ext[1])
-plogis(coef_ext[2])
-
-unmarked::backTransform(fm0, type="psi")
-unmarked::backTransform(fm0, type="det")
+coef_col <- coef(fm0, type = "col")
+plogis(coef_col[1]); plogis(coef_col[2]);plogis(coef_col[3]); plogis(coef_col[4])
 ```
 
 ```{r}
+coef_ext <- coef(fm0, type = "ext")
+plogis(coef_ext[1]); plogis(coef_ext[2]);plogis(coef_ext[3]); plogis(coef_ext[4])
+```
 
+```{r}
+coef_psi <- coef(fm, type = "psi")
+plogis(coef_psi[1]); plogis(coef_psi[2]); plogis(coef_psi[3]); plogis(coef_psi[4])
+```
+
+```{r}
+unmarked::backTransform(fm, type="det")
 ```
 
 ## Tests d'hypotheses
@@ -610,15 +520,14 @@ gof <- suppressWarnings(parboot(fm, statistic=SSE, nsim=30))
 gof;plot(gof)
 ```
 H_0: le modèle est adequat, vs H_1 : non H_0. 
-pvalue > 0.05 -> On ne peut pas rejeter l'hypothèse nulle ie on ne peut pas dire que le modele est inadequat.
+pvalue 0.48 > 0.05 -> On ne peut pas rejeter l'hypothèse nulle ie on ne peut pas dire que le modele est inadequat.
 pvalue <0.05 -> On rejette l'hypothese nulle: Le modele n'est pas adéquat.
 
-On a p-value = 0.1935484 > 0.05. On ne rejette pas encore le modele
+On a p-value =  0.48 > 0.05. On ne rejette pas encore le modele
 
-(avec le changement, on accepte)
 ```{r}
 library(AICcmodavg)
 mb_test <- suppressWarnings(mb.gof.test(fm, nsim=30))
 ```
 
-et ici on a un c-hat > 4 donc mauvais + p-value faible: on regette le modele.
+et ici on a un c-hat =1.8  donc bien  mais un p-value toujous au dessous de 0.05 (0.0333) c'est toujours un modèle rejettable.
