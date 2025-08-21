@@ -389,3 +389,5 @@ plot(gof0)
 pb.gof <- parboot
 gof4 <- suppressWarnings(parboot(fm4, statistic=chisq, nsim=30))
 ?parboot
+# library(formatR)
+#?tidy.source()

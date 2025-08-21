@@ -2,12 +2,15 @@ To do:
 
 Priorité
 
-- regarder video
+- ecrire livrable (
+    - variables d'environnement, 
+    - stats desc? 
+    - et commencer modélisation même si c'est un peu nulesque 
+        ie qu'a - t - on, comment interpréter, etc. Peut être sur le putois comme c'est lui qui marche le mieux?
+        Ou alors sur le lapin et reduire la taille des dates.)
+- executer les tests..
 
-- regarder colinearité (r pearson ou autre) des variables,
-- commencer a ecrire des choses
-- passer ttes variables, faire tab AIC.
-- tests..
+
 - Créer des packages..
 
 - faire des cartes avec a chaque année, oui ou non de détéction par espèce temoin.
