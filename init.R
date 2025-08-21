@@ -10,7 +10,7 @@ packages <- c(
   "patchwork", "scales", "lubridate", "purrr", "forcats", "forecast", "targets", "tarchetypes",
   "ggpubr", "collapse", "vegan", "ggspatial", "tigris", "permute", "viridis", "FactoMineR",
   "ggfortify", "bookdown", "Rcpp", "car", "corrplot", "Kendall", "terra", "exactextractr",
-  "unmarked", "GGally", "AICcmodavg"
+  "unmarked", "GGally", "AICcmodavg", "giscoR"
 )
 
 # Install missing packages

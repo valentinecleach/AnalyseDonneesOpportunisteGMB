@@ -383,5 +383,9 @@ write.table(site_covs, "site_covs.txt",
 View(site_covs)
 
 
-mb_test <- suppressWarnings(mb.gof.test(fm, nsim=30))
+mb_test <- suppressWarnings(mb.gof.test(fm0, nsim=30))
+plot(gof0)
 
+pb.gof <- parboot
+gof4 <- suppressWarnings(parboot(fm4, statistic=chisq, nsim=30))
+?parboot

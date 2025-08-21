@@ -178,25 +178,6 @@ extinction locale. C'est une chaine de Marcov.
 
 Ici on suppose, qu'il n'y a pas de faux positif.
 
-On a
-
--   psi $\psi$ : prob occupation
-
--   p $p$ : prob detection
-
--   gamma $\gamma$ : prob de colonisation
-
--   epsilon $\epsilon$ : prob d'extinction
-
-On separe les observations en 3 periodes de 4 ans :
-
--   2010 - 2014,
-
--   2015 - 2019,
-
--   2020 - 2024.
-
-
 ```{r}
 print(colSums(detection_matrice))
 ```
@@ -378,7 +359,7 @@ fm6 <- unmarked::colext(
 
 
 ```{r}
-fmList <- unmarked::fitList(fm0, fm1, fm3, fm4, fm5, fm6)
+fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5, fm6)
 unmarked::modSel(fmList)
 ```
 
@@ -425,26 +406,21 @@ fm4 <- unmarked::colext(
 ```
 
 ```{r}
+fmList <- unmarked::fitList(
+  '{psi(X, Y), p(), gamma(quali), epsilon(quali)}' = fm0, 
+  '{psi(X, Y, Dist_Eau), p(), gamma(quali), epsilon(quali)}' = fm1, 
+  '{psi(X, Y, , Dist_EcotoneArbore), p(), gamma(quali), epsilon(quali)}' = fm2, 
+  '{psi(X, Y, Dnst_Cultures), p(), gamma(quali), epsilon(quali)}' = fm3, 
+  '{psi(X, Y, Ind_Diversite), p(), gamma(quali), epsilon(quali)}' = fm4)
 fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4)
 unmarked::modSel(fmList)
 ```
 
 
 On s'arrête ici car fm0 a le + petit AIC. On va calculer le résultats des tests pour les 4 premiers car ce sont ceux ci
-```{r}
-fm <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
-  pformula = ~ 1, 
-  gammaformula =  ~ quali,
-  epsilonformula = ~ quali,
-  data = umf, 
-  control = list(trace = 1),
-  se = TRUE)
 
-summary(fm)
-```
 
-Significativité des variables?
+## Significativité des variables?
 
 Analyse des résultats:
 
@@ -459,14 +435,15 @@ plogis(coef_ext[1]); plogis(coef_ext[2]);plogis(coef_ext[3]); plogis(coef_ext[4]
 ```
 
 ```{r}
-coef_psi <- coef(fm, type = "psi")
-plogis(coef_psi[1]); plogis(coef_psi[2]); plogis(coef_psi[3]); plogis(coef_psi[4])
+coef_psi <- coef(fm0, type = "psi")
+plogis(coef_psi[1]); plogis(coef_psi[2]); plogis(coef_psi[3])
 ```
 
 ```{r}
-unmarked::backTransform(fm, type="det")
+unmarked::backTransform(fm0, type="det")
 ```
 
+summary(fm0)
 
 #### Periodes quantitatif.
 
@@ -516,8 +493,14 @@ unmarked::backTransform(fm, type="det")
 On va commencer par un goodness of fit test
 
 ```{r}
-gof <- suppressWarnings(parboot(fm, statistic=SSE, nsim=30))
-gof;plot(gof)
+gof0 <- suppressWarnings(parboot(fm0, statistic=SSE, nsim=30))
+gof0;plot(gof0)
+gof2 <- suppressWarnings(parboot(fm2, statistic=SSE, nsim=30))
+gof2;plot(gof2)
+gof3 <- suppressWarnings(parboot(fm3, statistic=SSE, nsim=30))
+gof3;plot(gof3)
+gof4 <- suppressWarnings(parboot(fm4, statistic=SSE, nsim=30))
+gof4;plot(gof4)
 ```
 H_0: le modèle est adequat, vs H_1 : non H_0. 
 pvalue 0.48 > 0.05 -> On ne peut pas rejeter l'hypothèse nulle ie on ne peut pas dire que le modele est inadequat.
@@ -530,4 +513,120 @@ library(AICcmodavg)
 mb_test <- suppressWarnings(mb.gof.test(fm, nsim=30))
 ```
 
-et ici on a un c-hat =1.8  donc bien  mais un p-value toujous au dessous de 0.05 (0.0333) c'est toujours un modèle rejettable.
+et ici on a un c-hat =1.8  donc bien  mais un p-value toujous au dessous de 0.05 (0.0333) c'est toujours un modèle pas bon...
+
+# Map
+```{r}
+grid_10x10 <- st_read(paste0(wd$data, 
+                             "derived/VariablesSite.shp")) %>%
+  transforme_carte()
+
+rf <- unmarked::ranef(fm)
+occ_prob <- unmarked::bup(rf, stat="mean")
+
+grid_10x10 <- cbind(grid_10x10, occ_prob)
+
+sum(rpois(15, 10))
+sum(bup(re))
+
+LtoM <-colorRampPalette(c('white', 'white','navy'))
+
+g1 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X1))+
+  labs(title="De 2010 à 2012")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilité de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
+g2 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X2))+
+  labs(title="De 2013 à 2015")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilité de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+g4 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X4))+
+  labs(title="De 2019 à 2021")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilité de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+g5 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X5))+
+  labs(title="De 2022 à 2024")+
+  scale_fill_gradient2(low=LtoM(0), 
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilité de presence")+ 
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
+plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
+                          g2 + theme(legend.position = "none"),
+                          g4 + theme(legend.position = "none"),
+                          g5 + theme(legend.position = "none"),
+                          common.legend = TRUE,
+                          legend = "right")
+
+ggpubr::annotate_figure(plot, 
+                        top = ggpubr::text_grob("Présence du putois"))
+
+```
+
+
+```{r}
+bretagne %>% 
+  ggplot() + 
+  geom_sf() + 
+  geom_sf(data = grid_poly, 
+          aes(fill = as_factor(z_mode[,23])),
+          lwd = 0.01) + 
+  geom_sf(data = france, alpha = 0) +
+  scale_fill_manual(name = "",
+                    values = c("gray90",
+                               "steelblue1"),
+                    labels = c("non-occupied cell", 
+                               "occupied cell")) +
+  labs(title = "Map of wolf occupancy in 2017")
+
+
+ggplot() + 
+  geom_sf(data = greece, colour = "grey50", fill = "white") + 
+  geom_sf(data = grid, colour = "grey50", fill = "white", lwd = 0.1) + 
+  geom_sf(data = ring_occ, lwd = 0.1, aes(fill = as.numeric(meanz))) + 
+  geom_sf(data = greece, colour = "grey50", fill = "white",lwd = 0.2) + 
+  scale_fill_distiller(
+    name = 'Pr(occupancy)', 
+    direction = 1,
+    palette = "Purples") + 
+  labs(title = '') +
+  xlab("") + ylab("") + 
+  facet_wrap(~ yearr, ncol = 2) + 
+  theme(legend.position = 'bottom', 
+        legend.title = element_text(size=8), 
+        legend.text = element_text(size=8),
+        legend.key.size = unit(0.5, "cm")
+        )
+```
+
+```{r}
+
+```
+
+
