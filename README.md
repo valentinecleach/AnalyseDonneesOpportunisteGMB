@@ -1,3 +1,8 @@
+
+# Analyse de donnees opportunistes pour rechercher une potentielle tendance d'évolution temporelle de populations de mammifères en Bretagne
+
+<hr style="border: 1px solid #000;">
+
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
@@ -12,20 +17,25 @@
     </ol>
 </details>
 
+
+---
+
+
 <!-- Le projet -->
 ## Le projet
 
-**Analyse de donnees opportunistes pour rechercher une potentielle tendance d'evolution temporelle de populations de mammiferes en Bretagne**
-
 Ce projet est réalisé pendant un stage d'ingénieur en data science au sein du Groupe Mammologique Breton en 2025. Il est encadré par Franck Simonnet. 
-<br>
-Il est codé avec R 4.5.0
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<p align="right">(<a href="#readme-top">remonter</a>)</p>
+
+
+---
 
 <!-- Comment utiliser -->
 ## Comment utiliser?
 
+Ce projet a été codé avec R 4.5.0
 
 1. Tout d'abord, importer les bases de données manquantes.
 
@@ -42,7 +52,9 @@ wd <- set_wd()
 4. Vous pourrez enfin lancer, a l'aide de  ```{r} knitr::knit() ``` les fichiers qui vous intéressent, sans devoir telecharger de packages ou autre.
 
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">remonter</a>)</p>
+
+---
 
 <!-- CONTACT -->
 ## Contact
@@ -50,4 +62,4 @@ Valentine CLEACH - valentine.cleach@gmail.com
 
 Lien du projet: https://github.com/valentinecleach/AnalyseDonneesOpportunisteGMB
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">remonter</a>)</p>
