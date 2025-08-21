@@ -1,5 +1,5 @@
 ---
-title: "Site Occupancy Lapin"
+title: "Site Occupancy Putois"
 date: "08/08"
 output:
   bookdown::html_document2:
@@ -32,9 +32,9 @@ VariablesSite <- VariablesSite%>%
 ```
 
 ```{r}
-Lapins <- Total %>%
+Putois <- Total %>%
   sf::st_join(VariablesSite) %>%
-  dplyr::filter(cd_nom == 61714,
+  dplyr::filter(cd_nom == 60731,
                 technique_observation == "Vu",
                 date >= as.Date("2005-01-01")) %>%
   # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
@@ -45,7 +45,7 @@ Lapins <- Total %>%
 ## Creation de la base de donnee Detection - Non Detection
 
 ```{r}
-detection_df <- Lapins %>%
+detection_df <- Putois %>%
   sf::st_drop_geometry() %>%
   dplyr::mutate(annee = lubridate::year(date)) %>%
   dplyr::select(Code_10km, annee) %>%
@@ -126,25 +126,15 @@ umf <- unmarked::unmarkedFrameOccu(y = detection_matrice,
 ```
 
 ```{r}
-unmarked::plot(umf, main="Detection/Non Detection de lapins sur les sites depuis 2005")
+unmarked::plot(umf, main="Detection/Non Detection des Putois sur les sites depuis 2005")
 ```
+Ici on va aussi garder les m�mes periodes (ie enlever 2025 et 2005-2010)
 
-On voit bien qu'on a tres peu de sites avant 2005, non pas parce qu'il
-n'y avais pas de presence de lapins, mais plus tres peu de detection. On
-a tres peu de donnees dans l'ensemble, sur toutes les especes.
-
-On retirera ensuite les annees [2005 - 2009]. J'ai longtemps hesite
-entre garder 2009, ou 2025. Les 2 ont peu de donnees par rapport aux
-reste (2025 ca je n'ai pas l'annee entiere, et 2009 car c'est tôt). Les
-deux participerait a augementer la probabilite de detection.
-
-Cependant, pour garder quelque chose de plus jolie avec des saisons de 5
-ans, j'ai garde 2025.
 
 ```{r}
-Lapins <- Total %>%
+Putoiss <- Total %>%
   sf::st_join(VariablesSite) %>%
-  dplyr::filter(cd_nom == 61714,
+  dplyr::filter(cd_nom == 60731,
                 technique_observation == "Vu",
                 date >= as.Date("2010-01-01"),
                 date < as.Date("2025-01-01")) %>%
@@ -152,7 +142,7 @@ Lapins <- Total %>%
   dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
   dplyr::mutate(year = lubridate::year(date))
 
-detection_df <- Lapins %>%
+detection_df <- Putoiss %>%
   sf::st_drop_geometry() %>%
   dplyr::mutate(annee = lubridate::year(date)) %>%
   dplyr::select(Code_10km, annee) %>%
@@ -181,94 +171,9 @@ summary(umf)
 
 ## Resultats
 
-### Modeles d'occupation a une seule saison
-
-Un model de base sans variables
-
-```{r}
-model_null <- unmarked::occu(~1 ~1, data = umf)
-unmarked::summary(model_null)
-
-
-backTransform(model_null, type="state")
-backTransform(model_null, type="det")
-
-
-confint(backTransform(model_null, type="state"))
-confint(backTransform(model_null, type="det"))
-
-coef(model_null)
-```
-
-En transformant, on a donc - La probabilite qu'un site est occupe par un
-ou plusieurs lapins est de 0,97. (En considerent toute la periode
-2005-2025) - La probabilite qu'on detecte un lapin est de 0,37
-
-On a egalement les intervalles de confiances qui sont assez serres
-autour de ces valeurs a 95%.
-
-```{r}
-model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
-unmarked::summary(model_eau)
-```
-
-```{r}
-
-noms_site_info <- c("Ind_Diversite", "Dnst_Cultures", "Dist_EcotoneArbore", "Dist_Littoral",
-                    "Dist_Eau", "air_km2", "X_10km", "Y_10km")
-
-for (i in noms_site_info) {
-  formule <- as.formula(paste("~1 ~", i))
-  
-  model <- unmarked::occu(formule, data = umf)
-  
-  grid <- seq(min(site_info[[i]], na.rm=TRUE),
-              max(site_info[[i]], na.rm=TRUE),
-              length=50)
-  
-  occ_pred <- plogis(coef(model)[1] + coef(model)[2] * grid)
-  
-  # Plot
-  plot(grid,
-       occ_pred, 
-       type = "l", 
-       lwd = 3, 
-       xlab = i, 
-       ylab = "Probabilite d'occupation estimee")
-}
-
-```
-
-On voit la relation entre nos variables de sites et la probabilite
-d'occupancy.
-
-Comparaison de plusieurs models
-
-```{r}
-model_null <- unmarked::occu(~1 ~ 1, data = umf)
-model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
-model_litt <- unmarked::occu(~1 ~ Dist_Littoral, data = umf)
-model_litt_eau <- unmarked::occu(~1 ~ Dist_Littoral + Dist_Eau,
-                                 data = umf)
-
-fmList <- unmarked::fitList('{psi, p}' = model_null,
-                            '{psi(dist_eau), p}' = model_eau,
-                            '{psi(dist_littoral), p}' = model_litt,
-                            '{psi(dist_littoral + dist_eau), p}' = model_litt_eau)
-
-unmarked::modSel(fmList)
-```
-
-D'apres Occupancy Models to study wildlife USGS, il est interessant de
-regarder les models avec $\Delta AIC < 2$. C'est a dire, ici on
-regarderais les 2 premiers models. Mais on va plutot regarder les models
-suivants comme c'est ce qui nous interesse.
-
-### Modeles d'occupation a plusieurs saisons
-
-Au sein d'une saison, les lapins sont soit présent soit absent mais ne
+Au sein d'une saison, les lapins sont soit present soit absent mais ne
 changent pas. Entre les saisons, les lapins peuvent coloniser un site
-(ie: il étiaent pas là avant et mtn ils le sont), ou disparaitre =
+(ie: il etiaent pas là avant et mtn ils le sont), ou disparaitre =
 extinction locale. C'est une chaine de Marcov.
 
 Ici on suppose, qu'il n'y a pas de faux positif.
@@ -291,113 +196,68 @@ On separe les observations en 3 periodes de 4 ans :
 
 -   2020 - 2024.
 
+
 ```{r}
-annees <- as.numeric(colnames(detection_matrice)) 
-
-quali_periodes_vector <-   dplyr::case_when(annees < 2015 ~ "periode1",
-                                            annees < 2020 ~ "periode2",
-                                            annees < 2025 ~ "periode3")
-
-quali_periodes_matrice <- matrix(rep(quali_periodes_vector, 
-                                     each = nrow(detection_df)),
-                           nrow = nrow(detection_df),
-                           byrow = FALSE) 
-
-colnames(quali_periodes_matrice) <- colnames(detection_matrice) 
-rownames(quali_periodes_matrice) <- rownames(detection_matrice)  
-quali_periodes_df <- as.data.frame(quali_periodes_matrice)
+print(colSums(detection_matrice))
 ```
 
-```{r}
-quanti_periodes_vector <-   dplyr::case_when(annees < 2015 ~ 1,
-                                             annees < 2020 ~ 2,
-                                             annees < 2025 ~ 3)
-quanti_periodes_matrice <- matrix(rep(quanti_periodes_vector, 
-                               each = nrow(detection_df)),
-                           nrow = nrow(detection_df),
-                           byrow = FALSE) 
-
-colnames(quanti_periodes_matrice) <- colnames(detection_matrice) 
-rownames(quanti_periodes_matrice) <- rownames(detection_matrice)  
-quanti_periodes_df <- as.data.frame(quanti_periodes_matrice)
-```
+On dirait que ca augemente apart 2015 - 2016 - 2017, o� on a eu une chute des detections des Putoiss.
 
 ```{r}
-site_covs_periodes <- list(
-  quanti_periodes = quanti_periodes_matrice,
-  quali_periodes = quali_periodes_matrice
-)
-```
-
-On a les periodes sous la forme qualitiative et quantitative, pour
-tester les 2 facons.
-
-```{r}
-detections_per_year = colSums(detection_matrice)
-
-print(detections_per_year)
-```
-
-On a bcp de detections sur toutes les années en vrai..
-
-```{r}
-dim(quanti_periodes_matrice); dim(quali_periodes_matrice)
-
-dim(detection_matrice)
-site_covs_periodes <- list(
-  quanti_periodes = quanti_periodes_matrice,
-  quali_periodes = quali_periodes_matrice
-)
-
 M <- nrow(detection_matrice)
-numPrimary <- 3
+numPrimary <- 5
 
 # Example: labeling each season (block)
-season_labels <- matrix(
-  c("2010-2014", "2015-2019", "2020-2024"),
+quali_periodes <- matrix(
+  c("2010-2012", "2013-2015", "2016-2018", "2019-2021", "2022-2024"),
   nrow = M, ncol = numPrimary, byrow = TRUE
 )
 
-View(season_labels)
+quanti_periodes <- matrix(
+  c(1, 2, 3, 4, 5),
+  nrow = M, ncol = numPrimary, byrow = TRUE
+)
 
 umf <- unmarkedMultFrame(
   y = detection_matrice,
   siteCovs = site_info,
-  yearlySiteCovs = list(season = season_labels),
+  yearlySiteCovs = list(quali = quali_periodes,
+                        quanti = quanti_periodes),
   numPrimary = numPrimary
 )
 
+View(detection_matrice)
 fm <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
+  psiformula = ~ 1,
   pformula = ~ 1, 
-  gammaformula =  ~ season,
-  epsilonformula = ~ season,
+  gammaformula =  ~ quali,
+  epsilonformula = ~ quali,
   data = umf, 
   control = list(trace = 1),
   se = TRUE)
 
-fm
-unmarked::backTransform(fm, type="col")
 
 coef_col <- coef(fm, type = "col")
 
 plogis(coef_col[1])
 plogis(coef_col[2])
+plogis(coef_col[3])
+plogis(coef_col[4])
+
 
 coef_ext <- coef(fm, type = "ext")
 
 plogis(coef_ext[1])
 plogis(coef_ext[2])
+plogis(coef_ext[3])
+plogis(coef_ext[4])
 
-unmarked::backTransform(fm, type="psi")
+
+coef_psi <- coef(fm, type = "psi")
+
+plogis(coef_psi[1])
+
 unmarked::backTransform(fm, type="det")
-
-
-umf <- unmarked::unmarkedMultFrame(y = detection_matrice,
-                                   siteCovs = site_info,
-                                   yearlySiteCovs = site_covs_periodes,
-                                   numPrimary = 3)
-?unmarkedM
 
 summary(umf)
 ```
@@ -414,30 +274,6 @@ fm0 <- colext(
 summary(fm0)
 ```
 
-colonisation
-
-```{r}
-unmarked::backTransform(fm0, type="col")
-```
-
-Il a ici une probabilite de $0,27$ de coloniser un site ou le lapin
-n'est pas present.
-
-```{r}
-unmarked::backTransform(fm0, type="ext")
-```
-
-Ona une probabilite d'extinction de $0,17$, donc comme $0.17<0.27$, les
-lapins devraient être sur de plus en plus du territoire.
-
-```{r}
-unmarked::backTransform(fm0, type="psi")
-unmarked::backTransform(fm0, type="det")
-```
-
-La probabilite d'etre present sur un territoire initialement, donc avant
-toute colonisation/extinction, est de $0,44$ et celle de detection est
-$0,77$.
 
 #### Periodes qualitatives.
 
@@ -455,33 +291,14 @@ fm0 <- unmarked::colext(
   se = FALSE)
 
 
-unmarked::backTransform(fm0, type="col")
-
-coef_ext <- coef(fm0, type = "ext")
-
-plogis(coef_ext[1])
-plogis(coef_ext[2])
-plogis(coef_ext[3])
-
-unmarked::backTransform(fm0, type="psi")
-unmarked::backTransform(fm0, type="det")
 ```
 
-Encore a travailler la compréhension du truc...
-
--   Probabilité de
-
-```{r}
-summary(fm0)
-coef(fm0)
-```
 
 Maintenant, on ajoute les variables de sites, et on regarde pour
 l'instant uniquement l'AIC, afin de faire un tri rapide. On fait une
 elimination forwards manuelle.
 
 ```{r}
-
 fm0 <- unmarked::colext(
   psiformula = ~ 1,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
@@ -559,10 +376,9 @@ fm7 <- unmarked::colext(
 
 fmList <- unmarked::fitList(fm1, fm3, fm4, fm5, fm6, fm7)
 unmarked::modSel(fmList)
-
 ```
 
-Ici on garde la variable de fm6 (\$ \\text{Dnst_Cultures} \$), et on
+Ici on garde la variable de ?? (\$ \\text{??} \$), et on
 ajoute les autres.
 
 ```{r}
@@ -675,10 +491,10 @@ unmarked::modSel(fmList)
 
 ```
 
-Maintenant, on garde le modèle fm5 c'est a dire les variables \$
+Maintenant, on garde le modele fm5 c'est a dire les variables \$
 \\text{Dnst_Cultures} + \\text{Dist_Littoral} +
 \text{Dist\_EcotoneArbore}\$. Il nous reste plus beaucoup de variables,
-comme elles sont correlés entre elles.
+comme elles sont correles entre elles.
 
 ```{r}
 fm0 <- fm5
@@ -705,11 +521,11 @@ fmList <- unmarked::fitList(fm0, fm1, fm2)
 unmarked::modSel(fmList)
 ```
 
-Maintenant, on remarque que le modèle sans variables supplémentaires
+Maintenant, on remarque que le modele sans variables supplementaires
 est celui dont l'AIC est le plus faible, donc on peut se permettre de
-s'arrêter.\
+s'arreter.\
 
-On regarde ce modèle avec la variance incluse:
+On regarde ce modele avec la variance incluse:
 
 ```{r}
 fm <- unmarked::colext(
@@ -785,42 +601,13 @@ unmarked::backTransform(fm0, type="det")
 
 ```
 
-### Modeles d'occupation avec des fausses positives
-
-Pas super pertinant je penses pour nous. Chaque detection, souvent est
-lie a plusieurs detections distinctes de multiples personnes. De pus,
-les donnees inserees sont des donnees de naturalites et sont verifies.
-Etant donnee que nous avons garde les donnes bien, ca nous concerne pas
-forcement, mais aurait pu etre utile avec les donnees diro.
-
 ## Tests d'hypotheses
-
-Hypothèses:
-
-1.  occupancy status at each unit does not change over the survey
-    season; i.e., units are ‘closed’ to changes in occupancy -\>
-    probablement pas mais bon
-2.  the probability of occupancy is constant across units, or
-    differences in occu pancy probability are modeled using covariates
-    -\>
-3.  the probability of detection is constant across all units and
-    surveys or is a function of unit-survey covariates; there is no
-    unmodeled heterogeneity in detection probabilities -\>
-4.  detection of species and detection histories at each location are
-    independent -\> non
-5.  species are correctly identified; i.e., no false positives -\> okay
 
 On va commencer par un goodness of fit test
 
 ```{r}
-install.packages("AICcmodavg")
-library(AICcmodavg)
-
-AICcmodavg::mb.gof.test(fm_quanti, nsim = 5)
-
 gof <- suppressWarnings(parboot(fm, statistic=SSE, nsim=30))
-gof
-plot(gof)
+gof;plot(gof)
 ```
 H_0: le mod�le est adequat, vs H_1 : non H_0. 
 pvalue > 0.05 -> On ne peut pas rejeter l'hypoth�se nulle ie on ne peut pas dire que le modele est inadequat.

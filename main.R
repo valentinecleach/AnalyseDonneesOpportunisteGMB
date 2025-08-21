@@ -5,7 +5,9 @@ loadedNamespaces()
 rm(list=setdiff(ls(), "Total"))
 
 options(encoding = 'UTF-8')
+
 source("init.R")
+wd <- set_wd()
 
 library(dplyr)
 library(sf)
@@ -379,3 +381,7 @@ write.table(site_covs, "site_covs.txt",
             sep = "\t", row.names = FALSE, col.names = FALSE, 
             quote = FALSE)
 View(site_covs)
+
+
+mb_test <- suppressWarnings(mb.gof.test(fm, nsim=30))
+
