@@ -391,3 +391,6 @@ gof4 <- suppressWarnings(parboot(fm4, statistic=chisq, nsim=30))
 ?parboot
 # library(formatR)
 #?tidy.source()
+
+mb_test_test <- mb.gof.test(fm, nsim=30)
+mb_test_test$p.value

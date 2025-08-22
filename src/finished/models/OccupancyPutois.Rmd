@@ -165,7 +165,7 @@ umf <- unmarked::unmarkedFrameOccu(y = detection_matrice,
                                    siteCovs = site_info
                                    )
 
-unmarked::plot(umf, main="Detection/Non Detection de lapins sur les sites de 2010 a 2024 inclus")
+unmarked::plot(umf, main="Detection/Non Detection de putois sur les sites de 2010 a 2024 inclus")
 summary(umf)
 ```
 
@@ -626,7 +626,26 @@ ggplot() +
 ```
 
 ```{r}
+umf <- unmarkedMultFrame(
+  y = detection_matrice,
+  siteCovs = site_info,
+  yearlySiteCovs = list(quali = quali_periodes,
+                        quanti = quanti_periodes),
+  numPrimary = numPrimary
+)
+site_info$Famille_paysage
+fm <- unmarked::colext(
+  psiformula = ~ Y_10km + X_10km + Famille_paysage,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = FALSE)
 
+summary(fm)
+backTransform(fm, "ext")
+backTransform(fm, "col")
 ```
 
 
