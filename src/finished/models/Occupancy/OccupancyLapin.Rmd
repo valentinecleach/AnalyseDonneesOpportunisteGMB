@@ -82,39 +82,6 @@ site_info <- site_info %>%
                        scale))
 ```
 
-```{r}
-site_info %>% 
-  dplyr::select(-air_km2) %>%
-  dplyr::select_if(is.numeric) %>%
-  GGally::ggcorr(label = TRUE, hjust = 0.75)
-```
-
-```{r}
-names(site_info)
-
-df <- site_info%>%
-  rename(X10km = X_10km,
-         Y10km = Y_10km) %>%
-  dplyr:: select(-air_km2) %>%
-  dplyr::select_if(is.numeric) 
-df <- as.data.frame(lapply(df, as.numeric))
-```
-
-```{r message=FALSE, warning=FALSE}
-GGally::ggpairs(as.data.frame(lapply(df, as.numeric)))
-```
-
-On voit dans ces graphiques une forte correlation lineaire entre la
-densite de cultures et l'indice de diversite. On remarque aussi une
-correlation lineaire entre X et la distance au littoral. Graphiquement,
-on ne voit pas forcement de correlation particuliers de correlation dans
-les nuage de points, apart X et Y dans contre la distance au littoral,
-mais c'est pas forcement un probleme.
-
-Comme ils le font dans l'etude avec les ours, on va se se retirer les
-covariables avec une correlation \> 0.5 et regarder les diff
-combinaisons.
-
 ## Implementation du Model
 
 Mise sous format pour la modelisation
@@ -179,147 +146,38 @@ unmarked::plot(umf, main="Detection/Non Detection de lapins sur les sites de 201
 summary(umf)
 ```
 
-## Resultats
+## Modeles d'occupation a plusieurs saisons
 
-### Modeles d'occupation a une seule saison
-
-Un model de base sans variables
-
-```{r}
-model_null <- unmarked::occu(~1 ~1, data = umf)
-unmarked::summary(model_null)
-
-
-backTransform(model_null, type="state")
-backTransform(model_null, type="det")
-
-
-confint(backTransform(model_null, type="state"))
-confint(backTransform(model_null, type="det"))
-
-coef(model_null)
-```
-
-En transformant, on a donc - La probabilite qu'un site est occupe par un
-ou plusieurs lapins est de 0,97. (En considerent toute la periode
-2005-2025) - La probabilite qu'on detecte un lapin est de 0,37
-
-On a egalement les intervalles de confiances qui sont assez serres
-autour de ces valeurs a 95%.
-
-```{r}
-model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
-unmarked::summary(model_eau)
-```
-
-```{r}
-
-noms_site_info <- c("Ind_Diversite", "Dnst_Cultures", "Dist_EcotoneArbore", "Dist_Littoral",
-                    "Dist_Eau", "air_km2", "X_10km", "Y_10km")
-
-for (i in noms_site_info) {
-  formule <- as.formula(paste("~1 ~", i))
-  
-  model <- unmarked::occu(formule, data = umf)
-  
-  grid <- seq(min(site_info[[i]], na.rm=TRUE),
-              max(site_info[[i]], na.rm=TRUE),
-              length=50)
-  
-  occ_pred <- plogis(coef(model)[1] + coef(model)[2] * grid)
-  
-  # Plot
-  plot(grid,
-       occ_pred, 
-       type = "l", 
-       lwd = 3, 
-       xlab = i, 
-       ylab = "Probabilite d'occupation estimee")
-}
-
-```
-
-On voit la relation entre nos variables de sites et la probabilite
-d'occupancy.
-
-Comparaison de plusieurs models
-
-```{r}
-model_null <- unmarked::occu(~1 ~ 1, data = umf)
-model_eau <- unmarked::occu(~1 ~ Dist_Eau, data = umf)
-model_litt <- unmarked::occu(~1 ~ Dist_Littoral, data = umf)
-model_litt_eau <- unmarked::occu(~1 ~ Dist_Littoral + Dist_Eau,
-                                 data = umf)
-
-fmList <- unmarked::fitList('{psi, p}' = model_null,
-                            '{psi(dist_eau), p}' = model_eau,
-                            '{psi(dist_littoral), p}' = model_litt,
-                            '{psi(dist_littoral + dist_eau), p}' = model_litt_eau)
-
-unmarked::modSel(fmList)
-```
-
-D'apres Occupancy Models to study wildlife USGS, il est interessant de
-regarder les models avec $\Delta AIC < 2$. C'est a dire, ici on
-regarderais les 2 premiers models. Mais on va plutot regarder les models
-suivants comme c'est ce qui nous interesse.
-
-### Modeles d'occupation a plusieurs saisons
-
-Au sein d'une saison, les lapins sont soit prÃ©sent soit absent mais ne
+Au sein d'une saison, les lapins sont soit present soit absent mais ne
 changent pas. Entre les saisons, les lapins peuvent coloniser un site
-(ie: il Ã©tiaent pas lÃ  avant et mtn ils le sont), ou disparaitre =
+(ie: il etiaent pas lÃ  avant et mtn ils le sont), ou disparaitre =
 extinction locale. C'est une chaine de Marcov.
 
 Ici on suppose, qu'il n'y a pas de faux positif.
 
 On a
-
 -   psi $\psi$ : prob occupation
-
 -   p $p$ : prob detection
-
 -   gamma $\gamma$ : prob de colonisation
-
 -   epsilon $\epsilon$ : prob d'extinction
 
 On separe les observations en 3 periodes de 4 ans :
-
 -   2010 - 2014,
-
 -   2015 - 2019,
-
 -   2020 - 2024.
 
 ```{r}
-annees <- as.numeric(colnames(detection_matrice)) 
+quali_periodes_matrice <- 
+  matrix(c('2010 - 2014','2015 - 2019','2020 - 2024'),
+         nrow = nrow(detection_df), 
+         ncol = 3, 
+         byrow = TRUE)
 
-quali_periodes_vector <-   dplyr::case_when(annees < 2015 ~ "periode1",
-                                            annees < 2020 ~ "periode2",
-                                            annees < 2025 ~ "periode3")
-
-quali_periodes_matrice <- matrix(rep(quali_periodes_vector, 
-                                     each = nrow(detection_df)),
-                           nrow = nrow(detection_df),
-                           byrow = FALSE) 
-
-colnames(quali_periodes_matrice) <- colnames(detection_matrice) 
-rownames(quali_periodes_matrice) <- rownames(detection_matrice)  
-quali_periodes_df <- as.data.frame(quali_periodes_matrice)
-```
-
-```{r}
-quanti_periodes_vector <-   dplyr::case_when(annees < 2015 ~ 1,
-                                             annees < 2020 ~ 2,
-                                             annees < 2025 ~ 3)
-quanti_periodes_matrice <- matrix(rep(quanti_periodes_vector, 
-                               each = nrow(detection_df)),
-                           nrow = nrow(detection_df),
-                           byrow = FALSE) 
-
-colnames(quanti_periodes_matrice) <- colnames(detection_matrice) 
-rownames(quanti_periodes_matrice) <- rownames(detection_matrice)  
-quanti_periodes_df <- as.data.frame(quanti_periodes_matrice)
+quanti_periodes_matrice <- matrix(
+  1:3, 
+  nrow=nrow(detection_df),
+  ncol=3, 
+  byrow=TRUE)
 ```
 
 ```{r}
@@ -338,68 +196,32 @@ detections_per_year = colSums(detection_matrice)
 print(detections_per_year)
 ```
 
-On a bcp de detections sur toutes les annÃ©es en vrai..
+On a bcp de detections sur toutes les annees en vrai..
 
 ```{r}
-dim(quanti_periodes_matrice); dim(quali_periodes_matrice)
-
-dim(detection_matrice)
-site_covs_periodes <- list(
-  quanti_periodes = quanti_periodes_matrice,
-  quali_periodes = quali_periodes_matrice
-)
-
-M <- nrow(detection_matrice)
-numPrimary <- 3
-
-# Example: labeling each season (block)
-season_labels <- matrix(
-  c("2010-2014", "2015-2019", "2020-2024"),
-  nrow = M, ncol = numPrimary, byrow = TRUE
-)
-
-View(season_labels)
-
 umf <- unmarkedMultFrame(
   y = detection_matrice,
   siteCovs = site_info,
-  yearlySiteCovs = list(season = season_labels),
-  numPrimary = numPrimary
+  yearlySiteCovs = site_covs_periodes,
+  numPrimary = 3
 )
+
 
 fm <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
   pformula = ~ 1, 
-  gammaformula =  ~ season,
-  epsilonformula = ~ season,
+  gammaformula =  ~ 1,
+  epsilonformula = ~ 1,
   data = umf, 
   control = list(trace = 1),
   se = TRUE)
+```
 
-fm
-unmarked::backTransform(fm, type="col")
-
-coef_col <- coef(fm, type = "col")
-
-plogis(coef_col[1])
-plogis(coef_col[2])
-
-coef_ext <- coef(fm, type = "ext")
-
-plogis(coef_ext[1])
-plogis(coef_ext[2])
-
-unmarked::backTransform(fm, type="psi")
-unmarked::backTransform(fm, type="det")
-
-
-umf <- unmarked::unmarkedMultFrame(y = detection_matrice,
-                                   siteCovs = site_info,
-                                   yearlySiteCovs = site_covs_periodes,
-                                   numPrimary = 3)
-?unmarkedM
-
-summary(umf)
+Les coefficients transformé:
+```{r}
+plogis(coef(fm)[1]);plogis(coef(fm)[2]);plogis(coef(fm)[3]);plogis(coef(fm)[4])
+plogis(coef(fm)[5]);plogis(coef(fm)[6])
+plogis(coef(fm)[7])
 ```
 
 ```{r}
@@ -420,14 +242,14 @@ colonisation
 unmarked::backTransform(fm0, type="col")
 ```
 
-Il a ici une probabilite de $0,27$ de coloniser un site ou le lapin
+Il a ici une probabilite de $0,55$ de coloniser un site ou le lapin
 n'est pas present.
 
 ```{r}
 unmarked::backTransform(fm0, type="ext")
 ```
 
-Ona une probabilite d'extinction de $0,17$, donc comme $0.17<0.27$, les
+Ona une probabilite d'extinction de $0,12$, donc comme $0.12<0.55$, les
 lapins devraient Ãªtre sur de plus en plus du territoire.
 
 ```{r}
@@ -439,41 +261,14 @@ La probabilite d'etre present sur un territoire initialement, donc avant
 toute colonisation/extinction, est de $0,44$ et celle de detection est
 $0,77$.
 
-#### Periodes qualitatives.
 
 On essaye plusieurs sans la variance, puis selon l'AIC, on calcule l'AIC
 a la fin avec le modele qu'on a choisi.
 
 ```{r}
-fm0 <- unmarked::colext(
-  psiformula = ~ 1,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
-  pformula = ~ 1,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-
-unmarked::backTransform(fm0, type="col")
-
-coef_ext <- coef(fm0, type = "ext")
-
-plogis(coef_ext[1])
-plogis(coef_ext[2])
-plogis(coef_ext[3])
-
-unmarked::backTransform(fm0, type="psi")
-unmarked::backTransform(fm0, type="det")
-```
-
-Encore a travailler la comprÃ©hension du truc...
-
--   ProbabilitÃ© de
-
-```{r}
-summary(fm0)
-coef(fm0)
+for(i in 1:length(coef(fm0))){
+  print(plogis(coef(fm0)[i]))
+}
 ```
 
 Maintenant, on ajoute les variables de sites, et on regarde pour
@@ -481,11 +276,10 @@ l'instant uniquement l'AIC, afin de faire un tri rapide. On fait une
 elimination forwards manuelle.
 
 ```{r}
-
 fm0 <- unmarked::colext(
   psiformula = ~ 1,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -494,7 +288,7 @@ fm0 <- unmarked::colext(
 fm1 <- unmarked::colext(
   psiformula = ~ Y_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -503,7 +297,7 @@ fm1 <- unmarked::colext(
 fm2 <- unmarked::colext(
   psiformula = ~ X_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -512,7 +306,7 @@ fm2 <- unmarked::colext(
 fm3 <- unmarked::colext(
   psiformula = ~ Dist_Eau,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -521,7 +315,7 @@ fm3 <- unmarked::colext(
 fm4 <- unmarked::colext(
   psiformula = ~ Dist_Littoral,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -530,7 +324,7 @@ fm4 <- unmarked::colext(
 fm5 <- unmarked::colext(
   psiformula = ~ Dist_EcotoneArbore,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -540,7 +334,7 @@ fm5 <- unmarked::colext(
 fm6 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -550,14 +344,14 @@ fm6 <- unmarked::colext(
 fm7 <- unmarked::colext(
   psiformula = ~ Ind_Diversite,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
 
-fmList <- unmarked::fitList(fm1, fm3, fm4, fm5, fm6, fm7)
+fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5, fm6, fm7)
 unmarked::modSel(fmList)
 
 ```
@@ -571,7 +365,7 @@ fm0 <- fm6
 fm1 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Y_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -580,7 +374,7 @@ fm1 <- unmarked::colext(
 fm2 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + X_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -589,7 +383,7 @@ fm2 <- unmarked::colext(
 fm3 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Eau,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -598,7 +392,7 @@ fm3 <- unmarked::colext(
 fm4 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Littoral,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -607,7 +401,7 @@ fm4 <- unmarked::colext(
 fm5 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_EcotoneArbore,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -616,7 +410,7 @@ fm5 <- unmarked::colext(
 fm6 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -636,7 +430,7 @@ fm0 <- fm4
 fm1 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Littoral + Y_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -645,7 +439,7 @@ fm1 <- unmarked::colext(
 fm2 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Littoral + X_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -654,58 +448,28 @@ fm2 <- unmarked::colext(
 fm3 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_Eau,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
-fm5 <- unmarked::colext(
+fm4 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
 
-fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5)
+fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4)
 unmarked::modSel(fmList)
 
 ```
 
-Maintenant, on garde le modÃ¨le fm5 c'est a dire les variables \$
-\\text{Dnst_Cultures} + \\text{Dist_Littoral} +
-\text{Dist\_EcotoneArbore}\$. Il nous reste plus beaucoup de variables,
-comme elles sont correlÃ©s entre elles.
-
-```{r}
-fm0 <- fm5
-
-fm1 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore + Y_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
-  pformula = ~ 1,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-fm2 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore + Dist_Eau,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ quali_periodes, # extinction
-  pformula = ~ 1,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-fmList <- unmarked::fitList(fm0, fm1, fm2)
-unmarked::modSel(fmList)
-```
-
-Maintenant, on remarque que le modÃ¨le sans variables supplÃ©mentaires
+Maintenant, on remarque que le modÃ¨le sans variables supplementaires
 est celui dont l'AIC est le plus faible, donc on peut se permettre de
 s'arrÃªter.\
 
@@ -713,77 +477,18 @@ On regarde ce modÃ¨le avec la variance incluse:
 
 ```{r}
 fm <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
-  pformula = ~ 1, 
-  gammaformula =  ~ 1,
-  epsilonformula = ~ quali_periodes,
-  data = umf, 
+  psiformula = ~ Dnst_Cultures + Dist_Littoral,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
   control = list(trace = 1),
   se = TRUE)
 
 summary(fm)
 ```
 
-```{r}
-unmarked::backTransform(fm, type="col")
-```
 
-```{r}
-coef_ext <- coef(fm, type = "ext")
-
-plogis(coef_ext[1]); plogis(coef_ext[2]); plogis(coef_ext[3])
-```
-
-```{r}
-coef_psi <- coef(fm, type = "psi")
-
-plogis(coef_psi[1]); plogis(coef_psi[2]); plogis(coef_psi[3]); plogis(coef_psi[4])
-```
-
-```{r}
-unmarked::backTransform(fm, type="det")
-```
-
-Significatif sauf Dist_EcotoneArbore.
-
-#### Periodes quantitatif.
-
-On fait de meme avec les variables en quantitatif.
-
-```{r}
-fm_quali <- fm
-
-fm_quanti <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
-  pformula = ~ 1, 
-  gammaformula =  ~ 1,
-  epsilonformula = ~ quanti_periodes,
-  data = umf, 
-  control = list(trace = 1),
-  se = TRUE)
-
-
-fmList <- unmarked::fitList(fm_quali, fm_quanti)
-unmarked::modSel(fmList)
-```
-
-```{r}
-summary(fm0)
-
-unmarked::backTransform(fm0, type="col")
-
-coef_ext <- coef(fm0, type = "ext")
-
-plogis(coef_ext[1])
-plogis(coef_ext[2])
-
-unmarked::backTransform(fm0, type="psi")
-unmarked::backTransform(fm0, type="det")
-```
-
-```{r}
-
-```
 
 ### Modeles d'occupation avec des fausses positives
 
@@ -813,14 +518,8 @@ HypothÃ¨ses:
 On va commencer par un goodness of fit test
 
 ```{r}
-install.packages("AICcmodavg")
-library(AICcmodavg)
-
-AICcmodavg::mb.gof.test(fm_quanti, nsim = 5)
-
-gof <- suppressWarnings(parboot(fm, statistic=SSE, nsim=30))
-gof
-plot(gof)
+gof <- suppressWarnings(unmarked::parboot(fm, statistic=SSE, nsim=30))
+gof;plot(gof)
 ```
 H_0: le modèle est adequat, vs H_1 : non H_0. 
 pvalue > 0.05 -> On ne peut pas rejeter l'hypothèse nulle ie on ne peut pas dire que le modele est inadequat.
@@ -830,8 +529,107 @@ On a p-value = 0.1935484 > 0.05. On ne rejette pas encore le modele
 
 (avec le changement, on accepte)
 ```{r}
-library(AICcmodavg)
-mb_test <- suppressWarnings(mb.gof.test(fm, nsim=30))
+mb_test <- suppressWarnings(AICcmodavg::mb.gof.test(fm, nsim=100))
 ```
 
 et ici on a un c-hat > 4 donc mauvais + p-value faible: on regette le modele.
+
+```{r}
+chisq <- function(fm) {
+    umf <- fm@data
+    y <- umf@y
+    y[y>1] <- 1
+    fv <- fitted(fm)
+    sum((y-fv)^2/(fv*(1-fv)), na.rm=TRUE)
+    }
+
+set.seed(1)
+(pb <- parboot(fm2, statistic=chisq, nsim=100, parallel=FALSE))
+```
+LE LAPIN OKAY? 
+Un peu suspicieux quand même 0.99 ....
+
+```{r}
+fm2 <- unmarked::colext(psiformula = ~Dnst_Cultures + Dist_Littoral + 
+    X_10km, gammaformula = ~1, epsilonformula = ~1, pformula = ~1, 
+    data = umf, se = TRUE, control = list(trace = 1))
+```
+
+
+## Graphiques 
+```{r}
+m1 <- nonparboot(fm, 
+                 B = 10)
+predicted_occupancy <- data.frame(saison = c(1:3),
+                                  smoothed_occ = smoothed(fm)[2,],
+                                  SE = m1@smoothed.mean.bsse[2,])
+
+predicted_occupancy%>%
+  ggplot( aes(x=saison, y=smoothed_occ)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Probabilité d'occupation du putois a travers les saisons")+
+  theme_bw()
+```
+```{r}
+
+grid_10x10 <- st_read(paste0(wd$data, 
+                             "derived/VariablesSite.shp")) %>%
+  transforme_carte()
+
+rf <- unmarked::ranef(fm)
+occ_prob <- unmarked::bup(rf, stat="mean")
+
+grid_10x10 <- cbind(grid_10x10, occ_prob)
+
+
+LtoM <-colorRampPalette(c('white','darkorange4'))
+
+
+g1 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X1))+
+  labs(title="De 2010 à 2014")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilité de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
+g2 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X2))+
+  labs(title="De 2015 à 2019")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilité de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
+g3 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X3))+
+  labs(title="De 2020 à 2024")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilité de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
+plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
+                          g2 + theme(legend.position = "none"),
+                          g3 + theme(legend.position = "none"),
+                          common.legend = TRUE,
+                          legend = "right")
+
+ggpubr::annotate_figure(plot, 
+                        top = ggpubr::text_grob("Présence du Lapin"))
+
+```
+

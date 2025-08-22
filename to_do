@@ -11,6 +11,12 @@ Priorité
 - executer les tests..
 
 
+- refaire l'occupancy model mais peut etre 
+      saison = annee (14)
+      detection = saison (4)
+    
+14*4 = 56 colonnes de saison ?
+
 - Créer des packages..
 
 - faire des cartes avec a chaque année, oui ou non de détéction par espèce temoin.

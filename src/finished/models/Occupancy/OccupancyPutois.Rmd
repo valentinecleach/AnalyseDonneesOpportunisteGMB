@@ -526,8 +526,6 @@ occ_prob <- unmarked::bup(rf, stat="mean")
 
 grid_10x10 <- cbind(grid_10x10, occ_prob)
 
-sum(rpois(15, 10))
-sum(bup(re))
 
 LtoM <-colorRampPalette(c('white', 'white','navy'))
 
