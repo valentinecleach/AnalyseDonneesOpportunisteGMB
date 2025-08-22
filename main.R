@@ -394,3 +394,17 @@ gof4 <- suppressWarnings(parboot(fm4, statistic=chisq, nsim=30))
 
 mb_test_test <- mb.gof.test(fm, nsim=30)
 mb_test_test$p.value
+
+
+m1 <- nonparboot(fm, 
+                 B = 10)
+predicted_occupancy <- data.frame(saison = c(1:5),
+                                  smoothed_occ = smoothed(fm)[2,],
+                                  SE = m1@smoothed.mean.bsse[2,])
+
+predicted_occupancy%>%
+  ggplot( aes(x=saison, y=smoothed_occ)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Probabilité d'occupation du putois a travers les saisons")+
+  theme_bw()

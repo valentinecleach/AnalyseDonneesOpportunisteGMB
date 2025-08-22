@@ -641,11 +641,26 @@ fm <- unmarked::colext(
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = FALSE)
+  se = TRUE)
 
 summary(fm)
 backTransform(fm, "ext")
 backTransform(fm, "col")
 ```
 
+On regarde ici les changement a travers le temps
+```{r}
+m1 <- nonparboot(fm, 
+                 B = 10)
+predicted_occupancy <- data.frame(saison = c(1:5),
+                                  smoothed_occ = smoothed(fm)[2,],
+                                  SE = m1@smoothed.mean.bsse[2,])
 
+predicted_occupancy%>%
+  ggplot( aes(x=saison, y=smoothed_occ)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Probabilité d'occupation du putois a travers les saisons")+
+  theme_bw()
+```
+On voit que le putois augemente, comme on a dit précédamment.
