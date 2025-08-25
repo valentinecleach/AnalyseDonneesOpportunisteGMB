@@ -106,9 +106,20 @@ knitr::knit(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"))
 (changer le highlight tango, theme dans le --- en haut)
 
 
-rmarkdown::render(paste0(wd$src, "finished/models/OccupancyLapin.Rmd"),
+rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/OccupancyLapin.Rmd"),
                   output_file = paste0(wd$output, 
-                                       "models/OccupancyLapin.html"),
+                                       "models/Occupancy/OccupancyLapin.html"),
+                  encoding="UTF-8")
+
+
+rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/OccupancyPutois.Rmd"),
+                  output_file = paste0(wd$output, 
+                                       "models/Occupancy/OccupancyPutois.html"),
+                  encoding="UTF-8")
+
+rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/OccupancyHerisson.Rmd"),
+                  output_file = paste0(wd$output, 
+                                       "models/Occupancy/OccupancyHerisson.html"),
                   encoding="UTF-8")
 
 rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/SiteCovariates.Rmd"),
@@ -242,7 +253,7 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 cat ~/.ssh/id_ed25519.pub
 # Ajouter clef ssh a github:
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGkbmhO7R0CRFQUs4wbsT+6z+fU/JMwAlCxRqsuX2rix valentine.cleach@gmail.com
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGI3pqcUBgSjS41VCD6szpSd2050m/L2wqHElg0j7jQa valentine.cleach@gmail.com
 # Dans bash a nouveau.
 ssh -T git@github.com
 git remote -v
@@ -289,7 +300,7 @@ ggplot() +
 
 
 ###############################
-##### Méthode grenouilles #####
+##### M?thode grenouilles #####
 ###############################
 
 
@@ -404,3 +415,46 @@ mb_test_test$p.value
 
 
 plot(pb)
+
+
+################################################
+################################################
+
+Lapins <- Total %>%
+  sf::st_join(VariablesSite) %>%
+  dplyr::filter(cd_nom == 61714,
+                technique_observation == "Vu",
+                date >= as.Date("2005-01-01")) %>%
+  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
+  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
+  dplyr::mutate(year = lubridate::year(date))
+
+Autres <- Total %>%
+  sf::st_join(VariablesSite) %>%
+  dplyr::filter(cd_nom != 61714,
+                technique_observation == "Vu",
+                date >= as.Date("2005-01-01"))%>%
+  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
+  dplyr::mutate(year = lubridate::year(date))
+
+View(Autres)
+
+detection_autres <- Autres %>%
+  sf::st_drop_geometry() %>%
+  dplyr::mutate(annee = lubridate::year(date)) %>%
+  dplyr::select(Code_10km, annee) %>%
+  dplyr::count(Code_10km, annee) %>%
+  tidyr::complete(Code_10km, 
+                  annee = tidyr::full_seq(annee, 1), 
+                  fill = list(n = 0)) %>%
+  tidyr::pivot_wider(names_from = annee, 
+                     values_from = n) %>%
+  dplyr::arrange(Code_10km) %>%
+  dplyr::filter(!is.na(Code_10km))
+
+noms <- detection_autres$Code_10km
+detection_autres_matrice <- as.matrix(detection_autres[, -1])
+rownames(detection_autres_matrice) <- noms
+
+
+################################################

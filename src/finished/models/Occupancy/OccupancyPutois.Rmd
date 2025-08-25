@@ -15,6 +15,7 @@ editor_options:
 ```{r}
 library(dplyr);library(ggplot2);library(sf);library(unmarked)
 theme_set(theme_light(base_size = 16))
+set.seed(1234)
 ```
 
 ## Importation des bases de donnees
@@ -128,7 +129,7 @@ umf <- unmarked::unmarkedFrameOccu(y = detection_matrice,
 ```{r}
 unmarked::plot(umf, main="Detection/Non Detection des Putois sur les sites depuis 2005")
 ```
-Ici on va aussi garder les mêmes periodes (ie enlever 2025 et 2005-2010)
+Ici on va aussi garder les m?mes periodes (ie enlever 2025 et 2005-2010)
 
 
 ```{r}
@@ -182,7 +183,7 @@ Ici on suppose, qu'il n'y a pas de faux positif.
 print(colSums(detection_matrice))
 ```
 
-On dirait que ca augemente apart 2015 - 2016 - 2017, où on a eu une chute des detections des Putoiss.
+On dirait que ca augemente apart 2015 - 2016 - 2017, o? on a eu une chute des detections des Putoiss.
 
 ```{r}
 M <- nrow(detection_matrice)
@@ -208,17 +209,15 @@ umf <- unmarkedMultFrame(
 )
 ```
 
-
-#### Periodes qualitatives.
-
+# creation des modeles
 On essaye plusieurs sans la variance, puis selon l'AIC, on calcule l'AIC
 a la fin avec le modele qu'on a choisi.
 
 ```{r, include=FALSE}
 fm0 <- unmarked::colext(
   psiformula = ~ 1,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -226,8 +225,8 @@ fm0 <- unmarked::colext(
 
 fm1 <- unmarked::colext(
   psiformula = ~ Y_10km,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -235,8 +234,8 @@ fm1 <- unmarked::colext(
 
 fm2 <- unmarked::colext(
   psiformula = ~ X_10km,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -244,8 +243,8 @@ fm2 <- unmarked::colext(
 
 fm3 <- unmarked::colext(
   psiformula = ~ Dist_Eau,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -253,8 +252,8 @@ fm3 <- unmarked::colext(
 
 fm4 <- unmarked::colext(
   psiformula = ~ Dist_Littoral,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -262,8 +261,8 @@ fm4 <- unmarked::colext(
 
 fm5 <- unmarked::colext(
   psiformula = ~ Dist_EcotoneArbore,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -272,8 +271,8 @@ fm5 <- unmarked::colext(
 
 fm6 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -282,8 +281,8 @@ fm6 <- unmarked::colext(
 
 fm7 <- unmarked::colext(
   psiformula = ~ Ind_Diversite,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -304,17 +303,17 @@ fm0 <- fm1
 
 fm1 <- unmarked::colext(
   psiformula = ~ Y_10km + X_10km,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = FALSE)
+  se = TRUE)
 
 fm2 <- unmarked::colext(
   psiformula = ~ Y_10km + Dist_Eau,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -322,8 +321,8 @@ fm2 <- unmarked::colext(
 
 fm3 <- unmarked::colext(
   psiformula = ~ Y_10km + Dist_Littoral,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -331,8 +330,8 @@ fm3 <- unmarked::colext(
 
 fm4 <- unmarked::colext(
   psiformula = ~ Y_10km + Dist_EcotoneArbore,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -340,8 +339,8 @@ fm4 <- unmarked::colext(
 
 fm5 <- unmarked::colext(
   psiformula = ~ Y_10km + Dnst_Cultures,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -349,8 +348,8 @@ fm5 <- unmarked::colext(
 
 fm6 <- unmarked::colext(
   psiformula = ~ Y_10km + Ind_Diversite,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -370,8 +369,8 @@ fm0 <- fm1
 
 fm1 <- unmarked::colext(
   psiformula = ~ Y_10km + X_10km + Dist_Eau,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -379,8 +378,8 @@ fm1 <- unmarked::colext(
 
 fm2 <- unmarked::colext(
   psiformula = ~ Y_10km + X_10km + Dist_EcotoneArbore,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -388,8 +387,8 @@ fm2 <- unmarked::colext(
 
 fm3 <- unmarked::colext(
   psiformula = ~ Y_10km + X_10km + Dnst_Cultures,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -397,8 +396,8 @@ fm3 <- unmarked::colext(
 
 fm4 <- unmarked::colext(
   psiformula = ~ Y_10km + X_10km + Ind_Diversite,     # initial occupancy
-  gammaformula =  ~ quali,  # colonization
-  epsilonformula = ~ quali, # extinction
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1),
@@ -407,22 +406,22 @@ fm4 <- unmarked::colext(
 
 ```{r}
 fmList <- unmarked::fitList(
-  '{psi(X, Y), p(), gamma(quali), epsilon(quali)}' = fm0, 
-  '{psi(X, Y, Dist_Eau), p(), gamma(quali), epsilon(quali)}' = fm1, 
-  '{psi(X, Y, , Dist_EcotoneArbore), p(), gamma(quali), epsilon(quali)}' = fm2, 
-  '{psi(X, Y, Dnst_Cultures), p(), gamma(quali), epsilon(quali)}' = fm3, 
-  '{psi(X, Y, Ind_Diversite), p(), gamma(quali), epsilon(quali)}' = fm4)
+  '{psi(X, Y), p(), gamma(), epsilon()}' = fm0, 
+  '{psi(X, Y, Dist_Eau), p(), gamma(), epsilon()}' = fm1, 
+  '{psi(X, Y, , Dist_EcotoneArbore), p(), gamma(), epsilon()}' = fm2, 
+  '{psi(X, Y, Dnst_Cultures), p(), gamma(), epsilon()}' = fm3, 
+  '{psi(X, Y, Ind_Diversite), p(), gamma(), epsilon()}' = fm4)
 fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4)
 unmarked::modSel(fmList)
 ```
 
 
-On s'arrête ici car fm0 a le + petit AIC. On va calculer le résultats des tests pour les 4 premiers car ce sont ceux ci
+On s'arr?te ici car fm0 a le + petit AIC. On va calculer le r?sultats des tests pour les 4 premiers car ce sont ceux ci
 
 
-## Significativité des variables?
+## Significativit? des variables?
 
-Analyse des résultats:
+Analyse des r?sultats:
 
 ```{r}
 coef_col <- coef(fm0, type = "col")
@@ -443,49 +442,8 @@ plogis(coef_psi[1]); plogis(coef_psi[2]); plogis(coef_psi[3])
 unmarked::backTransform(fm0, type="det")
 ```
 
+```{r}
 summary(fm0)
-
-#### Periodes quantitatif.
-
-On fait de meme avec les variables en quantitatif.
-
-```{r}
-fm_quali <- fm
-
-fm_quanti <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
-  pformula = ~ 1, 
-  gammaformula =  ~ quali,
-  epsilonformula = ~ quali,
-  data = umf, 
-  control = list(trace = 1),
-  se = TRUE)
-
-fmList <- unmarked::fitList(fm_quali, fm_quanti)
-unmarked::modSel(fmList)
-```
-
-Significativité des variables?
-
-Analyse des résultats:
-
-```{r}
-coef_col <- coef(fm0, type = "col")
-plogis(coef_col[1]); plogis(coef_col[2]);plogis(coef_col[3]); plogis(coef_col[4])
-```
-
-```{r}
-coef_ext <- coef(fm0, type = "ext")
-plogis(coef_ext[1]); plogis(coef_ext[2]);plogis(coef_ext[3]); plogis(coef_ext[4])
-```
-
-```{r}
-coef_psi <- coef(fm, type = "psi")
-plogis(coef_psi[1]); plogis(coef_psi[2]); plogis(coef_psi[3]); plogis(coef_psi[4])
-```
-
-```{r}
-unmarked::backTransform(fm, type="det")
 ```
 
 ## Tests d'hypotheses
@@ -493,27 +451,40 @@ unmarked::backTransform(fm, type="det")
 On va commencer par un goodness of fit test
 
 ```{r}
-gof0 <- suppressWarnings(parboot(fm0, statistic=SSE, nsim=30))
-gof0;plot(gof0)
-gof2 <- suppressWarnings(parboot(fm2, statistic=SSE, nsim=30))
-gof2;plot(gof2)
-gof3 <- suppressWarnings(parboot(fm3, statistic=SSE, nsim=30))
-gof3;plot(gof3)
-gof4 <- suppressWarnings(parboot(fm4, statistic=SSE, nsim=30))
-gof4;plot(gof4)
+
+chisq <- function(fm) {
+    umf <- fm@data
+    y <- umf@y
+    y[y>1] <- 1
+    fv <- fitted(fm)
+    sum((y-fv)^2/(fv*(1-fv)), na.rm=TRUE)
+    }
+
+(gof0 <- parboot(fm0, statistic=chisq, nsim=40, parallel=FALSE))
+
+(gof1 <- parboot(fm1, statistic=chisq, nsim=40, parallel=FALSE))
+
+(gof2 <- parboot(fm2, statistic=chisq, nsim=40, parallel=FALSE))
+
+(gof3 <- parboot(fm3, statistic=chisq, nsim=40, parallel=FALSE))
+
+(gof4 <- parboot(fm4, statistic=chisq, nsim=40, parallel=FALSE))
 ```
-H_0: le modèle est adequat, vs H_1 : non H_0. 
-pvalue 0.48 > 0.05 -> On ne peut pas rejeter l'hypothèse nulle ie on ne peut pas dire que le modele est inadequat.
-pvalue <0.05 -> On rejette l'hypothese nulle: Le modele n'est pas adéquat.
+H_0: le mod?le est adequat, vs H_1 : non H_0. 
+pvalue 0.48 > 0.05 -> On ne peut pas rejeter l'hypoth?se nulle ie on ne peut pas dire que le modele est inadequat.
+pvalue <0.05 -> On rejette l'hypothese nulle: Le modele n'est pas ad?quat.
 
 On a p-value =  0.48 > 0.05. On ne rejette pas encore le modele
 
 ```{r}
+
+fm <- fm0
+
 library(AICcmodavg)
-mb_test <- suppressWarnings(mb.gof.test(fm, nsim=30))
+mb_test <- suppressWarnings(AICcmodavg::mb.gof.test(fm, nsim=30))
 ```
 
-et ici on a un c-hat =1.8  donc bien  mais un p-value toujous au dessous de 0.05 (0.0333) c'est toujours un modèle pas bon...
+et ici on a un c-hat =1.8  donc bien  mais un p-value toujous au dessous de 0.05 (0.0333) c'est toujours un mod?le pas bon...
 
 # Map
 ```{r}
@@ -526,16 +497,15 @@ occ_prob <- unmarked::bup(rf, stat="mean")
 
 grid_10x10 <- cbind(grid_10x10, occ_prob)
 
-
 LtoM <-colorRampPalette(c('white', 'white','navy'))
 
 g1 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X1))+
-  labs(title="De 2010 à 2012")+
+  labs(title="De 2010 ? 2012")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilité de presence")+
+                       name = "Probabilit? de presence")+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
@@ -543,33 +513,34 @@ g1 <- ggplot() +
 
 g2 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X2))+
-  labs(title="De 2013 à 2015")+
+  labs(title="De 2013 ? 2015")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilité de presence")+
+                       name = "Probabilit? de presence")+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
 
+
 g4 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X4))+
-  labs(title="De 2019 à 2021")+
+  labs(title="De 2019 ? 2021")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilité de presence")+
+                       name = "Probabilit? de presence")+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
 
 g5 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X5))+
-  labs(title="De 2022 à 2024")+
+  labs(title="De 2022 ? 2024")+
   scale_fill_gradient2(low=LtoM(0), 
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilité de presence")+ 
+                       name = "Probabilit? de presence")+ 
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
@@ -583,45 +554,10 @@ plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
                           legend = "right")
 
 ggpubr::annotate_figure(plot, 
-                        top = ggpubr::text_grob("Présence du putois"))
+                        top = ggpubr::text_grob("Pr?sence du putois"))
 
 ```
 
-
-```{r}
-bretagne %>% 
-  ggplot() + 
-  geom_sf() + 
-  geom_sf(data = grid_poly, 
-          aes(fill = as_factor(z_mode[,23])),
-          lwd = 0.01) + 
-  geom_sf(data = france, alpha = 0) +
-  scale_fill_manual(name = "",
-                    values = c("gray90",
-                               "steelblue1"),
-                    labels = c("non-occupied cell", 
-                               "occupied cell")) +
-  labs(title = "Map of wolf occupancy in 2017")
-
-
-ggplot() + 
-  geom_sf(data = greece, colour = "grey50", fill = "white") + 
-  geom_sf(data = grid, colour = "grey50", fill = "white", lwd = 0.1) + 
-  geom_sf(data = ring_occ, lwd = 0.1, aes(fill = as.numeric(meanz))) + 
-  geom_sf(data = greece, colour = "grey50", fill = "white",lwd = 0.2) + 
-  scale_fill_distiller(
-    name = 'Pr(occupancy)', 
-    direction = 1,
-    palette = "Purples") + 
-  labs(title = '') +
-  xlab("") + ylab("") + 
-  facet_wrap(~ yearr, ncol = 2) + 
-  theme(legend.position = 'bottom', 
-        legend.title = element_text(size=8), 
-        legend.text = element_text(size=8),
-        legend.key.size = unit(0.5, "cm")
-        )
-```
 
 ```{r}
 umf <- unmarkedMultFrame(
@@ -658,7 +594,7 @@ predicted_occupancy%>%
   ggplot( aes(x=saison, y=smoothed_occ)) +
   geom_line() +
   geom_point() +
-  labs(title = "Probabilité d'occupation du putois a travers les saisons")+
+  labs(title = "Probabilit? d'occupation du putois a travers les saisons")+
   theme_bw()
 ```
-On voit que le putois augemente, comme on a dit précédamment.
+On voit que le putois augemente, comme on a dit precedamment.

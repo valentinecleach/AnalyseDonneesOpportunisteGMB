@@ -120,3 +120,4 @@ ajoute_clust_a_Total <- function(bdd = Total){
   
   return(bdd)
 } 
+
