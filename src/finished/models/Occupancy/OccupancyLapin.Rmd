@@ -15,7 +15,7 @@ editor_options:
 ```{r}
 library(dplyr);library(ggplot2);library(sf);library(unmarked)
 theme_set(theme_light(base_size = 16))
-set.seed(1234)
+set.seed(12345)
 ```
 
 ## Importation des bases de donnees
@@ -144,15 +144,15 @@ summary(umf)
 ### Periodes
 ```{r}
 quali_periodes_matrice <- 
-  matrix(c('2010 - 2014','2015 - 2019','2020 - 2024'),
+  matrix(c('2010 - 2012','2013 - 2015', '2016 - 2018', '2019-2021', '2022 - 2024'),
          nrow = nrow(detection_df), 
-         ncol = 3, 
+         ncol = 5, 
          byrow = TRUE)
 
 quanti_periodes_matrice <- matrix(
-  1:3, 
+  1:5, 
   nrow=nrow(detection_df),
-  ncol=3, 
+  ncol=5, 
   byrow=TRUE)
 ```
 
@@ -200,92 +200,51 @@ site_covs_periodes <- list(
 ```
 
 ```{r}
-detections_per_year = colSums(detection_matrice)
-print(detections_per_year)
+print(colSums(detection_matrice))
 ```
 
 
 
 ```{r}
-umf <- unmarkedMultFrame(
+umf <- unmarked::unmarkedMultFrame(
   y = detection_matrice,
   siteCovs = site_info,
   obsCovs = list(pression_obs = detection_autres),
   yearlySiteCovs = site_covs_periodes,
-  numPrimary = 3
+  numPrimary = 5
 )
+
 ```
 
 
 ```{r}
-fm <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral + Dist_EcotoneArbore,
-  pformula = ~ pression_obs, 
-  gammaformula =  ~ 1,
-  epsilonformula = ~ 1,
-  data = umf, 
-  control = list(trace = 1),
-  se = TRUE)
-```
-
-```{r}
-summary(fm)
-```
-
-Les coefficients transform?:
-```{r}
-plogis(coef(fm)[1]);plogis(coef(fm)[2]);plogis(coef(fm)[3]);plogis(coef(fm)[4])
-plogis(coef(fm)[5]);plogis(coef(fm)[6])
-plogis(coef(fm)[7]); plogis(coef(fm)[8])
-
-summary(fm)
-```
-
-```{r}
-fm0 <- colext(
+fm <- colext(
   psiformula = ~ 1,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ 1,  # detection
   data = umf, # data
   control = list(trace = 1)
-  ) 
-summary(fm0)
+  )
 ```
-
-colonisation
 
 ```{r}
-unmarked::backTransform(fm0, type="col")
-```
-
-Il a ici une probabilite de $0,55$ de coloniser un site ou le lapin
-n'est pas present.
+fm
+``` 
 
 ```{r}
-unmarked::backTransform(fm0, type="ext")
+confint(backTransform(fm,type="psi"))
+confint(backTransform(fm,type="col"))
+confint(backTransform(fm,type="ext"))
+confint(backTransform(fm,type="det"))
 ```
-
-Ona une probabilite d'extinction de $0,12$, donc comme $0.12<0.55$, les
-lapins devraient être sur de plus en plus du territoire.
-
-```{r}
-unmarked::backTransform(fm0, type="psi")
-unmarked::backTransform(fm0, type="det")
-```
-
-La probabilite d'etre present sur un territoire initialement, donc avant
-toute colonisation/extinction, est de $0,44$ et celle de detection est
-$0,77$.
 
 
 On essaye plusieurs sans la variance, puis selon l'AIC, on calcule l'AIC
 a la fin avec le modele qu'on a choisi.
 
 ```{r}
-for(i in 1:length(coef(fm0))){
-  print(plogis(coef(fm0)[i]))
-}
+print(coef(fm))
 ```
 
 Maintenant, on ajoute les variables de sites, et on regarde pour
@@ -306,11 +265,19 @@ fm1 <- unmarked::colext(
   psiformula = ~ Y_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
-  pformula = ~ 1,  # detection
+  pformula = ~ pressions_obs,  # detection
   data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
+  se = TRUE)
 
+fm1
+confint(backTransform(fm1, "col"))
+confint(backTransform(fm1, "ext"))
+
+summary(umf)
+```
+
+
+```{r}
 fm2 <- unmarked::colext(
   psiformula = ~ X_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization

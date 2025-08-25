@@ -12,6 +12,8 @@ wd <- set_wd()
 library(dplyr)
 library(sf)
 library(ggplot2)
+library(unmarked)
+
 
 wd <- set_wd()
 set.seed(12345)
