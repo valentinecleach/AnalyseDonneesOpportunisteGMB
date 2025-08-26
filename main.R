@@ -1,19 +1,11 @@
-library(renv)
-renv::repair()
-loadedNamespaces()
-
 rm(list=setdiff(ls(), "Total"))
-
 options(encoding = 'UTF-8')
 
 source("init.R")
 wd <- set_wd()
 
-library(dplyr)
-library(sf)
-library(ggplot2)
+library(dplyr);library(sf);library(ggplot2)
 library(unmarked)
-
 
 wd <- set_wd()
 set.seed(12345)
@@ -27,10 +19,6 @@ VariablesSite <- sf::st_read(paste0(wd$data, "derived/VariablesSite.shp"),
                              options = "ENCODING=UTF8")
 VariablesSite <- VariablesSite%>%
   transform_VarSites()
-
-Total <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"), 
-                     options = "ENCODING=UTF8")
-Total <- transform_Total()
 
 ################################
 ######## KNIT / RENDER #########
@@ -105,8 +93,6 @@ rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"),
 knitr::knit(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"))
 
 ##### occupancy #####
-(changer le highlight tango, theme dans le --- en haut)
-
 
 rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/OccupancyLapin.Rmd"),
                   output_file = paste0(wd$output, 
@@ -128,15 +114,6 @@ rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/SiteCovariates.Rmd")
                   output_file = paste0(wd$output, 
                                        "models/Occupancy/SiteCovariates.html"),
                   encoding="UTF-8")
-
-
-#### Recap Semaines ####
-
-rmarkdown::render(paste0(wd$src, "finished/Recap semaine/S9.Rmd"),
-                  output_file = paste0(wd$output, 
-                                       "recap/S9.html"),
-                  encoding="UTF-8")
-
 
 ################################
 ######## Brouillons GLM ########
@@ -255,7 +232,7 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 cat ~/.ssh/id_ed25519.pub
 # Ajouter clef ssh a github:
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGI3pqcUBgSjS41VCD6szpSd2050m/L2wqHElg0j7jQa valentine.cleach@gmail.com
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEI6aYZzX0yFzmtgqyRuFgYbHI49FWBzV/RNTz+sELz9 valentine.cleach@gmail.com
 # Dans bash a nouveau.
 ssh -T git@github.com
 git remote -v
@@ -265,10 +242,7 @@ git remote -v
 #####   BROUILLONS    #####
 ###########################
 
-library(unmarked)
-library(dplyr)
-library(sf)
-library(ggplot2)
+library(unmarked);library(dplyr);library(sf);library(ggplot2)
 
 # Map des lapins
 
@@ -299,164 +273,7 @@ ggplot() +
   scale_fill_gradient(low="white", high="orangered3") +
   theme_bw()
 
-
-
-###############################
-##### M?thode grenouilles #####
-###############################
-
-
-mois <- c('Jan', 'Fev', 'Mars', 'Avr', 'Mai', 'Juin', 
-          'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec') # extract month with data
-indyear <- c(2006:2015, 2015:2024) # define two periods
-ids <- unique(Total$Code_10km)
-detections <- list()
-for (k in 1:length(indyear)){
-  detections[[k]] <- matrix(0,
-                            nrow=length(ids),
-                            ncol=length(mois))
-  data <- filter(Lapins,
-                 year==indyear[k])
-  ind <- 1
-  for (i in mois){
-    temp <- filter(data, mois==i)
-    utm_temp <- unique(temp$utm)
-    for (j in utm_temp){
-      detections[[k]][ids==j,ind] <- 1
-    }
-    ind <- ind + 1
-  }
-}
-det <- do.call(cbind, detections) # bind data from all year in columns
-# convert the occupancy dataset in a 3D array:
-y <- list()
-ind <- 0
-for (i in 1:length(indyear)){
-  mask <- (ind + i):(ind + i + length(mois) - 1)
-  y[[i]] <- det[,mask]
-  ind <- ind + length(mois) - 1
-}
-
-y <- array(unlist(y), 
-           dim = c(nrow(y[[1]]), ncol(y[[1]]), length(y)))
-
-new_y <- NULL
-for (i in 1:dim(y)[3]){ # loop over years
-  new_y <- cbind(new_y,apply(y[,1:12,i],1,sum))
-}
-new_y <- (new_y > 0) 
-annee <- apply(new_y[,1:10],1,sum)
-y2 <- apply(new_y[,11:20],1,sum)
-y <- cbind(annee,y2)
-
-dim(y)
-summary(y)
-range(y)
-
 #############################################
 #############################################
 #############################################
 
-
-fm_test <- unmarked::occu(~ 1 ~ 1, data = umf)
-?AICcmodavg::mb.gof.test(fm_test, nsim=5)
-# Le modele n'est pas bien mais au moins le code tourne.
-
-umf <- unmarked::unmarkedMultFrame(y = detection_matrice,
-                                   siteCovs = site_info,
-                                   yearlySiteCovs = site_covs_periodes,
-                                   numPrimary = 15)
-
-fm0 <- unmarked::colext(
-  psiformula = ~ 1,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ 1,  # detection
-  data = umf, # data
-  control = list(trace = 1))
-AICcmodavg::mb.gof.test(fm0, nsim=5)
-
-
-chisq
-View(detection_matrice)
-
-install.packages('RPresence',repo='https://www.mbr-pwrc.usgs.gov/mbrCRAN')
-
-learnr::run_tutorial(
-  
-  name = "single_season",
-  
-  package = "occupancyTuts"
-  
-)
-
-
-y <- unmarked::getY(umf)
-y[is.na(y)] <- "."
-site_covs <- as.data.frame(unmarked::siteCovs(umf)) # Optional
-data_out <- cbind(y, site_covs) # or just y
-View(y)
-write.csv(data_out, "presence_input.csv")
-
-write.csv(y, "detection_presence.csv")
-write.table(site_covs, "site_covs.txt",
-            sep = "\t", row.names = FALSE, col.names = FALSE, 
-            quote = FALSE)
-View(site_covs)
-
-
-mb_test <- suppressWarnings(mb.gof.test(fm0, nsim=30))
-plot(gof0)
-
-pb.gof <- parboot
-gof4 <- suppressWarnings(parboot(fm4, statistic=chisq, nsim=30))
-?parboot
-
-mb_test_test <- mb.gof.test(fm, nsim=30)
-mb_test_test$p.value
-
-
-plot(pb)
-
-
-################################################
-################################################
-
-Lapins <- Total %>%
-  sf::st_join(VariablesSite) %>%
-  dplyr::filter(cd_nom == 61714,
-                technique_observation == "Vu",
-                date >= as.Date("2005-01-01")) %>%
-  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
-  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
-  dplyr::mutate(year = lubridate::year(date))
-
-Autres <- Total %>%
-  sf::st_join(VariablesSite) %>%
-  dplyr::filter(cd_nom != 61714,
-                technique_observation == "Vu",
-                date >= as.Date("2005-01-01"))%>%
-  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
-  dplyr::mutate(year = lubridate::year(date))
-
-View(Autres)
-
-detection_autres <- Autres %>%
-  sf::st_drop_geometry() %>%
-  dplyr::mutate(annee = lubridate::year(date)) %>%
-  dplyr::select(Code_10km, annee) %>%
-  dplyr::count(Code_10km, annee) %>%
-  tidyr::complete(Code_10km, 
-                  annee = tidyr::full_seq(annee, 1), 
-                  fill = list(n = 0)) %>%
-  tidyr::pivot_wider(names_from = annee, 
-                     values_from = n) %>%
-  dplyr::arrange(Code_10km) %>%
-  dplyr::filter(!is.na(Code_10km))
-
-noms <- detection_autres$Code_10km
-detection_autres_matrice <- as.matrix(detection_autres[, -1])
-rownames(detection_autres_matrice) <- noms
-
-
-################################################
