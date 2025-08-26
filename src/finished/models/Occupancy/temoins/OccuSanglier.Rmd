@@ -209,7 +209,7 @@ fm0 <- unmarked::colext(
   pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = TRUE)
+  se = FALSE)
 ```
 
 
@@ -220,7 +220,7 @@ fm1 <- unmarked::colext(
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
   data = umf, # data
-  se = TRUE)
+  se = FALSE)
 ```
 
 
@@ -232,7 +232,7 @@ fm2 <- unmarked::colext(
   pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = TRUE)
+  se = FALSE)
 ```
 
 
@@ -244,7 +244,7 @@ fm3 <- unmarked::colext(
   pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = TRUE)
+  se = FALSE)
 ```
 
 
@@ -256,7 +256,7 @@ fm4 <- unmarked::colext(
   pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = TRUE)
+  se = FALSE)
 ```
 
 
@@ -268,7 +268,7 @@ fm5 <- unmarked::colext(
   pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = TRUE)
+  se = FALSE)
 ```
 
 
@@ -280,7 +280,7 @@ fm6 <- unmarked::colext(
   pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = TRUE)
+  se = FALSE)
 ```
 
 
@@ -292,7 +292,7 @@ fm7 <- unmarked::colext(
   pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = TRUE)
+  se = FALSE)
 ```
 
 
