@@ -87,15 +87,15 @@ famille_paysage <- famille_paysage %>%
 
 
 jointure <- sf::st_intersection(grille_10x10, famille_paysage) %>%
-  dplyr::mutate(intersection_area = sf::st_area(.))
+  dplyr::mutate(aire_intersection = sf::st_area(.))
 
-grid_aire <- grille_10x10 %>%
+grille_aire <- grille_10x10 %>%
   dplyr::mutate(aire_cellule = sf::st_area(.)) %>%
   dplyr::select(CODE_10KM, aire_cellule)%>%
   sf::st_drop_geometry()
 
 jointure <- jointure %>%
-  dplyr::left_join(grid_area, by="CODE_10KM") %>%
+  dplyr::left_join(grille_aire, by="CODE_10KM") %>%
   dplyr::mutate(pourcentage_famille = as.numeric(aire_intersection / aire_cellule))
 
 mode_cellule <- jointure %>%
@@ -109,7 +109,7 @@ grille_10x10 <- grille_10x10 %>%
   dplyr::left_join(mode_cellule, by = "CODE_10KM")
 ```
 
-On a une case sans de valeurs, donc on lui attribut la valeur la plus fréquente parmi ses voisins.
+On a une case sans de valeurs (E013N686), donc on lui attribut la valeur la plus fréquente parmi ses voisins.
 
 ```{r}
 index <- sf::st_touches(grille_10x10, grille_10x10)
