@@ -10,178 +10,64 @@ output:
 ```{r}
 source("init.R")
 
-library(ggfortify)
-library(dplyr)
-library(sf)
-library(ggplot2)
+library(ggfortify); library(dplyr); library(sf); library(ggplot2)
 
 wd <- set_wd()
+```
 
-TotalC <- sf::st_read(paste0(wd$data, "derived/TotalComplet.shp"),
+## Importation des variables explicatives
+```{r}
+VariablesSite <- sf::st_read(paste0(wd$data, "derived/VariablesSite.shp"),
+                             options = "ENCODING=UTF8")
+VariablesSite <- VariablesSite %>%
+  transform_VarSites() %>%
+  dplyr::rename(Dnst_Cultures = `Dnst_Cultures `)
+```
+
+## Total
+```{r}
+Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
                      options = "ENCODING=UTF8")
-
-collision_faune_diro <- readr::read_csv(paste0(wd$data, 
-                                               "raw/collision_faune_diro.csv"))
+Total <- Total %>%
+  transform_Total() %>%
+  sf::st_join(VariablesSite)
 ```
 
 ```{r}
-Total <- transform_Total(bdd = TotalC)
-
-Total <- Total%>%
-  dplyr::filter(technique_observation == "Vu")%>%
-  dplyr::select(id_synt, nom_vernaculaire, 
-                date, cd_nom, 
-                paysage_ID, paysage_nom, famille_paysage, 
-                Code_10km, X_10km, Y_10km, bdd_originale,
-                etat_biologique, 
-                Indice_Diversite, Densite_Cultures, Distance_EcotoneArbore,
-                Distance_Littoral, Distance_Eau)
-Total <- Total%>%
-  dplyr:: mutate(cd_nom = as.numeric(cd_nom),
-                 cd_nom_grp_must = dplyr::if_else(cd_nom %in% c("60704", "60658", 
-                                                       "60716", "60686", "199752",
-                                                       "60674", "60731", "60746"),
-                                         111, cd_nom)
-                 )%>%
+Total <- Total %>%
+  dplyr::filter(technique_observation == "Vu") %>%
+  sf::st_drop_geometry() %>%
+  dplyr:: mutate(cd_nom = as.numeric(cd_nom)) %>%
   dplyr::select(Code_10km, X_10km, Y_10km, 
-                date, cd_nom, cd_nom_grp_must,
-                paysage_ID, paysage_nom, famille_paysage, 
+                date, cd_nom, bdd_originale,
+                Nom_paysage, Famille_paysage, 
                 etat_biologique, 
-                Indice_Diversite, Densite_Cultures, Distance_EcotoneArbore,
-                Distance_Littoral, Distance_Eau)%>%
-  sf::st_drop_geometry()
-
+                Ind_Diversite, Dnst_Cultures, Dist_EcotoneArbore,
+                Dist_Littoral, Dist_Eau)
 ```
 
+## Diro
 ```{r}
-diro <- collision_faune_diro %>%
-  dplyr::mutate(
-    geom_x = as.numeric(stringr::str_match(geom, "POINT \\(([^ ]+)")[,2]),
-    geom_y = as.numeric(stringr::str_match(geom, "POINT \\([^ ]+ ([^\\)]+)")[,2])
-  )%>%
-  dplyr::filter(!is.na(geom))
+diro <- sf::st_read(paste0(wd$data, "derived/diro.shp"))
 
-diro_sf <- sf::st_as_sf(diro, 
-                        coords = c("geom_x", "geom_y"), 
-                        crs = 2154)
-diro_sf <- sf::st_transform(diro_sf, 
-                        sf::st_crs(4326))
-
-carte_bretagne_44 <- sf::st_read(paste0(wd$data,                                    "masques/Masque_Bretagne_Continentale/Masque_Bretagne_Continentale.shp"
-                                        )) %>%
-  sf::st_transform(2154)%>%
-  sf::st_transform(sf::st_crs(4326))
-
-diro_conti <- sf::st_filter(diro_sf,
-                            carte_bretagne_44, 
-                            .predicate = sf::st_within)
-
-diro_sf <- diro_conti%>%
-  dplyr::filter(deppr != 44)
-
-diro_sf <- diro_sf %>%
-   dplyr::filter(!(espece %in% c("amphibien", "amphibiens", "autre", "autre oiseau",
-                          "castor", "chat", "chauve-souris", "chien", "chouette",
-                          "nr", "oiseaux sauf rapace", "rapace diurne", 
-                          "rapace nocturne", "rapaces nocturnes", "rapaces diurnes",
-                          "reptile", "reptiles")))%>%
-  dplyr::mutate(date = as.Date(paste(as.character(annee), mois, 01, sep="-")),
-                espece = dplyr::if_else(commentaire == "Furet", 
-                          "furet", espece, missing=espece))%>% 
-  dplyr::mutate(bdd_originale = "DIRO",
-                etat_biologique = "Trouvé mort : impact routier")%>%
-  dplyr::mutate(espece = as.factor(espece)) %>%
-  dplyr::select(-date_maj, -annee, -mois, -commentaire, -grp_espece)
-
-diro_sf <- diro_sf%>%
-  dplyr::mutate(cd_nom = dplyr::case_when(
-    espece == "blaireau" ~ 60636,
-    espece == "cerf/biche" ~ 61000,
-    espece == "chevreuil" ~ 61057,
-    espece == "écureuil" ~ 61153,
-    espece == "hérisson" ~ 60015,
-    espece == "lapin" ~ 61714,
-    espece == "lièvre" ~ 61678,
-    espece == "loutre" ~ 60630,
-    espece == "mustélidé" ~ 111,
-    espece == "ragondin" ~ 61667,
-    espece == "rat" ~ NA,
-    espece == "rat musqué" ~ 61448,
-    espece == "renard" ~ 60658,
-    espece == "sanglier" ~ 60981,
-    espece == "martre" ~ 60658, 
-    espece == "furet" ~ 199752, 
-    espece == "vison d'amérique" ~ 60746, 
-    espece == "belette" ~ 60716, 
-    espece == "fouine" ~ 60674, 
-    espece == "hermine" ~ 60686, 
-    espece == "putois" ~ 60731, 
-    .default = NA
-  ),
-  cd_nom_grp_must = dplyr::if_else(
-    cd_nom %in% c("60704", "60658", "60716", "60686", "199752","60674", "60731",
-                  "60746"), 111, cd_nom, missing = NA
-    )
-  )%>%
-  dplyr::filter(!is.na(cd_nom))%>%
-  dplyr::select(cd_nom, cd_nom_grp_must, espece, date, geom, geometry, 
-                etat_biologique)
-
-diro_sf <- diro_sf%>%
-  ajout_famille_paysage() %>%
-  ajout_10x10_predetermine()%>%
-  dplyr::rename(Code_10km = CODE_10KM)%>%
+diro <- diro %>%
+  sf::st_join(VariablesSite) %>%
+  sf::st_drop_geometry() %>% 
+  dplyr::mutate(etat_biologique = "Trouvé mort : impact routier") %>%
+  dplyr::rename(bdd_originale = bdd_rgn,
+                cd_nom = cd_nm_t) %>%
   dplyr::select(Code_10km, X_10km, Y_10km, 
-                date, cd_nom, cd_nom_grp_must,
-                paysage_ID, paysage_nom, famille_paysage,
-                etat_biologique)
-
-grille_10x10 <- sf::st_read(
-  paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
-)
-RegionBretagneConti <- sf::st_read(
-    paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
-)
-grille_10x10 <- grille_10x10 %>%
-  transforme_carte()
-RegionBretagneConti <- RegionBretagneConti %>%
-  transforme_carte()
-grille_10x10 <- sf::st_intersection(grille_10x10, 
-                                    RegionBretagneConti)
-  
-# Ajout des variables
-grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
-                                     bdd_tif = "Indice_Diversite_500m")
-grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
-                                     bdd_tif = "Densite_Cultures_500m")
-grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
-                                     bdd_tif = "Distance_EcotoneArbore")
-grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
-                                     bdd_tif = "Distance_Littoral")
-grille_10x10 <- cree_variable_struct(bdd_grille = grille_10x10, 
-                                     bdd_tif = "Distance_Eau")
-
-
-grille_10x10 <-  sf::st_transform(grille_10x10, sf::st_crs(diro_sf))
-  
-diro_sf <- grille_10x10 %>%
-  dplyr::rename( Densite_Cultures = Densite_Cultures_500m,
-                 Indice_Diversite = Indice_Diversite_500m ) %>%
-  dplyr::select( Indice_Diversite, 
-                 Densite_Cultures,
-                 Distance_EcotoneArbore,
-                 Distance_Littoral,
-                 Distance_Eau) %>%
-  sf::st_join(diro_sf, left = TRUE)
-
-diro <- diro_sf%>%
-  sf::st_drop_geometry()
+                date, cd_nom, bdd_originale,
+                Nom_paysage, Famille_paysage, 
+                etat_biologique, 
+                Ind_Diversite, Dnst_Cultures, Dist_EcotoneArbore,
+                Dist_Littoral, Dist_Eau)
 ```
 
+## Export des 2
 ```{r}
 Total_et_Diro <- rbind(Total, diro)
 utils::write.csv(x = Total_et_Diro, 
                  file = paste0(wd$data, "derived/Total_et_Diro.csv"),
                  fileEncoding = "UTF-8")
 ```
-
