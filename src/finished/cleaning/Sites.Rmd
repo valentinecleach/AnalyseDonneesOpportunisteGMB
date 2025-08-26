@@ -20,7 +20,7 @@ grille_10x10 <- sf::st_read(
 RegionBretagneConti <- sf::st_read(
   paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
 )
-RegionBretagneConti <- RegionBretagneConti%>%
+RegionBretagneConti <- RegionBretagneConti %>%
   transforme_carte() %>%
   sf::st_transform(2154) %>%
   sf::st_buffer(dist = 200) %>%
@@ -34,7 +34,6 @@ grille_10x10 <- grille_10x10 %>%
 
 grille_10x10 <- grille_10x10 %>%
   dplyr::filter(sf::st_is(grille_10x10,c("POLYGON","MULTIPOLYGON")))
-
 ```
 
 ## VARIABLES STRUCTURANTES
@@ -56,7 +55,7 @@ for(var in var_noms) {
 Suppression car hors du territoire -\> Ca nous corrige le problème qu'on avait avec les individus dans la partie bluffée du 44.
 
 ```{r}
-grille_10x10 <- grille_10x10%>%
+grille_10x10 <- grille_10x10 %>%
   dplyr::filter(!is.na(Distance_Littoral))
 ```
 
@@ -74,26 +73,37 @@ for(var in var_noms) {
 
 ## FAMILLES DE PAYSAGES
 
-On choisis la famille la plus fréquente dans la cellule?
+On choisis la famille avec la plus grande couverture de la cellule. Seule 2 ont une couverture complete.
 ```{r}
 famille_paysage <- sf::st_read(
   paste0(wd$data, "masques/famille_paysage/familles_paysages.shp")
 )
+
 famille_paysage <- famille_paysage %>%
   dplyr::rename(Nom_paysage = NOM,
                 Famille_paysage = FAMILLE)%>%
   dplyr::mutate_if(is.character,as.factor)%>%
   dplyr::select(Nom_paysage, Famille_paysage)
 
-jointure <- sf::st_join(grille_10x10, famille_paysage, left = FALSE)
+
+jointure <- sf::st_intersection(grille_10x10, famille_paysage) %>%
+  dplyr::mutate(intersection_area = sf::st_area(.))
+
+grid_aire <- grille_10x10 %>%
+  dplyr::mutate(aire_cellule = sf::st_area(.)) %>%
+  dplyr::select(CODE_10KM, aire_cellule)%>%
+  sf::st_drop_geometry()
+
+jointure <- jointure %>%
+  dplyr::left_join(grid_area, by="CODE_10KM") %>%
+  dplyr::mutate(pourcentage_famille = as.numeric(aire_intersection / aire_cellule))
 
 mode_cellule <- jointure %>%
-  sf::st_drop_geometry() %>%  
-  dplyr::group_by(CODE_10KM) %>%   
-  dplyr::summarise(
-    Famille_paysage = Mode(Famille_paysage),
-    Nom_paysage = Mode(Nom_paysage)
-    )
+  dplyr::group_by(CODE_10KM) %>%
+  dplyr::slice_max(order_by = pourcentage_famille, n = 1, with_ties = FALSE) %>%
+  dplyr::ungroup()%>%
+  dplyr::select(CODE_10KM, Famille_paysage, Nom_paysage)%>%
+  sf::st_drop_geometry()
 
 grille_10x10 <- grille_10x10 %>%
   dplyr::left_join(mode_cellule, by = "CODE_10KM")
