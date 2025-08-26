@@ -1,0 +1,568 @@
+---
+title: "Site Occupancy Sanglier"
+date: "25/08"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+## Intallation des packages
+
+```{r}
+library(dplyr);library(ggplot2);library(sf);library(unmarked)
+theme_set(theme_light(base_size = 16))
+set.seed(12345)
+```
+
+## Importation des bases de donnees
+
+```{r}
+Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
+                     options = "ENCODING=UTF8")
+Total <- Total%>%
+  transform_Total()
+
+VariablesSite <- sf::st_read(paste0(wd$data, "derived/VariablesSite.shp"),
+                             options = "ENCODING=UTF8")
+VariablesSite <- VariablesSite%>%
+  transform_VarSites()
+```
+
+```{r}
+Sangliers <- Total %>%
+  sf::st_join(VariablesSite) %>%
+  dplyr::filter(cd_nom == 60981,
+                technique_observation == "Vu",
+                date >= as.Date("2005-01-01")) %>%
+  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
+  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
+  dplyr::mutate(year = lubridate::year(date))
+```
+
+## Covariables de site
+
+```{r}
+site_info <- VariablesSite %>%
+  sf::st_drop_geometry() %>%
+  dplyr::arrange(Code_10km)
+
+noms <- site_info$Code_10km
+rownames(site_info) <- noms
+
+site_info <- site_info %>%
+  dplyr::select(-Code_10km) %>%
+  dplyr::rename(Dnst_Cultures = `Dnst_Cultures `)%>%
+  dplyr::mutate(across(where(is.numeric), 
+                       scale))
+```
+
+# Impl√©mentation du mod√®le
+
+```{r}
+Sanglier <- Total %>%
+  sf::st_join(VariablesSite) %>%
+  dplyr::filter(cd_nom == 60981,
+                technique_observation == "Vu",
+                date >= as.Date("2010-01-01"),
+                date < as.Date("2025-01-01")) %>%
+  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
+  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
+  dplyr::mutate(year = lubridate::year(date))
+
+detection_df <- Sanglier %>%
+  sf::st_drop_geometry() %>%
+  dplyr::mutate(annee = lubridate::year(date)) %>%
+  dplyr::select(Code_10km, annee) %>%
+  dplyr::count(Code_10km, annee) %>%
+  tidyr::complete(Code_10km, 
+                  annee = tidyr::full_seq(annee, 1), 
+                  fill = list(n = 0)) %>%
+  tidyr::pivot_wider(names_from = annee, 
+                     values_from = n) %>%
+  dplyr::arrange(Code_10km) %>%
+  dplyr::filter(!is.na(Code_10km))
+
+detection_df[,-1] <- ifelse(detection_df[,-1]>0, 1, 0)
+
+noms <- detection_df$Code_10km
+detection_matrice <- as.matrix(detection_df[, -1])
+rownames(detection_matrice) <- noms
+
+umf <- unmarked::unmarkedFrameOccu(y = detection_matrice, 
+                                   siteCovs = site_info
+                                   )
+
+unmarked::plot(umf, main="Detection/Non Detection de Sanglier sur les sites de 2010 a 2024 inclus")
+summary(umf)
+```
+
+### Periodes
+```{r}
+quali_periodes_matrice <- 
+  matrix(c('2010 - 2012','2013 - 2015', '2016 - 2018', '2019-2021', '2022 - 2024'),
+         nrow = nrow(detection_df), 
+         ncol = 5, 
+         byrow = TRUE)
+
+quanti_periodes_matrice <- matrix(
+  1:5, 
+  nrow=nrow(detection_df),
+  ncol=5, 
+  byrow=TRUE)
+```
+
+
+### Pression d'observation, par site par saison
+```{r}
+Autres <- Total %>%
+  sf::st_join(VariablesSite) %>%
+  dplyr::filter(cd_nom != 60981,
+                technique_observation == "Vu",
+                date >= as.Date("2010-01-01"),
+                date < as.Date("2025-01-01"))%>%
+  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
+  dplyr::mutate(year = lubridate::year(date))
+
+detection_autres <- Autres %>%
+  sf::st_drop_geometry() %>%
+  dplyr::mutate(annee = lubridate::year(date)) %>%
+  dplyr::select(Code_10km, annee) %>%
+  dplyr::count(Code_10km, annee) %>%
+  tidyr::complete(Code_10km, 
+                  annee = tidyr::full_seq(annee, 1), 
+                  fill = list(n = 0)) %>%
+  tidyr::pivot_wider(names_from = annee, 
+                     values_from = n) %>%
+  dplyr::arrange(Code_10km) %>%
+  dplyr::filter(!is.na(Code_10km))
+
+detection_autres <- detection_autres[-1]
+```
+
+
+```{r}
+site_covs_periodes <- list(
+  quanti_periodes = quanti_periodes_matrice,
+  quali_periodes = quali_periodes_matrice
+)
+```
+
+```{r}
+print(colSums(detection_matrice))
+```
+
+
+
+```{r}
+umf <- unmarked::unmarkedMultFrame(
+  y = detection_matrice,
+  siteCovs = site_info,
+  obsCovs = list(pression_obs = detection_autres),
+  yearlySiteCovs = site_covs_periodes,
+  numPrimary = 5
+)
+```
+
+
+```{r}
+fm <- colext(
+  psiformula = ~ 1,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ 1,  # detection
+  data = umf, # data
+  control = list(trace = 1)
+  )
+```
+
+```{r}
+fm
+``` 
+
+```{r}
+confint(backTransform(fm,type="psi"));plogis(coef(fm)[1])
+confint(backTransform(fm,type="col"));plogis(coef(fm)[2])
+confint(backTransform(fm,type="ext"));plogis(coef(fm)[3])
+confint(backTransform(fm,type="det"));plogis(coef(fm)[4])
+```
+
+On essaye plusieurs sans la variance, puis selon l'AIC, on calcule l'AIC
+a la fin avec le modele qu'on a choisi.
+
+```{r}
+print(coef(fm))
+```
+
+Maintenant, on ajoute les variables de sites, et on regarde pour
+l'instant uniquement l'AIC, afin de faire un tri rapide. On fait une
+elimination forwards manuelle.
+
+```{r, include=FALSE}
+fm0 <- unmarked::colext(
+  psiformula = ~ 1,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+
+```{r, include=FALSE}
+fm1 <- unmarked::colext(
+  psiformula = ~ Y_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  se = TRUE)
+```
+
+
+```{r, include=FALSE}
+fm2 <- unmarked::colext(
+  psiformula = ~ X_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+
+```{r, include=FALSE}
+fm3 <- unmarked::colext(
+  psiformula = ~ Dist_Eau,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+
+```{r, include=FALSE}
+fm4 <- unmarked::colext(
+  psiformula = ~ Dist_Littoral,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+
+```{r, include=FALSE}
+fm5 <- unmarked::colext(
+  psiformula = ~ Dist_EcotoneArbore,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+
+```{r, include=FALSE}
+fm6 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+
+```{r, include=FALSE}
+fm7 <- unmarked::colext(
+  psiformula = ~ Ind_Diversite,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+
+```{r}
+fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5, fm6, fm7)
+unmarked::modSel(fmList)
+```
+
+Ici on garde la variable de fm6 (\$ \\text{Dnst_Cultures} \$), et on
+ajoute les autres.
+
+```{r, include=FALSE}
+fm0 <- fm6 
+
+fm1 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+
+fm2 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + X_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+
+fm3 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Eau,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+
+fm4 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+
+fm5 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_EcotoneArbore,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+
+fm6 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+
+```{r, include=TRUE}
+fmList <- unmarked::fitList(fm0, fm1, fm3, fm4, fm5, fm6)
+unmarked::modSel(fmList)
+```
+
+On continue ensuite avec fm1, c'est a dire les variables $\text{Dnst_Cultures + Y_10km}$.
+
+```{r}
+fm0 <- fm4 
+
+fm1 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km + X_10km,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+
+fm2 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km + Dist_Eau,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+
+fm3 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km + Dist_Littoral,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+
+fm4 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km + Dist_EcotoneArbore,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+
+```{r}
+fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4)
+unmarked::modSel(fmList)
+```
+
+```{r, include = FALSE}
+fm0 <- fm1
+
+fm1 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km + X_10km + Dist_Eau,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+
+fm2 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km + X_10km+ Dist_EcotoneArbore,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+```{r}
+fmList <- unmarked::fitList(fm0, fm1, fm2)
+unmarked::modSel(fmList)
+```
+On garde fm2, mais on pourrait garder Ègalement fm0. On va alors garder fm0 et fm2 quon nommera fm1.
+```{r}
+fm0 <- fm0
+
+fm1 <- fm2
+
+fm2 <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km + X_10km+ Dist_EcotoneArbore+Dist_Eau,     # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
+```
+
+```{r}
+fmList <- unmarked::fitList(fm0, fm1, fm2)
+unmarked::modSel(fmList)
+```
+
+On s'arrete et on analyse fm1 et fm0.
+
+## Tests d'hypotheses -> 
+
+## Validation / Robustesse ?
+
+```{r}
+chisq <- function(fm) {
+    umf <- fm@data
+    y <- umf@y
+    y[y>1] <- 1
+    fv <- fitted(fm)
+    sum((y-fv)^2/(fv*(1-fv)), na.rm=TRUE)
+    }
+
+pb0 <- parboot(fm0, statistic=chisq, nsim=40, parallel=FALSE)
+pb1 <- parboot(fm1, statistic=chisq, nsim=40, parallel=FALSE)
+```
+Les deux ont peut accepter par defaut
+
+## InterprÈtation
+```{r}
+fm1
+```
+
+
+## Graphiques 
+```{r}
+m1 <- nonparboot(fm, 
+                 B = 10)
+predicted_occupancy <- data.frame(saison = c(1:3),
+                                  smoothed_occ = smoothed(fm)[2,],
+                                  SE = m1@smoothed.mean.bsse[2,])
+
+predicted_occupancy%>%
+  ggplot( aes(x=saison, y=smoothed_occ)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Probabilit? d'occupation du Sanglier a travers les saisons")+
+  theme_bw()
+```
+
+```{r}
+
+grid_10x10 <- st_read(paste0(wd$data, 
+                             "derived/VariablesSite.shp")) %>%
+  transforme_carte()
+
+rf <- unmarked::ranef(fm)
+occ_prob <- unmarked::bup(rf, stat="mean")
+
+grid_10x10 <- cbind(grid_10x10, occ_prob)
+
+
+LtoM <-colorRampPalette(c('white','darkorange4'))
+
+
+g1 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X1))+
+  labs(title="De 2010 ? 2014")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilit? de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
+g2 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X2))+
+  labs(title="De 2015 ? 2019")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilit? de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
+g3 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X3))+
+  labs(title="De 2020 ? 2024")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilit? de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
+plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
+                          g2 + theme(legend.position = "none"),
+                          g3 + theme(legend.position = "none"),
+                          common.legend = TRUE,
+                          legend = "right")
+
+ggpubr::annotate_figure(plot, 
+                        top = ggpubr::text_grob("Pr?sence du Sanglier"))
+
+```
