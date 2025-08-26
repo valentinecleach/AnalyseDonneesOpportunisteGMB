@@ -28,12 +28,14 @@ Total_et_Diro <- readr::read_csv(paste0(wd$data,
                                  locale = readr::locale(encoding = "UTF-8"))
 Total_et_Diro <- Total_et_Diro %>%
   dplyr::select(-`...1`)
+
+
 ```
 
-# Mortalit?s routi?res - Toutes donn?es
+# Mortalites routieres - Toutes donnees
 ```{r}
 Donnees <- Total_et_Diro %>%
-  dplyr::filter(etat_biologique == "Trouvé mort : impact routier")
+  dplyr::filter(etat_biologique == "Trouve mort : impact routier")
 ```
 
 ## Lapin
@@ -186,7 +188,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + X_10km + Dnst_Cultures + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year  + X_10km + Dnst_Cultures + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
@@ -279,7 +281,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dnst_Cultures + Dist_Ecotone + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Dnst_Cultures + Dist_Ecotone + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
@@ -311,7 +313,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + X_10km + Dist_Ecotone + prop_tmoins1 + year2)
+           formula = proportion_interet ~ year  + X_10km + Dist_Ecotone + prop_tmoins1)
 ```
 
 ```{r}
@@ -372,7 +374,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year   + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
@@ -436,7 +438,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km  + Dist_Littoral + year2)
+           formula = proportion_interet ~ year + X_10km  + Dist_Littoral)
 ```
 
 ```{r}
@@ -618,7 +620,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Dist_Ecotone + Dist_Littoral + prop_tmoins1  + year2)
+           formula = proportion_interet ~ year   + Dist_Ecotone + Dist_Littoral + prop_tmoins1)
 ```
 
 ```{r}
@@ -957,4 +959,4 @@ bgtest(reg); bptest(reg); car::vif(reg)
 
 # Mortalite routieres - DIRO uniquement
 
-Il me manque la colonne bdd_originale... Ou est elle passe?
+Il me manque la colonne bdd_originale... Ou est elle passee

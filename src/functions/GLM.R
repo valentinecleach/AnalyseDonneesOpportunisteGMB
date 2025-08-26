@@ -27,15 +27,15 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
     dplyr::filter(date > as.Date("2010-01-01")) %>%
     dplyr::mutate(year = lubridate::year(date))
     
-  colonnes <- c("famille_paysage", "clust", 
-                "Indice_Diversite", "Densite_Cultures", 
-                "Distance_EcotoneArbore", "Distance_Littoral",
-                "Distance_Eau")
+  colonnes <- c("Ind_Diversite", "Dnst_Cultures", "Dist_EcotoneArbore",
+                "Dist_Littoral", "Dist_Eau", "Famille_paysage", "Nom_paysage",
+                "X_10km", "Y_10km", "clust")
+  
   colonnes_presentes <- intersect(colonnes, names(tab))
   
   tab <- tab %>%
     dplyr::select(any_of(c("date", "nom_vernaculaire", "cd_nom", 
-                           "Code_10km", "X_10km", "Y_10km", "year",
+                           "Code_10km", "year",
                            colonnes_presentes)))
   
   tab <- tab %>%
@@ -43,19 +43,19 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
     dplyr::mutate(proportion_interet = sum(cd_nom == espece_interet) / dplyr::n())
   
   tab <- tab %>%
-    ajoute_si_present(variable = "famille_paysage", 
+    ajoute_si_present(variable = "Famille_paysage", 
                       technique = Mode) %>%
     ajoute_si_present(variable = "clust", 
                       technique = Mode) %>%
-    ajoute_si_present(variable = "Indice_Diversite",
+    ajoute_si_present(variable = "Ind_Diversite",
                       technique = mean) %>%
-    ajoute_si_present(variable = "Densite_Cultures",
+    ajoute_si_present(variable = "Dnst_Cultures",
                       technique = mean) %>%
-    ajoute_si_present(variable = "Distance_EcotoneArbore",
+    ajoute_si_present(variable = "Dist_EcotoneArbore",
                       technique = mean) %>%
-    ajoute_si_present(variable = "Distance_Littoral",
+    ajoute_si_present(variable = "Dist_Littoral",
                       technique = mean) %>%
-    ajoute_si_present(variable = "Distance_Eau",
+    ajoute_si_present(variable = "Dist_Eau",
                       technique = mean)
     
   tab <- tab %>%
@@ -69,10 +69,10 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
     ttes_collones_sortantes <- c("year", "proportion_interet", "proportion_total",
                    "Code_10km", "nb_annee_site", "X_10km", "Y_10km")
   
-    collones_sortantes_opt <- c("famille_paysage_max", "clust_max", 
-                              "Indice_Diversite_m", "Densite_Cultures_m", 
-                              "Distance_EcotoneArbore_m", "Distance_Littoral_m",
-                              "Distance_Eau_m")
+    collones_sortantes_opt <- c("Famille_paysage_m", "clust_m", 
+                              "Ind_Diversite_m", "Dnst_Cultures_m", 
+                              "Dist_EcotoneArbore_m", "Dist_Littoral_m",
+                              "Dist_Eau_m")
     collones_sortantes_presentes <- intersect(collones_sortantes_opt, names(tab))
     
     tab <- tab %>%
@@ -81,11 +81,11 @@ tab_glm <- function(espece_interet, espece_benchmark, bdd = Total){
     
     tab <- tab%>%
       dplyr::rename_with(~ case_when(
-        . == "Indice_Diversite_m" ~ "Ind_Diversite",
-        . == "Densite_Cultures_m" ~ "Dnst_Cultures",
-        . == "Distance_EcotoneArbore_m" ~ "Dist_Ecotone",
-        . == "Distance_Littoral_m" ~ "Dist_Littoral",
-        . == "Distance_Eau_m" ~ "Dist_Eau",
+        . == "Ind_Diversite_m" ~ "Ind_Diversite",
+        . == "Dnst_Cultures_m" ~ "Dnst_Cultures",
+        . == "Dist_EcotoneArbore_m" ~ "Dist_Ecotone",
+        . == "Dist_Littoral_m" ~ "Dist_Littoral",
+        . == "Dist_Eau_m" ~ "Dist_Eau",
         TRUE ~ .))
     
     tab <- tab %>%
@@ -167,25 +167,25 @@ glm_automatique <- function(cd_nom_interet, cd_nom_benchmark,
    col <- colorRampPalette(c("#990000","#990000", 
                              "#eeeeee",
                              "#05600b","#05600b"))
-   corrplot::corrplot(cor(subset(bdd_reg, select=-c(famille_paysage_max, Code_10km))),
+   corrplot::corrplot(cor(subset(bdd_reg, select=-c(Famille_paysage_max, Code_10km))),
              method="color", col=col(200),  
              order="hclust", 
              addCoef.col = "black", # Ajout du coefficient de correlation
              tl.col="black", tl.srt=90 # Rotation des etiquettes de textes
     )
   # alias(lm(data = bdd_reg, 
-  #           proportion_interet ~ year+Y_10km+X_10km+famille_paysage_max+Code_10km))
+  #           proportion_interet ~ year+Y_10km+X_10km+Famille_paysage_max+Code_10km))
   car::vif(lm(data = bdd_reg, 
-          proportion_interet ~ year+famille_paysage_max+Code_10km))
+          proportion_interet ~ year+Famille_paysage_max+Code_10km))
   car::vif(lm(data = bdd_reg, 
-              proportion_interet ~ year+Y_10km + X_10km + famille_paysage_max))
+              proportion_interet ~ year+Y_10km + X_10km + Famille_paysage_max))
 
    # Interactions entre Variables qualitatives
-   interaction.plot(bdd_reg$famille_paysage_max,
+   interaction.plot(bdd_reg$Famille_paysage_max,
                     as.factor(bdd_reg$Code_10km),
                     bdd_reg$proportion_interet,
                     main = "Interaction entre la grille et la famille de paysage")
-   interaction.plot(bdd_reg$famille_paysage_max,
+   interaction.plot(bdd_reg$Famille_paysage_max,
                     as.factor(bdd_reg$clust_max),
                     bdd_reg$proportion_interet,
                     main = "Interaction entre les clusters et la famille de paysage")
