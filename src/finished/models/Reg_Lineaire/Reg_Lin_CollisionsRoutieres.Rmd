@@ -27,9 +27,8 @@ Total_et_Diro <- readr::read_csv(paste0(wd$data,
                                         "derived/Total_et_Diro.csv"),
                                  locale = readr::locale(encoding = "UTF-8"))
 Total_et_Diro <- Total_et_Diro %>%
-  dplyr::select(-`...1`)
-
-
+  dplyr::select(-`...1`)%>%
+  dplyr::filter(date < as.Date("2025-01-01"))
 ```
 
 # Mortalites routieres - Toutes donnees
@@ -64,12 +63,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Ind_Diversite + Dnst_Cultures + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + year2)
+           formula = proportion_interet ~ year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg)
 ```
 
 
@@ -96,7 +95,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Dist_Littoral + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + Famille_paysage_m + Dnst_Cultures + prop_tmoins1)
 ```
 
 ```{r}
@@ -126,7 +125,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km  + Dnst_Cultures + Dist_Ecotone  + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + Dist_Ecotone + prop_tmoins2)
 ```
 
 ```{r}
@@ -157,7 +156,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + Ind_Diversite + Dist_Littoral + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year  + Famille_paysage_m + Dist_Littoral + prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
@@ -188,7 +187,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + X_10km + Dnst_Cultures + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -220,7 +219,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + X_10km + Y_10km + Dist_Ecotone + prop_tmoins1 + prop_tmoins2 )
+           formula = proportion_interet ~ year + Y_10km + prop_tmoins1 + prop_tmoins2 )
 ```
 
 ```{r}
@@ -250,7 +249,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Dnst_Cultures + Dist_Ecotone + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -281,7 +280,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dnst_Cultures + Dist_Ecotone + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
@@ -313,7 +312,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + X_10km + Dist_Ecotone + prop_tmoins1)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -343,7 +342,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + prop_tmoins1)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -374,7 +373,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year   + Y_10km)
 ```
 
 ```{r}
@@ -405,7 +404,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + prop_tmoins1 )
+           formula = proportion_interet ~ year )
 ```
 
 ```{r}
@@ -438,7 +437,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km  + Dist_Littoral)
+           formula = proportion_interet ~ year + Famille_paysage_m + Dist_Ecotone)
 ```
 
 ```{r}
@@ -468,7 +467,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + prop_tmoins1)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -498,7 +497,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + year2)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -528,7 +527,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year2)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -561,7 +560,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dnst_Cultures + Dist_Ecotone + Dist_Eau + year2)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -591,7 +590,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + prop_tmoins1 + prop_tmoins2 )
+           formula = proportion_interet ~ year + Ind_Diversite )
 ```
 
 ```{r}
@@ -620,7 +619,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Dist_Ecotone + Dist_Littoral + prop_tmoins1)
+           formula = proportion_interet ~ year   + Famille_paysage_m +  Dist_Littoral)
 ```
 
 ```{r}
@@ -647,9 +646,10 @@ reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
 ```{r}
 par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 ```
+
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Dnst_Cultures)
+           formula = proportion_interet ~ year  + Famille_paysage_m)
 ```
 
 ```{r}
@@ -680,7 +680,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Ind_Diversite + Dist_Ecotone + Dist_Littoral + Dist_Eau + prop_tmoins1 + year2)
+           formula = proportion_interet ~ year2)
 ```
 
 ```{r}
@@ -710,7 +710,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + Famille_paysage_m)
 ```
 
 ```{r}
@@ -739,7 +739,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dist_Ecotone + Dist_Littoral + Dist_Eau + prop_tmoins1 + year2)
+           formula = proportion_interet ~ prop_tmoins2 + year2)
 ```
 
 ```{r}
@@ -769,7 +769,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~   X_10km + Ind_Diversite + Dnst_Cultures + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~   year + X_10km + Famille_paysage_m)
 ```
 
 ```{r}
@@ -800,7 +800,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ prop_tmoins1 + year2)
 ```
 
 ```{r}
@@ -829,7 +829,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dist_Littoral + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -858,7 +858,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km  + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ prop_tmoins1 )
 ```
 
 ```{r}
@@ -888,7 +888,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year  + Y_10km)
 ```
 
 ```{r}
@@ -918,7 +918,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Dnst_Cultures + Dist_Eau + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + prop_tmoins1 + year2)
 ```
 
 ```{r}
@@ -949,7 +949,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + X_10km + Dnst_Cultures)
 ```
 
 ```{r}
