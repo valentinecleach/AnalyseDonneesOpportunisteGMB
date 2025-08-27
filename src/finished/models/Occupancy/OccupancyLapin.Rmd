@@ -190,6 +190,7 @@ detection_autres <- Autres %>%
 noms <- detection_autres$Code_10km
 rownames(detection_autres) <- noms
 detection_autres <- detection_autres[-1]
+detection_autres <- scale(detection_autres)
 ```
 
 ```{r}
