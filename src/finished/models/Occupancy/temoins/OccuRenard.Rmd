@@ -32,17 +32,6 @@ VariablesSite <- VariablesSite%>%
   transform_VarSites()
 ```
 
-```{r}
-Renards <- Total %>%
-  sf::st_join(VariablesSite) %>%
-  dplyr::filter(cd_nom == 60585,
-                technique_observation == "Vu",
-                date >= as.Date("2005-01-01")) %>%
-  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
-  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
-  dplyr::mutate(year = lubridate::year(date))
-```
-
 ## Covariables de site
 
 ```{r}
@@ -60,7 +49,7 @@ site_info <- site_info %>%
                        scale))
 ```
 
-# Implémentation du modèle
+# Implementation du modele
 
 ```{r}
 Renard <- Total %>%
@@ -145,7 +134,7 @@ detection_autres <- Autres %>%
 # press_obs_s1 = rowSums(detection_autres[2:6])
 # press_obs_s2 = rowSums(detection_autres[7:11])
 # press_obs_s3 = rowSums(detection_autres[12:16])
-# pressions_obs = cbind(press_obs_s1, press_obs_s2, press_obs_s3)
+# pression_obs = cbind(press_obs_s1, press_obs_s2, press_obs_s3)
 noms <- detection_autres$Code_10km
 rownames(detection_autres) <- noms
 detection_autres <- detection_autres[-1]
@@ -215,24 +204,24 @@ fm0 <- unmarked::colext(
   psiformula = ~ 1,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
-  pformula = ~ 1,  # detection
+  pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
 
+backTransform(fm0, "col")
+backTransform(fm0, "ext")
+```
+
+
+```{r}
 fm1 <- unmarked::colext(
   psiformula = ~ Y_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
-  pformula = ~ pressions_obs,  # detection
+  pformula = ~ pression_obs,  # detection
   data = umf, # data
-  se = TRUE)
-
-fm1
-confint(backTransform(fm1, "col"))
-confint(backTransform(fm1, "ext"))
-
-summary(umf)
+  se = FALSE)
 ```
 
 
@@ -292,18 +281,18 @@ fm7 <- unmarked::colext(
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
-
-
-fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5, fm6, fm7)
-unmarked::modSel(fmList)
-
 ```
 
-Ici on garde la variable de fm6 (\$ \\text{Dnst_Cultures} \$), et on
-ajoute les autres.
 
 ```{r}
-fm0 <- fm6 
+fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5, fm6, fm7)
+unmarked::modSel(fmList)
+```
+
+
+
+```{r}
+# fm0 <-  
 
 fm1 <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Y_10km,     # initial occupancy
@@ -412,18 +401,18 @@ unmarked::modSel(fmList)
 
 ```
 
-Maintenant, on remarque que le modèle sans variables supplementaires
+Maintenant, on remarque que le modele sans variables supplementaires
 est celui dont l'AIC est le plus faible, donc on peut se permettre de
-s'arrêter.\
+s'arreter.\
 
-On regarde ce modèle avec la variance incluse:
+On regarde ce modele avec la variance incluse:
 
 ```{r}
 fm <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Dist_Littoral,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
-  pformula = ~ pressions_obs,  # detection
+  pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = TRUE)
@@ -436,7 +425,7 @@ coef(fm)[3]
 
 ## Tests d'hypotheses -> 
 
-## Validation / Robustesse ?
+## Validation / Robustesse e
 
 On va commencer par un goodness of fit test
 
@@ -444,9 +433,9 @@ On va commencer par un goodness of fit test
 gof <- suppressWarnings(unmarked::parboot(fm, statistic=SSE, nsim=30))
 gof;plot(gof)
 ```
-H_0: le mod?le est adequat, vs H_1 : non H_0. 
-pvalue > 0.05 -> On ne peut pas rejeter l'hypoth?se nulle ie on ne peut pas dire que le modele est inadequat.
-pvalue <0.05 -> On rejette l'hypothese nulle: Le modele n'est pas ad?quat.
+H_0: le modle est adequat, vs H_1 : non H_0. 
+pvalue > 0.05 -> On ne peut pas rejeter l'hypothese nulle ie on ne peut pas dire que le modele est inadequat.
+pvalue <0.05 -> On rejette l'hypothese nulle: Le modele n'est pas adequat.
 
 On a p-value = 0.1935484 > 0.05. On ne rejette pas encore le modele
 
@@ -455,7 +444,7 @@ On a p-value = 0.1935484 > 0.05. On ne rejette pas encore le modele
 mb_test <- suppressWarnings(AICcmodavg::mb.gof.test(fm, nsim=100))
 ```
 
-et ici on a un c-hat > 4 donc mauvais + p-value faible: on regette le modele.
+et ici on a un c-hat > 4 donc mauvais + p-value faible: on rejette le modele.
 
 ```{r}
 chisq <- function(fm) {
@@ -474,7 +463,7 @@ chisq <- function(fm) {
 ```{r}
 m1 <- nonparboot(fm, 
                  B = 10)
-predicted_occupancy <- data.frame(saison = c(1:3),
+predicted_occupancy <- data.frame(saison = c(1:5),
                                   smoothed_occ = smoothed(fm)[2,],
                                   SE = m1@smoothed.mean.bsse[2,])
 
@@ -482,7 +471,7 @@ predicted_occupancy%>%
   ggplot( aes(x=saison, y=smoothed_occ)) +
   geom_line() +
   geom_point() +
-  labs(title = "Probabilit? d'occupation du lapin a travers les saisons")+
+  labs(title = "Probabilite d'occupation du lapin a travers les saisons")+
   theme_bw()
 ```
 ```{r}
@@ -502,11 +491,11 @@ LtoM <-colorRampPalette(c('white','darkorange4'))
 
 g1 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X1))+
-  labs(title="De 2010 ? 2014")+
+  labs(title="De 2010 e 2014")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilit? de presence")+
+                       name = "Probabilite de presence")+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
@@ -514,23 +503,34 @@ g1 <- ggplot() +
 
 g2 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X2))+
-  labs(title="De 2015 ? 2019")+
+  labs(title="De 2015 e 2019")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilit? de presence")+
+                       name = "Probabilite de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+g4 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X4))+
+  labs(title="De 2015 e 2019")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilite de presence")+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
 
 
-g3 <- ggplot() +
-  geom_sf(data = grid_10x10, aes(fill = X3))+
-  labs(title="De 2020 ? 2024")+
+g5 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X5))+
+  labs(title="De 2020 e 2024")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilit? de presence")+
+                       name = "Probabilite de presence")+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
@@ -538,11 +538,12 @@ g3 <- ggplot() +
 
 plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
                           g2 + theme(legend.position = "none"),
-                          g3 + theme(legend.position = "none"),
+                          g4 + theme(legend.position = "none"),
+                          g5 + theme(legend.position = "none"),
                           common.legend = TRUE,
                           legend = "right")
 
 ggpubr::annotate_figure(plot, 
-                        top = ggpubr::text_grob("Pr?sence du Lapin"))
+                        top = ggpubr::text_grob("Presence du Renard"))
 
 ```
