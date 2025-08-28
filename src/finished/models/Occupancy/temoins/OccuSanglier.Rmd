@@ -360,13 +360,11 @@ fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5)
 unmarked::modSel(fmList)
 ```
 
-On arrête, ca prends deja assez de temps.
+On arrête, ca prends deja assez de temps. On analyse avec les variables X_10, Dnst_Cultures et pression_obs.
 
 ```{r}
-fm0 <- fm0
-
-fm2 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Y_10km + X_10km+ Dist_EcotoneArbore+Dist_Eau,     # initial occupancy
+fm <- unmarked::colext(
+  psiformula = ~ X_10km + Dnst_Cultures,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -375,16 +373,9 @@ fm2 <- unmarked::colext(
   se = TRUE)
 ```
 
-```{r}
-fmList <- unmarked::fitList(fm0, fm1, fm2)
-unmarked::modSel(fmList)
-```
-
-On s'arrete et on analyse fm1 et fm0.
-
 ## Tests d'hypotheses -> 
 
-## Validation / Robustesse ?
+## Validation / Robustesse e
 
 ```{r}
 chisq <- function(fm) {
@@ -395,14 +386,19 @@ chisq <- function(fm) {
     sum((y-fv)^2/(fv*(1-fv)), na.rm=TRUE)
     }
 
-pb0 <- parboot(fm0, statistic=chisq, nsim=40, parallel=FALSE)
-pb1 <- parboot(fm1, statistic=chisq, nsim=40, parallel=FALSE)
+pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
 ```
 Les deux ont peut accepter par defaut
 
 ## Interprétation
+
 ```{r}
-fm1
+fm
+```
+
+```{r}
+backTransform(fm, "col")
+backTransform(fm, "ext")
 ```
 
 
@@ -410,7 +406,7 @@ fm1
 ```{r}
 m1 <- nonparboot(fm, 
                  B = 10)
-predicted_occupancy <- data.frame(saison = c(1:3),
+predicted_occupancy <- data.frame(saison = c(1:5),
                                   smoothed_occ = smoothed(fm)[2,],
                                   SE = m1@smoothed.mean.bsse[2,])
 
@@ -418,12 +414,11 @@ predicted_occupancy%>%
   ggplot( aes(x=saison, y=smoothed_occ)) +
   geom_line() +
   geom_point() +
-  labs(title = "Probabilit? d'occupation du Sanglier a travers les saisons")+
+  labs(title = "Probabilite d'occupation du Sanglier a travers les saisons")+
   theme_bw()
 ```
 
 ```{r}
-
 grid_10x10 <- st_read(paste0(wd$data, 
                              "derived/VariablesSite.shp")) %>%
   transforme_carte()
@@ -439,11 +434,11 @@ LtoM <-colorRampPalette(c('white','darkorange4'))
 
 g1 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X1))+
-  labs(title="De 2010 ? 2014")+
+  labs(title="De 2010 a 2012")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilit? de presence")+
+                       name = "Probabilite de presence")+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
@@ -451,23 +446,34 @@ g1 <- ggplot() +
 
 g2 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X2))+
-  labs(title="De 2015 ? 2019")+
+  labs(title="De 2013 a 2015")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilit? de presence")+
+                       name = "Probabilite de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+g3 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X2))+
+  labs(title="De 2019 a 2021")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilite de presence")+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
 
 
-g3 <- ggplot() +
+g4 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X3))+
-  labs(title="De 2020 ? 2024")+
+  labs(title="De 2022 a 2024")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
-                       name = "Probabilit? de presence")+
+                       name = "Probabilite de presence")+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         axis.title = element_blank())
@@ -476,10 +482,10 @@ g3 <- ggplot() +
 plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
                           g2 + theme(legend.position = "none"),
                           g3 + theme(legend.position = "none"),
+                          g4 + theme(legend.position = "none"),
                           common.legend = TRUE,
                           legend = "right")
 
 ggpubr::annotate_figure(plot, 
-                        top = ggpubr::text_grob("Pr?sence du Sanglier"))
-
+                        top = ggpubr::text_grob("Presence du Sanglier"))
 ```

@@ -110,6 +110,11 @@ rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/OccupancyHerisson.Rm
                                        "models/Occupancy/OccupancyHerisson.html"),
                   encoding="UTF-8")
 
+rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/temoins/OccuSanglier.Rmd"),
+                  output_file = paste0(wd$output, 
+                                       "models/Occupancy/OccupancySanglier.html"),
+                  encoding="UTF-8")
+
 rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/SiteCovariates.Rmd"),
                   output_file = paste0(wd$output, 
                                        "models/Occupancy/SiteCovariates.html"),
