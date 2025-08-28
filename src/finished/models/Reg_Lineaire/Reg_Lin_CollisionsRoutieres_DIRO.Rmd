@@ -63,7 +63,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year)
+           formula = proportion_interet ~ year+X_10km+Dist_Ecotone+Dist_Littoral+prop_tmoins1+prop_tmoins2+year2)
 ```
 
 ```{r}
@@ -80,27 +80,27 @@ bdd_reg <- tab_glm(Donnees,
                    espece_benchmark = 60585)
 
 liste <- choisi_forme_year(bdd = bdd_reg)
-regfit <- liste[1]$regfit
-bdd <- liste[2]$bdd
+#regfit <- liste[1]$regfit
+#bdd <- liste[2]$bdd
 ```
 
 ```{r}
-reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+#reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
 ```
 
 ```{r}
-par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+#par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 ```
 
 
 ```{r}
-reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Famille_paysage_m + Dnst_Cultures + prop_tmoins1)
+# reg <- glm(data = bdd,
+#            formula = proportion_interet ~ year + Famille_paysage_m + Dnst_Cultures + prop_tmoins1)
 ```
 
 ```{r}
-summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg) 
+#summary(reg); autoplot(reg)
+#bgtest(reg); bptest(reg) 
 ```
 
 ### Lapin - Chevreuil
@@ -125,7 +125,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Dist_Ecotone + prop_tmoins2)
+           formula = proportion_interet ~ year+ X_10km + Dist_Ecotone + + prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
@@ -156,7 +156,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + Famille_paysage_m +  prop_tmoins1 + prop_tmoins2 + )
+           formula = proportion_interet ~ year + Dist_Ecotone +  prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
@@ -187,7 +187,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year)
+           formula = proportion_interet ~ year+ Dist_Ecotone + prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
@@ -210,21 +210,21 @@ bdd <- liste[2]$bdd
 ```
 
 ```{r}
-reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+#reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
 ```
 
 ```{r}
-par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+#par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 ```
 
 ```{r}
-reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Y_10km + prop_tmoins1 + prop_tmoins2 )
+#reg <- glm(data = bdd,
+#           formula = proportion_interet ~ year + Y_10km + prop_tmoins1 + #prop_tmoins2 )
 ```
 
 ```{r}
-summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg) 
+#summary(reg); autoplot(reg)
+#bgtest(reg); bptest(reg) 
 ```
 
 
@@ -249,7 +249,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Ind_Diversite + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + year2 )
 ```
 
 ```{r}
@@ -280,7 +280,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m +  Ind_Diversite + Dist_Ecotone + Dist_Littoral + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
@@ -404,7 +404,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year )
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Ind_Diversite + Dist_Ecotone+ Dist_Littoral + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
@@ -467,7 +467,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Famille_paysage_m)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Ind_Diversite + Dist_Ecotone + Dist_Littoral  + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
@@ -574,7 +574,6 @@ bgtest(reg); bptest(reg)
 bdd_reg <- tab_glm(Donnees, 
                    espece_interet = 60716,
                    espece_benchmark = 60585)
-
 liste <- choisi_forme_year(bdd = bdd_reg)
 regfit <- liste[1]$regfit
 bdd <- liste[2]$bdd
@@ -829,7 +828,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year)
+           formula = proportion_interet ~ year + X_10km + Y_10km + Famille_paysage_m + Dist_Littoral + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
@@ -858,7 +857,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + prop_tmoins1 )
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Dist_Littoral + prop_tmoins1 + prop_tmoins2 )
 ```
 
 ```{r}
@@ -949,7 +948,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dnst_Cultures)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}

@@ -243,16 +243,25 @@ choisi_forme_year <- function(bdd) {
     data = data_quanti,
     method = "seqrep"
   )
+  bic_vals <- summary(regfit_quanti)$bic
+  if (all(is.na(bic_vals))) {
+    warning("Pas de BIC valid pour regfit_quanti")
+  }else{
+    min_bic_quanti <- min(summary(regfit_quanti)$bic, na.rm = TRUE)
+  }
+  
   regfit_quali <- leaps::regsubsets(
     x = proportion_interet~. ,
     data = data_quali,
     method = "seqrep"
   )
+  bic_vals <- summary(regfit_quali)$bic
+  if (all(is.na(bic_vals))) {
+    warning("Pas de BIC valid pour regfit_quali")
+  }else{
+    min_bic_quali  <- min(summary(regfit_quali)$bic, na.rm = TRUE)
+  }
 
-  # BIC_minimum
-  min_bic_quanti <- min(summary(regfit_quanti)$bic, na.rm = TRUE)
-  min_bic_quali  <- min(summary(regfit_quali)$bic, na.rm = TRUE)
-  
   # Choix
   if (min_bic_quanti < min_bic_quali) {
     print(list(choice = "quantitative", min_bic = min_bic_quanti))
