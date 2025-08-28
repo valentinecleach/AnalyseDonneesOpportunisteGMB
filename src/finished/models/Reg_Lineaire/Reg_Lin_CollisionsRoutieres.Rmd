@@ -156,7 +156,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + Famille_paysage_m + Dist_Littoral + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year  + Famille_paysage_m +  prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
@@ -280,7 +280,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1)
 ```
 
 ```{r}
@@ -342,7 +342,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year)
+           formula = proportion_interet ~ year+year2)
 ```
 
 ```{r}
@@ -373,7 +373,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Y_10km)
+           formula = proportion_interet ~ year + Dnst_Cultures + Dist_Littoral)
 ```
 
 ```{r}
@@ -467,7 +467,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year)
+           formula = proportion_interet ~ year + Famille_paysage_m)
 ```
 
 ```{r}
@@ -560,7 +560,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year)
+           formula = proportion_interet ~ year2)
 ```
 
 ```{r}
@@ -619,7 +619,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Famille_paysage_m +  Dist_Littoral)
+           formula = proportion_interet ~ year)
 ```
 
 ```{r}
@@ -649,7 +649,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + Famille_paysage_m)
+           formula = proportion_interet ~ year  + Famille_paysage_m + year2)
 ```
 
 ```{r}
@@ -739,7 +739,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + Dnst_Cultures + prop_tmoins2)
 ```
 
 ```{r}
@@ -769,7 +769,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~   year + X_10km + Famille_paysage_m)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m)
 ```
 
 ```{r}
@@ -800,7 +800,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ prop_tmoins1 + year2)
+           formula = proportion_interet ~ year + prop_tmoins1 + year2)
 ```
 
 ```{r}
@@ -858,7 +858,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ prop_tmoins1 )
+           formula = proportion_interet ~ year + prop_tmoins1 )
 ```
 
 ```{r}
@@ -888,7 +888,7 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + Y_10km)
+           formula = proportion_interet ~ year + Y_10km)
 ```
 
 ```{r}
@@ -956,7 +956,3 @@ reg <- glm(data = bdd,
 summary(reg); autoplot(reg)
 bgtest(reg); bptest(reg); car::vif(reg)
 ```
-
-# Mortalite routieres - DIRO uniquement
-
-Il me manque la colonne bdd_originale... Ou est elle passee
