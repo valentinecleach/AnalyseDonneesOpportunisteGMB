@@ -202,165 +202,10 @@ Maintenant, on ajoute les variables de sites, et on regarde pour
 l'instant uniquement l'AIC, afin de faire un tri rapide. On fait une
 elimination forwards manuelle.
 
-```{r, include=FALSE}
-fm0 <- unmarked::colext(
-  psiformula = ~ 1,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-```
+On commence par ajouter la variable \$ \\text{Dnst_Cultures} \$, et on
+essaye avec les autres. On se retrouve a garder les variables Dnst_cultures et X_10km.
 
-
-```{r, include=FALSE}
-fm1 <- unmarked::colext(
-  psiformula = ~ Y_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  se = FALSE)
-```
-
-
-```{r, include=FALSE}
-fm2 <- unmarked::colext(
-  psiformula = ~ X_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-```
-
-
-```{r, include=FALSE}
-fm3 <- unmarked::colext(
-  psiformula = ~ Dist_Eau,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-```
-
-
-```{r, include=FALSE}
-fm4 <- unmarked::colext(
-  psiformula = ~ Dist_Littoral,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-```
-
-
-```{r, include=FALSE}
-fm5 <- unmarked::colext(
-  psiformula = ~ Dist_EcotoneArbore,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-```
-
-
-```{r, include=FALSE}
-fm6 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-```
-
-
-```{r, include=FALSE}
-fm7 <- unmarked::colext(
-  psiformula = ~ Ind_Diversite,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-```
-
-
-```{r}
-fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5, fm6, fm7)
-unmarked::modSel(fmList)
-```
-
-Ici on garde la variable de fm6 (\$ \\text{Dnst_Cultures} \$), et on
-ajoute les autres.
-
-```{r, include=FALSE}
-fm0 <- fm2 
-
-fm1 <- unmarked::colext(
-  psiformula = ~ X_10km + Y_10km,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-fm2 <- unmarked::colext(
-  psiformula = ~ X_10km + Dist_Eau,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-fm3 <- unmarked::colext(
-  psiformula = ~ X_10km + Dist_EcotoneArbore,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-fm4 <- unmarked::colext(
-  psiformula = ~ X_10km + Dnst_Cultures,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-
-fm5 <- unmarked::colext(
-  psiformula = ~ X_10km + Ind_Diversite,     # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = FALSE)
-```
-
-
-```{r, include=TRUE}
-fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5)
-unmarked::modSel(fmList)
-```
-
-On arrête, ca prends deja assez de temps. On analyse avec les variables X_10, Dnst_Cultures et pression_obs.
+On arrete, ca prends deja assez de temps. On analyse avec les variables X_10, Dnst_Cultures et pression_obs.
 
 ```{r}
 fm <- unmarked::colext(
@@ -374,8 +219,10 @@ fm <- unmarked::colext(
 ```
 
 ## Tests d'hypotheses -> 
+indépendance des sites?
 
-## Validation / Robustesse e
+
+## Validation / Robustesse
 
 ```{r}
 chisq <- function(fm) {
@@ -388,9 +235,10 @@ chisq <- function(fm) {
 
 pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
 ```
+
 Les deux ont peut accepter par defaut
 
-## Interprétation
+## Interpretation
 
 ```{r}
 fm
@@ -403,13 +251,22 @@ backTransform(fm, "ext")
 
 
 ## Graphiques 
+
+Une croissance des sanglier au cours des periodes:
 ```{r}
 m1 <- nonparboot(fm, 
                  B = 10)
+```
+
+
+```{r}
 predicted_occupancy <- data.frame(saison = c(1:5),
                                   smoothed_occ = smoothed(fm)[2,],
                                   SE = m1@smoothed.mean.bsse[2,])
+```
 
+
+```{r}
 predicted_occupancy%>%
   ggplot( aes(x=saison, y=smoothed_occ)) +
   geom_line() +
@@ -418,6 +275,8 @@ predicted_occupancy%>%
   theme_bw()
 ```
 
+
+Les sangliers semblent se deplacer legerement sur le territoire.
 ```{r}
 grid_10x10 <- st_read(paste0(wd$data, 
                              "derived/VariablesSite.shp")) %>%

@@ -100,7 +100,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Lapin - Chevreuil
@@ -130,7 +130,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Lapin - Blaireau
@@ -161,7 +161,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ## Herisson
@@ -192,7 +192,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -224,7 +224,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -254,7 +254,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -285,7 +285,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -317,7 +317,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Putois - Renard
@@ -347,7 +347,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -378,7 +378,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -409,7 +409,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -442,7 +442,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -472,7 +472,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -502,7 +502,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -565,7 +565,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -595,7 +595,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Belette - Chevreuil
@@ -624,7 +624,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -654,7 +654,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ## Fouine
@@ -685,7 +685,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -715,7 +715,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Fouine - Chevreuil
@@ -744,7 +744,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -774,7 +774,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ## Temoins
@@ -805,7 +805,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Sanglier - Chevreuil
@@ -834,7 +834,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Sanglier - Blaireau
@@ -863,7 +863,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -893,7 +893,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -923,7 +923,7 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -954,5 +954,5 @@ reg <- glm(data = bdd,
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```

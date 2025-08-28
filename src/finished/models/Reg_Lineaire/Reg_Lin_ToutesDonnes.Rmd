@@ -9,6 +9,7 @@ output:
 
 # Importations / nettoyage
 
+
 ```{r}
 library(ggfortify)
 library(lmtest)
@@ -26,13 +27,9 @@ wd <- set_wd()
 Total_et_Diro <- readr::read_csv(paste0(wd$data, 
                                         "derived/Total_et_Diro.csv"),
                                  locale = readr::locale(encoding = "UTF-8"))
-Total_et_Diro <- Total_et_Diro %>%
-  dplyr::select(-`...1`)
-```
-
-# Mortalites routieres - Toutes donnees
-```{r}
-Donnees <- Total_et_Diro
+Donnees <- Total_et_Diro %>%
+  dplyr::select(-`...1`)%>%
+  dplyr::filter(date < as.Date("2025-01-01"))
 ```
 
 ## Lapin
@@ -61,12 +58,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Ind_Diversite + Dist_Ecotone + Dist_Littoral + prop_tmoins1 +prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Y_10km + Famille_paysage_m + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -93,12 +90,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Ind_Diversite + Dist_Ecotone + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + Famille_paysage_m + Dist_Ecotone + prop_tmoins1 +prop_tmoins2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Lapin - Chevreuil
@@ -123,12 +120,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Dist_Ecotone + Dist_Littoral  + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Dist_Ecotone + Dist_Littoral + Dist_Eau + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Lapin - Blaireau
@@ -154,12 +151,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + Dnst_Cultures + Dist_Ecotone + prop_tmoins1 + prop_tmoins2+ year2)
+           formula = proportion_interet ~ year + Famille_paysage_m + Dnst_Cultures + Dist_Ecotone + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ## Herisson
@@ -185,14 +182,13 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + X_10km + Y_10km + Dist_Littoral + Dist_Eau + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Dist_Littoral + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
-
 
 
 ### Herisson - Renard
@@ -217,12 +213,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + X_10km  + prop_tmoins1 + prop_tmoins2 )
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -247,12 +243,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Dist_Eau + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -278,12 +274,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dnst_Cultures + Dist_Ecotone + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Y_10km + Famille_paysage_m + Dnst_Cultures + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -310,12 +306,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year  + X_10km  + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Putois - Renard
@@ -340,12 +336,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + Ind_Diversite + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + prop_tmoins1)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -371,12 +367,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + X_10km + Y_10km  + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Y_10km + Dist_Ecotone + prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -402,12 +398,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year   + prop_tmoins1 )
+           formula = proportion_interet ~ year + Famille_paysage_m + Dist_Ecotone + prop_tmoins1 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -435,12 +431,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km  + Dist_Ecotone + prop_tmoins1 + year2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Ind_Diversite + prop_tmoins1 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -465,12 +461,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ Y_10km   + prop_tmoins1)
+           formula = proportion_interet ~ year + Dist_Ecotone + prop_tmoins1)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -495,12 +491,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Y_10km + Dist_Ecotone + prop_tmoins2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -525,12 +521,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Y_10km +  Dist_Ecotone + Dist_Eau + prop_tmoins1)
+           formula = proportion_interet ~ year + Y_10km + Dist_Ecotone + prop_tmoins1 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -558,12 +554,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dnst_Cultures + Dist_Ecotone + Dist_Eau + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Dist_Eau + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -588,12 +584,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Ind_Diversite + Dist_Ecotone + Dist_Eau + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + Famille_paysage_m + Dist_Ecotone + Dist_Eau + prop_tmoins1 + prop_tmoins2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Belette - Chevreuil
@@ -617,13 +613,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dist_Ecotone + Dist_Littoral + Dist_Eau + prop_tmoins1 + prop_tmoins2 + year2)
-
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Dist_Ecotone + Dist_Eau + prop_tmoins1 +prop_tmoins2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -648,13 +643,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Dnst_Cultures + Dist_Ecotone + Dist_Eau +
-             prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + Famille_paysage_m + Dnst_Cultures + Dist_Ecotone + Dist_Eau + prop_tmoins1 +prop_tmoins2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ## Fouine
@@ -680,14 +674,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year +
-             Ind_Diversite + Dnst_Cultures +
-             prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -712,13 +704,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dnst_Cultures +
-             prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Fouine - Chevreuil
@@ -742,14 +733,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km +
-             Ind_Diversite + Dnst_Cultures + Dist_Eau +
-             prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + Famille_paysage_m + Dist_Littoral + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -774,15 +763,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km +
-             Ind_Diversite + Dnst_Cultures +
-             prop_tmoins1 + prop_tmoins2 + year2)
-
+           formula = proportion_interet ~ year + X_10km + Ind_Diversite + prop_tmoins1 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ## Temoins
@@ -808,13 +794,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km +
-             prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1 +prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Sanglier - Chevreuil
@@ -838,13 +823,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Dnst_Cultures +
-             prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + Y_10km + Famille_paysage_m + Dist_Littoral + prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 ### Sanglier - Blaireau
@@ -868,13 +852,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dnst_Cultures +
-             prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Dnst_Cultures + Dist_Ecotone + Dist_Littoral + prop_tmoins1 +prop_tmoins2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -899,13 +882,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dist_Eau +
-             prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + Dnst_Cultures + Dist_Eau + prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -930,13 +912,12 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + Dnst_Cultures +
-             Dist_Ecotone + prop_tmoins1 + prop_tmoins2 + year2)
+           formula = proportion_interet ~ year + Famille_paysage_m + Dnst_Cultures + Dist_Ecotone + prop_tmoins1 + prop_tmoins2 + year2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
 
 
@@ -962,11 +943,10 @@ par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
 
 ```{r}
 reg <- glm(data = bdd,
-           formula = proportion_interet ~ year + X_10km + Dnst_Cultures +
-             Dist_Eau + prop_tmoins1 + prop_tmoins2)
+           formula = proportion_interet ~ year + X_10km + Y_10km + Famille_paysage_m + Dnst_Cultures + prop_tmoins1 +prop_tmoins2)
 ```
 
 ```{r}
 summary(reg); autoplot(reg)
-bgtest(reg); bptest(reg); car::vif(reg)
+bgtest(reg); bptest(reg) 
 ```
