@@ -423,28 +423,10 @@ coef(fm)[3]
 ```
 
 
-## Tests d'hypotheses -> 
+## Tests d'hypotheses 
 
-## Validation / Robustesse e
+## Validation / Robustesse 
 
-On va commencer par un goodness of fit test
-
-```{r}
-gof <- suppressWarnings(unmarked::parboot(fm, statistic=SSE, nsim=30))
-gof;plot(gof)
-```
-H_0: le modle est adequat, vs H_1 : non H_0. 
-pvalue > 0.05 -> On ne peut pas rejeter l'hypothese nulle ie on ne peut pas dire que le modele est inadequat.
-pvalue <0.05 -> On rejette l'hypothese nulle: Le modele n'est pas adequat.
-
-On a p-value = 0.1935484 > 0.05. On ne rejette pas encore le modele
-
-(avec le changement, on accepte)
-```{r}
-mb_test <- suppressWarnings(AICcmodavg::mb.gof.test(fm, nsim=100))
-```
-
-et ici on a un c-hat > 4 donc mauvais + p-value faible: on rejette le modele.
 
 ```{r}
 chisq <- function(fm) {
@@ -471,7 +453,7 @@ predicted_occupancy%>%
   ggplot( aes(x=saison, y=smoothed_occ)) +
   geom_line() +
   geom_point() +
-  labs(title = "Probabilite d'occupation du lapin a travers les saisons")+
+  labs(title = "Probabilite d'occupation du renard a travers les saisons")+
   theme_bw()
 ```
 ```{r}
