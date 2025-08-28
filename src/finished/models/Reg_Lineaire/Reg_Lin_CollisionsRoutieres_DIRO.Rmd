@@ -1,0 +1,958 @@
+---
+title: "Morts Collisions DIRO"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+---
+
+# Importations / nettoyage
+
+```{r}
+library(ggfortify)
+library(lmtest)
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r}
+wd <- set_wd()
+```
+
+
+```{r}
+Total_et_Diro <- readr::read_csv(paste0(wd$data, 
+                                        "derived/Total_et_Diro.csv"),
+                                 locale = readr::locale(encoding = "UTF-8"))
+Total_et_Diro <- Total_et_Diro %>%
+  dplyr::select(-`...1`)%>%
+  dplyr::filter(date < as.Date("2025-01-01"))
+```
+
+# Mortalites routieres - Toutes donnees
+```{r}
+Donnees <- Total_et_Diro %>%
+  dplyr::filter(bdd_originale == "DIRO")
+```
+
+## Lapin
+
+### Lapin - Sanglier
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60981)
+```
+
+
+```{r}
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg)
+```
+
+
+### Lapin - Renard
+
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60585)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Famille_paysage_m + Dnst_Cultures + prop_tmoins1)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+### Lapin - Chevreuil
+
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 61714,
+                   espece_benchmark = 61057)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Dist_Ecotone + prop_tmoins2)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+### Lapin - Blaireau
+
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 61714,
+                   espece_benchmark = 60636)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year  + Famille_paysage_m +  prop_tmoins1 + prop_tmoins2 + )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+## Herisson
+
+### Herisson - Sanglier
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60015,
+                   espece_benchmark = 60981)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+
+### Herisson - Renard
+
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60015,
+                   espece_benchmark = 60585)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Y_10km + prop_tmoins1 + prop_tmoins2 )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Herisson - Chevreuil
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60015,
+                   espece_benchmark = 61057)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Herisson - Blaireau
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60015,
+                   espece_benchmark = 60636)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m + prop_tmoins1)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+## Putois
+
+### Putois - Sanglier
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60731,
+                   espece_benchmark = 60981)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+### Putois - Renard
+
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60731,
+                   espece_benchmark = 60585)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year+)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Putois - Chevreuil
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60731,
+                   espece_benchmark = 61057)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Dnst_Cultures + Dist_Littoral)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Putois - Blaireau
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60731,
+                   espece_benchmark = 60636)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+## Hermine
+
+### Hermine - Sanglier
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60686,
+                   espece_benchmark = 60981)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Famille_paysage_m + Dist_Ecotone)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Hermine - Renard
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60686,
+                   espece_benchmark = 60585)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Famille_paysage_m)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Hermine - Chevreuil
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60686,
+                   espece_benchmark = 61057)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Hermine - Blaireau
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60686,
+                   espece_benchmark = 60636)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg)
+```
+
+
+## Belette
+
+
+### Belette - Sanglier
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60716,
+                   espece_benchmark = 60981)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Belette - Renard
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60716,
+                   espece_benchmark = 60585)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Ind_Diversite )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+### Belette - Chevreuil
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60716,
+                   espece_benchmark = 61057)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Belette - Blaireau
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60716,
+                   espece_benchmark = 60636)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year  + Famille_paysage_m + )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+## Fouine
+
+### Fouine - Sanglier
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60674,
+                   espece_benchmark = 60981)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Fouine - Renard
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60674,
+                   espece_benchmark = 60585)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Famille_paysage_m)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+### Fouine - Chevreuil
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60674,
+                   espece_benchmark = 61057)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Dnst_Cultures + prop_tmoins2)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Fouine - Blaireau
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60674,
+                   espece_benchmark = 60636)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + X_10km + Famille_paysage_m)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+## Temoins
+
+### Sanglier - Renard
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60981,
+                   espece_benchmark = 60585)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + prop_tmoins1 + )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+### Sanglier - Chevreuil
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60981,
+                   espece_benchmark = 61057)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+### Sanglier - Blaireau
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60981,
+                   espece_benchmark = 60636)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + prop_tmoins1 )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Renard - Chevreuil
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60585,
+                   espece_benchmark = 61057)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + Y_10km)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Renard - Blaireau
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 60585,
+                   espece_benchmark = 60636)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + prop_tmoins1 + )
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```
+
+
+### Chevreuil - Blaireau
+
+```{r}
+bdd_reg <- tab_glm(Donnees, 
+                   espece_interet = 61057,
+                   espece_benchmark = 60636)
+
+liste <- choisi_forme_year(bdd = bdd_reg)
+regfit <- liste[1]$regfit
+bdd <- liste[2]$bdd
+```
+
+```{r}
+reg.summary <- summary(regfit); plot_regsubsets(reg.summary)
+```
+
+```{r}
+par(mfrow=c(1 ,1)) ; plot(regfit, scale ="bic")
+```
+
+```{r}
+reg <- glm(data = bdd,
+           formula = proportion_interet ~ year + X_10km + Dnst_Cultures)
+```
+
+```{r}
+summary(reg); autoplot(reg)
+bgtest(reg); bptest(reg) 
+```

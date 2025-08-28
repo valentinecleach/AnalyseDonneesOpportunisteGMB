@@ -92,6 +92,11 @@ rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lineaire/Reg_Lin_ToutesDon
 
 knitr::knit(paste0(wd$src, "finished/models/Reg_Lin_ToutesDonnes.Rmd"))
 
+rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lineaire/Reg_Lin_CollisionsRoutieres_DIRO.Rmd"),
+                  output_file = paste0(wd$output, 
+                                       "models/glm/Reg_Lin_DIRO.html"),
+                  encoding="UTF-8")
+
 ##### occupancy #####
 
 rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/OccupancyLapin.Rmd"),
