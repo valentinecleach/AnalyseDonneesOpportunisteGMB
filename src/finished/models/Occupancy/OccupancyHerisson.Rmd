@@ -1,6 +1,6 @@
 ---
-title: "Site Occupancy Lapin"
-date: "08/08"
+title: "Site Occupancy Herisson"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   bookdown::html_document2:
     toc: true
@@ -540,5 +540,5 @@ plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
                           legend = "right")
 
 ggpubr::annotate_figure(plot, 
-                        top = ggpubr::text_grob("Presence du Hérisson"))
+                        top = ggpubr::text_grob("Presence du Herisson"))
 ```
