@@ -180,13 +180,6 @@ detection_autres <- Autres %>%
                      values_from = n) %>%
   dplyr::arrange(Code_10km) %>%
   dplyr::filter(!is.na(Code_10km))
-```
-
-```{r}
-# press_obs_s1 = rowSums(detection_autres[2:6])
-# press_obs_s2 = rowSums(detection_autres[7:11])
-# press_obs_s3 = rowSums(detection_autres[12:16])
-# pression_obs = cbind(press_obs_s1, press_obs_s2, press_obs_s3)
 detection_autres <- detection_autres[-1]
 detection_autres <- scale(detection_autres)
 ```
@@ -381,48 +374,48 @@ fm5 <- unmarked::colext(
   data = umf, # data
   control = list(trace = 1),
   se = FALSE)
+```
 
-fm6 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures,     # initial occupancy
+
+```{r}
+fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5)
+unmarked::modSel(fmList)
+```
+
+C'est fm4 qui semble etre le mieux, fm1 (Dnst_Cultures + Y_10km) pas loin derrière avec \delta AIC = 0.97
+
+```{r}
+fm <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Dist_Littoral, # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
-  se = FALSE)
+  se = TRUE)
 ```
-
+Pas significative pour la colonisation, donc on essaye l'autre.
 
 ```{r}
-fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5, fm6)
-unmarked::modSel(fmList)
+fm <- unmarked::colext(
+  psiformula = ~ Dnst_Cultures + Y_10km, # initial occupancy
+  gammaformula =  ~ 1,  # colonization
+  epsilonformula = ~ 1, # extinction
+  pformula = ~ pression_obs,  # detection
+  data = umf, # data
+  control = list(trace = 1),
+  se = TRUE)
 ```
 
 
-
-
-## Tests d'hypotheses -> 
+## Tests d'hypotheses 
 
 ## Validation / Robustesse
 
-On va commencer par un goodness of fit test
-
 ```{r}
-gof <- suppressWarnings(unmarked::parboot(fm, statistic=SSE, nsim=30))
-gof;plot(gof)
-```
-H_0: le modele est adequat, vs H_1 : non H_0. 
-pvalue > 0.05 -> On ne peut pas rejeter l'hypothese nulle ie on ne peut pas dire que le modele est inadequat.
-pvalue <0.05 -> On rejette l'hypothese nulle: Le modele n'est pas adequat.
-
-On a p-value = 0.1935484 > 0.05. On ne rejette pas encore le modele
-
-(avec le changement, on accepte)
-```{r}
-mb_test <- suppressWarnings(AICcmodavg::mb.gof.test(fm, nsim=100))
+mb_test <- suppressWarnings(AICcmodavg::mb.gof.test(fm, nsim=30))
 ```
 
-et ici on a un c-hat > 4 donc mauvais + p-value faible: on regette le modele.
 
 ```{r}
 chisq <- function(fm) {
@@ -433,15 +426,27 @@ chisq <- function(fm) {
     sum((y-fv)^2/(fv*(1-fv)), na.rm=TRUE)
     }
 
-(pb <- parboot(fm2, statistic=chisq, nsim=40, parallel=FALSE))
+pb <- parboot(fm2, statistic=chisq, nsim=40, parallel=FALSE); pb
 ```
 
 
-## Graphiques 
+## Interpretation 
+
+```{r}
+confint(backTransform(fm, "ext")); backTransform(fm, "ext")
+confint(backTransform(fm, "col")); backTransform(fm, "col")  
+```
+
+```{r}
+fm
+
+```
+
+
 ```{r}
 m1 <- nonparboot(fm, 
                  B = 10)
-predicted_occupancy <- data.frame(saison = c(1:3),
+predicted_occupancy <- data.frame(saison = c(1:5),
                                   smoothed_occ = smoothed(fm)[2,],
                                   SE = m1@smoothed.mean.bsse[2,])
 
@@ -452,8 +457,8 @@ predicted_occupancy%>%
   labs(title = "Probabilite d'occupation du lapin a travers les saisons")+
   theme_bw()
 ```
-```{r}
 
+```{r}
 grid_10x10 <- st_read(paste0(wd$data, 
                              "derived/VariablesSite.shp")) %>%
   transforme_carte()
@@ -503,13 +508,38 @@ g3 <- ggplot() +
         axis.title = element_blank())
 
 
+g4 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X4))+
+  labs(title="De 2020 e 2024")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilite de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
+g5 <- ggplot() +
+  geom_sf(data = grid_10x10, aes(fill = X5))+
+  labs(title="De 2020 e 2024")+
+  scale_fill_gradient2(low=LtoM(0),
+                       high=LtoM(100),
+                       limits = c(0, 1),
+                       name = "Probabilite de presence")+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
+
+
 plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
                           g2 + theme(legend.position = "none"),
                           g3 + theme(legend.position = "none"),
+                          g4 + theme(legend.position = "none"),
+                          g5 + theme(legend.position = "none"),
                           common.legend = TRUE,
                           legend = "right")
 
 ggpubr::annotate_figure(plot, 
                         top = ggpubr::text_grob("Presence du Lapin"))
-
 ```
