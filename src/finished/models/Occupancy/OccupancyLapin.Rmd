@@ -474,7 +474,7 @@ LtoM <-colorRampPalette(c('white','darkorange4'))
 
 g1 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X1))+
-  labs(title="De 2010 e 2014")+
+  labs(title="De 2010 a 2012")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
@@ -486,7 +486,7 @@ g1 <- ggplot() +
 
 g2 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X2))+
-  labs(title="De 2015 e 2019")+
+  labs(title="De 2013 a 2015")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
@@ -498,7 +498,7 @@ g2 <- ggplot() +
 
 g3 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X3))+
-  labs(title="De 2020 e 2024")+
+  labs(title="De 2016 a 2018")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
@@ -510,7 +510,7 @@ g3 <- ggplot() +
 
 g4 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X4))+
-  labs(title="De 2020 e 2024")+
+  labs(title="De 2019 a 2021")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
@@ -522,7 +522,7 @@ g4 <- ggplot() +
 
 g5 <- ggplot() +
   geom_sf(data = grid_10x10, aes(fill = X5))+
-  labs(title="De 2020 e 2024")+
+  labs(title="De 2022 a 2024")+
   scale_fill_gradient2(low=LtoM(0),
                        high=LtoM(100),
                        limits = c(0, 1),
