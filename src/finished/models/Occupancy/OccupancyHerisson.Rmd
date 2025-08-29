@@ -252,6 +252,14 @@ fm0 <- unmarked::colext(
   control = list(trace = 1),
   se = FALSE)
 ```
+```{r}
+fm0
+backTransform(fm0, "ext")
+backTransform(fm0, "col")
+backTransform(fm0, "psi")
+plogis(coef(fm0)[4]);coef(fm0)[5]
+```
+
 
 ```{r}
 fm1 <- unmarked::colext(

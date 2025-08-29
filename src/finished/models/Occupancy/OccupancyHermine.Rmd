@@ -1,5 +1,5 @@
 ---
-title: "Site Occupancy Putois"
+title: "Site Occupancy Hermine"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
   bookdown::html_document2:
@@ -33,9 +33,9 @@ VariablesSite <- VariablesSite%>%
 ```
 
 ```{r}
-Putois <- Total %>%
+Hermine <- Total %>%
   sf::st_join(VariablesSite) %>%
-  dplyr::filter(cd_nom == 60731,
+  dplyr::filter(cd_nom == 60686,
                 technique_observation == "Vu",
                 date >= as.Date("2005-01-01")) %>%
   # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
@@ -46,7 +46,7 @@ Putois <- Total %>%
 ## Creation de la base de donnee Detection - Non Detection
 
 ```{r}
-detection_df <- Putois %>%
+detection_df <- Hermine %>%
   sf::st_drop_geometry() %>%
   dplyr::mutate(annee = lubridate::year(date)) %>%
   dplyr::select(Code_10km, annee) %>%
@@ -94,19 +94,19 @@ umf <- unmarked::unmarkedFrameOccu(y = detection_matrice,
 ```
 
 ```{r}
-unmarked::plot(umf, main="Detection/Non Detection de Putois sur les sites depuis 2005")
+unmarked::plot(umf, main="Detection/Non Detection de Hermine sur les sites depuis 2005")
 ```
 
 On voit bien qu'on a tres peu de sites avant 2005, non pas parce qu'il
-n'y avais pas de presence d'Putois, mais plus tres peu de detection. On
+n'y avais pas de presence d'Hermine, mais plus tres peu de detection. On
 a tres peu de donnees dans l'ensemble, sur toutes les especes.
  
 # Implementation du modele
 
 ```{r}
-Putois <- Total %>%
+Hermine <- Total %>%
   sf::st_join(VariablesSite) %>%
-  dplyr::filter(cd_nom == 60731,
+  dplyr::filter(cd_nom == 60686,
                 technique_observation == "Vu",
                 date >= as.Date("2010-01-01"),
                 date < as.Date("2025-01-01")) %>%
@@ -114,7 +114,7 @@ Putois <- Total %>%
   dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
   dplyr::mutate(year = lubridate::year(date))
 
-detection_df <- Putois %>%
+detection_df <- Hermine %>%
   sf::st_drop_geometry() %>%
   dplyr::mutate(annee = lubridate::year(date)) %>%
   dplyr::select(Code_10km, annee) %>%
@@ -137,7 +137,7 @@ umf <- unmarked::unmarkedFrameOccu(y = detection_matrice,
                                    siteCovs = site_info
                                    )
 
-unmarked::plot(umf, main="Detection/Non Detection d'Putois sur les sites de 2010 a 2024 inclus")
+unmarked::plot(umf, main="Detection/Non Detection d'Hermine sur les sites de 2010 a 2024 inclus")
 summary(umf)
 ```
 
@@ -161,7 +161,7 @@ quanti_periodes_matrice <- matrix(
 ```{r}
 Autres <- Total %>%
   sf::st_join(VariablesSite) %>%
-  dplyr::filter(cd_nom != 60731,
+  dplyr::filter(cd_nom != 60686,
                 technique_observation == "Vu",
                 date >= as.Date("2010-01-01"),
                 date < as.Date("2025-01-01"))%>%
@@ -453,7 +453,7 @@ predicted_occupancy%>%
   ggplot( aes(x=saison, y=smoothed_occ)) +
   geom_line() +
   geom_point() +
-  labs(title = "Probabilite d'occupation du Putois a travers les saisons")+
+  labs(title = "Probabilite d'occupation du Hermine a travers les saisons")+
   theme_bw()
 ```
 
@@ -540,5 +540,5 @@ plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
                           legend = "right")
 
 ggpubr::annotate_figure(plot, 
-                        top = ggpubr::text_grob("Presence du Putois"))
+                        top = ggpubr::text_grob("Presence du Hermine"))
 ```

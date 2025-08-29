@@ -225,7 +225,7 @@ fm
 
 ```{r}
 confint(backTransform(fm,type="psi"))
-confint(backTransform(fm,type="col"))
+confint(backTransform(fm,type="col")) 
 confint(backTransform(fm,type="ext"))
 confint(backTransform(fm,type="det"))
 ```
@@ -397,7 +397,7 @@ fm <- unmarked::colext(
 Pas significative pour la colonisation, donc on essaye l'autre.
 
 ```{r}
-fm <- unmarked::colext(
+fm_lapin <- unmarked::colext(
   psiformula = ~ Dnst_Cultures + Y_10km, # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
@@ -407,13 +407,23 @@ fm <- unmarked::colext(
   se = TRUE)
 ```
 
+equilibre?
+```{r}
+backTransform(fm_lapin, "col") / 
+  (backTransform(fm_lapin, "col") + backTransform(fm_lapin, "ext"))
+
+plogis(coef(fm_lapin)[5])/(plogis(coef(fm_lapin)[5])+plogis(coef(fm_lapin)[4]))
+
+```
+proportion a laquelle les lapins devraient remonter.
+Quand 15% du territoire des lapins, alors les lapins remonterons.
 
 ## Tests d'hypotheses 
 
 ## Validation / Robustesse
 
 ```{r}
-mb_test <- suppressWarnings(AICcmodavg::mb.gof.test(fm, nsim=30))
+mb_test <- suppressWarnings(AICcmodavg::mb.gof.test(fm_lapin, nsim=30))
 ```
 
 
@@ -426,25 +436,24 @@ chisq <- function(fm) {
     sum((y-fv)^2/(fv*(1-fv)), na.rm=TRUE)
     }
 
-pb <- parboot(fm2, statistic=chisq, nsim=40, parallel=FALSE); pb
+pb <- parboot(fm_lapin, statistic=chisq, nsim=30, parallel=FALSE); pb
 ```
 
 
 ## Interpretation 
 
+
 ```{r}
-confint(backTransform(fm, "ext")); backTransform(fm, "ext")
-confint(backTransform(fm, "col")); backTransform(fm, "col")  
+fm_lapin
 ```
 
 ```{r}
-fm
-
+confint(backTransform(fm_lapin, "ext")); backTransform(fm_lapin, "ext")
+confint(backTransform(fm_lapin, "col")); backTransform(fm_lapin, "col")  
 ```
 
-
 ```{r}
-m1 <- nonparboot(fm, 
+m1 <- unmarked::nonparboot(fm, 
                  B = 10)
 predicted_occupancy <- data.frame(saison = c(1:5),
                                   smoothed_occ = smoothed(fm)[2,],
