@@ -5,15 +5,74 @@ output:
   bookdown::html_document2:
     toc: true
     toc_float: true
-editor_options: 
-  markdown: 
-    wrap: 72
 ---
+
+```{r, include = FALSE}
+library(dplyr);library(ggplot2);library(sf);library(unmarked)
+theme_set(theme_light(base_size = 16))
+set.seed(12345)
+
+couleur_sanglier = "#5B3A29"
+couleur_renard = "#FF874D"
+couleur_lapin = "#C19A6B"
+couleur_herisson = "#2A3D00"
+couleur_putois = "#A67C2D"
+couleur_hermine = "#1B3A1A"
+couleur_belette = "#D57E2A"
+couleur_fouine = "#1C1C1C"
+```
+
+```{r, include = FALSE}
+Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
+                     options = "ENCODING=UTF8")
+Total <- Total%>%
+  transform_Total()
+
+VariablesSite <- sf::st_read(paste0(wd$data, "derived/VariablesSite.shp"),
+                             options = "ENCODING=UTF8")
+VariablesSite <- VariablesSite%>%
+  transform_VarSites()
+```
+
+```{r, include=FALSE}
+site_info <- VariablesSite %>%
+  sf::st_drop_geometry() %>%
+  dplyr::arrange(Code_10km)
+
+noms <- site_info$Code_10km
+rownames(site_info) <- noms
+
+site_info <- site_info %>%
+  dplyr::select(-Code_10km) %>%
+  dplyr::rename(Dnst_Cultures = `Dnst_Cultures `)%>%
+  dplyr::mutate(across(where(is.numeric), 
+                       scale))
+```
+
+On a utilisé définit nos sites par des mailles 10x10 sur l'ensemble de la Bretagne. On a retiré les sites dont l'aire est strictement inféreur à $10km^2$. On a donc eu 317 sites au total.
+
+```{r}
+VariablesSite%>%
+  ggplot()+geom_sf()+labs(title = "Sites utilisés pour nos analyses")
+```
+
+# Régressions
+
+On a fait des régressions linéaires avec la proportion de l'espèce sur un site chaque année $t$ en question avec d'autres espèces. On a inclut divers variables tel que :
+
+-   l'année en qualitatif ou en quantitatif selon le cas, ainsi que l'année au carré si applicable.
+
+-   Des variables d'environnement tel que la distance au littoral, la densité de cultures, etc.
+
+-   La proportion a l'année précédente $t-1$, ainsi que l'année qui précède celle ci $t-2$, afin de réduire l'autocorrélation.
+
+Nous avons utilisé le BIC pour choisir le modèle optimale. Cependant, bien que la plupart des résultats étaient cohérents avec ce qui peux être observé, les modèles ne semblait pas valider les hypothèses nécéssaire aux GLM (résidus et différents tests).
+
+De plus, comme nous utilisons une espèce témoin, ceci peut affecter le modèle. Nous sommes donc parti sur des modèles d'occupancy.
 
 # Modèles Occupancy
 
-On a fait différents modèle d'occupancy sur différentes espèces. Les
-espèces qui nous ont intéressé le plus étaient:
+On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui nous ont intéressé le plus étaient:
 
 -   Le sanglier
 
@@ -29,8 +88,132 @@ espèces qui nous ont intéressé le plus étaient:
 
 -   La fouine
 
-    ## Le lapin de garenne
+    En lisant de la biblio, les espèces moins fréquentamment repérés ont des meilleurs résultats avec des périodes plus longues. On a donc séparé les espèces soit en 5 périodes de 3 ans, ou alors 3 périodes de 5 ans. On a les mêmes variables d'environnement que pour les GLM. On ajoute la variable pression d'observation qui prends en compte le nombre d'observation autre que l'espèce de notre modèle, par site et par année.
 
-```{r}
+    Variables pour définir les années :
 
+    ```{r}
+    quali_periodes_matrice_5 <- 
+      matrix(c('2010 - 2012','2013 - 2015', '2016 - 2018', '2019-2021', '2022 - 2024'),
+             nrow = 317, 
+             ncol = 5, 
+             byrow = TRUE)
+
+    quanti_periodes_matrice_5 <- matrix(
+      1:5, 
+      nrow=317,
+      ncol=5, 
+      byrow=TRUE)
+
+    site_covs_periodes_5 <- list(
+      quanti_periodes = quanti_periodes_matrice_5,
+      quali_periodes = quanti_periodes_matrice_5
+    )
+
+    quali_periodes_matrice_3 <- 
+      matrix(c('2010 - 2014','2015 - 2019', '2020 - 2024'),
+             nrow = 317, 
+             ncol = 3, 
+             byrow = TRUE)
+
+    quanti_periodes_matrice_3 <- matrix(
+      1:3, 
+      nrow=nrow317,
+      ncol=3, 
+      byrow=TRUE)
+
+    site_covs_periodes_3 <- list(
+      quanti_periodes = quanti_periodes_matrice_3,
+      quali_periodes = quanti_periodes_matrice_3
+    )
+    ```
+
+-   
+
+    ## Le sanglier
+
+    ```{r}
+    detection_matrice <- matrice_occu_detections(num_cd_nom = 60981)
+
+    umf <- unmarkedFrameOccu(y = detection_matrice, 
+                             siteCovs = site_info)
+
+    ```
+
+    On observe que les sites sont de plus en plus nombreux :
+
+    ```{plot(umf,}
+         main="Détection/Non Détection de Sanglier sur les sites de 2010 à 2024 inclus")
+
+    print(colSums(detection_matrice))
+    ```
+
+    ```{r}
+    pression_obs <- pression_obs_bdd(num_cd_nom = 60981)
+
+    umf <- unmarked::unmarkedMultFrame(
+      y = detection_matrice,
+      siteCovs = site_info,
+      obsCovs = list(pression_obs = detection_autres),
+      yearlySiteCovs = site_covs_periodes_5,
+      numPrimary = 5
+    )
+
+    fm <- unmarked::colext(
+      psiformula = ~ X_10km + Dnst_Cultures,     # initial occupancy
+      gammaformula =  ~ 1,  # colonization
+      epsilonformula = ~ 1, # extinction
+      pformula = ~ pression_obs,  # detection
+      data = umf, # data
+      control = list(trace = 1),
+      se = TRUE)
+
+    ```
+
+    ```{r}
+    fm
+
+    backTransform(fm, "col"); confint(backTransform(fm, "col"))
+    backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
+    ```
+
+    tests :
+
+    ```{r}
+    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
+
+    ```
+
+    graphiques :
+
+    ```{r}
+    m1 <- nonparboot(fm, 
+                     B = 100)
+
+    predicted_occupancy <- data.frame(saison = c(1:5),
+                                      smoothed_occ = smoothed(fm)[2,],
+                                      SE = m1@smoothed.mean.bsse[2,])
+
+    predicted_occupancy %>%
+      mutate(saison = factor(
+        saison,
+        levels = 1:5,
+        labels = c("[2010 ; 2012]", 
+                   "[2013 ; 2015]", 
+                   "[2016 ; 2018]", 
+                   "[2019 ; 2021]", 
+                   "[2022 ; 2024]")
+      )) %>%
+      ggplot(aes(x = saison, y = smoothed_occ, group = 1, col = couleur_sanglier)) +
+      geom_line() +
+      geom_point() +
+      labs(title = "Probabilité d'occupation du Sanglier à travers les saisons",
+           x = "Saisons", y ="Probabilité d'occupation lisée") +
+      theme_bw()
+
+    ```
+
+    ## e lapin de garenne
+
+```{}
 ```

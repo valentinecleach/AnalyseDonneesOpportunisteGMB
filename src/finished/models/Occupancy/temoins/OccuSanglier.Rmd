@@ -261,8 +261,10 @@ predicted_occupancy <- data.frame(saison = c(1:5),
                                   smoothed_occ = smoothed(fm)[2,],
                                   SE = m1@smoothed.mean.bsse[2,])
 
+couleur_sanglier = "#5B3A29"
+
 predicted_occupancy%>%
-  ggplot( aes(x=saison, y=smoothed_occ)) +
+  ggplot( aes(x=saison, y=smoothed_occ, col =couleur_sanglier)) +
   geom_line() +
   geom_point() +
   labs(title = "Occupancy probability of the Wild boar across seaons")+
@@ -366,4 +368,5 @@ ggplot(site_occ_long, aes(x = as.numeric(season), y = occupancy, group = site, c
   theme_bw() +
   theme(legend.position = "none") # Hide legend if too many sites
 ```
+
 
