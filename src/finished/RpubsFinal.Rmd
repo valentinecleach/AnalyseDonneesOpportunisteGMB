@@ -12,11 +12,25 @@ editor_options:
 
 # Modèles Occupancy
 
+On a fait différents modèle d'occupancy sur différentes espèces. Les
+espèces qui nous ont intéressé le plus étaient:
 
-## Le lapin
+-   Le sanglier
+
+-   Le renard
+
+-   Le lapin
+
+-   Le hérisson
+
+-   Le putois
+
+-   L'hermine
+
+-   La fouine
+
+    ## Le lapin de garenne
+
 ```{r}
 
 ```
-
-
-

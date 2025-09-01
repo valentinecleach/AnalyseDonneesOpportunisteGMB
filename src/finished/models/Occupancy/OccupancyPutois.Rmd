@@ -32,40 +32,6 @@ VariablesSite <- VariablesSite%>%
   transform_VarSites()
 ```
 
-```{r}
-Putois <- Total %>%
-  sf::st_join(VariablesSite) %>%
-  dplyr::filter(cd_nom == 60731,
-                technique_observation == "Vu",
-                date >= as.Date("2005-01-01")) %>%
-  # select(-c(insee_dept, lib_dept, lib_dept, FID, surf, CD_SIG)) %>%
-  dplyr::select(-nom_valide, -nom_vernaculaire, -ordre, -technique_observation) %>%
-  dplyr::mutate(year = lubridate::year(date))
-```
-
-## Creation de la base de donnee Detection - Non Detection
-
-```{r}
-detection_df <- Putois %>%
-  sf::st_drop_geometry() %>%
-  dplyr::mutate(annee = lubridate::year(date)) %>%
-  dplyr::select(Code_10km, annee) %>%
-  dplyr::count(Code_10km, annee) %>%
-  tidyr::complete(Code_10km, 
-                  annee = tidyr::full_seq(annee, 1), 
-                  fill = list(n = 0)) %>%
-  tidyr::pivot_wider(names_from = annee, 
-                     values_from = n) %>%
-  dplyr::arrange(Code_10km) %>%
-  dplyr::filter(!is.na(Code_10km))
-
-detection_df[,-1] <- ifelse(detection_df[,-1]>0, 1, 0)
-
-noms <- detection_df$Code_10km
-detection_matrice <- as.matrix(detection_df[, -1])
-rownames(detection_matrice) <- noms
-```
-
 ## Covariables de site
 
 ```{r}
@@ -83,24 +49,7 @@ site_info <- site_info %>%
                        scale))
 ```
 
-## Depuis 2005
 
-Mise sous format pour la modelisation
-
-```{r}
-umf <- unmarked::unmarkedFrameOccu(y = detection_matrice, 
-                                   siteCovs = site_info
-                                   )
-```
-
-```{r}
-unmarked::plot(umf, main="Detection/Non Detection de Putois sur les sites depuis 2005")
-```
-
-On voit bien qu'on a tres peu de sites avant 2005, non pas parce qu'il
-n'y avais pas de presence d'Putois, mais plus tres peu de detection. On
-a tres peu de donnees dans l'ensemble, sur toutes les especes.
- 
 # Implementation du modele
 
 ```{r}
@@ -144,15 +93,15 @@ summary(umf)
 ### Periodes
 ```{r}
 quali_periodes_matrice <- 
-  matrix(c('2010 - 2012','2013 - 2015', '2016 - 2018', '2019-2021', '2022 - 2024'),
+  matrix(c('2010 - 2014','2015 - 2019', '2020 - 2024'),
          nrow = nrow(detection_df), 
-         ncol = 5, 
+         ncol = 3, 
          byrow = TRUE)
 
 quanti_periodes_matrice <- matrix(
-  1:5, 
+  1:3, 
   nrow=nrow(detection_df),
-  ncol=5, 
+  ncol=3, 
   byrow=TRUE)
 ```
 
@@ -203,7 +152,7 @@ umf <- unmarked::unmarkedMultFrame(
   siteCovs = site_info,
   obsCovs = list(pression_obs = detection_autres),
   yearlySiteCovs = site_covs_periodes,
-  numPrimary = 5
+  numPrimary = 3
 )
 ```
 
@@ -324,14 +273,14 @@ fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5, fm6, fm7)
 unmarked::modSel(fmList)
 ```
 
-Ici on garde la variable de fm (\$ \\text{variable} \$), et on
+Ici on garde la variable de fm2 (\$ \\text{X_10km} \$), et on
 ajoute les autres.
 
 ```{r}
-fm0 <- fm6 
+fm0 <- fm2 
 
 fm1 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Y_10km,     # initial occupancy
+  psiformula = ~ X_10km + Y_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -340,7 +289,7 @@ fm1 <- unmarked::colext(
   se = FALSE)
 
 fm2 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + X_10km,     # initial occupancy
+  psiformula = ~ X_10km + Dist_Eau,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -348,8 +297,9 @@ fm2 <- unmarked::colext(
   control = list(trace = 1),
   se = FALSE)
 
+
 fm3 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Eau,     # initial occupancy
+  psiformula = ~ X_10km + Dist_EcotoneArbore,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -358,7 +308,7 @@ fm3 <- unmarked::colext(
   se = FALSE)
 
 fm4 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral,     # initial occupancy
+  psiformula = ~ X_10km + Dnst_Cultures,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -367,7 +317,7 @@ fm4 <- unmarked::colext(
   se = FALSE)
 
 fm5 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_EcotoneArbore,     # initial occupancy
+  psiformula = ~ X_10km + Ind_Diversite,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -383,25 +333,15 @@ unmarked::modSel(fmList)
 ```
 
 
-
-```{r}
-fm <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral, # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = TRUE)
-```
+tester fm1, fm0, fm3
 
 
 ```{r}
 fm <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Y_10km, # initial occupancy
+  psiformula = ~ X_10km + Y_10km, # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
+  pformula = ~ scale(pression_obs),  # detection
   data = umf, # data
   control = list(trace = 1),
   se = TRUE)
@@ -433,6 +373,19 @@ pb <- parboot(fm2, statistic=chisq, nsim=40, parallel=FALSE); pb
 ## Interpretation 
 
 ```{r}
+fm
+```
+
+```{r}
+coef(fm, type = "psi");confint(fm, type= "psi")
+coef(fm, type = "col");confint(fm, type= "col")
+coef(fm, type = "ext");confint(fm, type= "ext")
+coef(fm, type = "det");confint(fm, type= "det")
+```
+
+
+
+```{r}
 confint(backTransform(fm, "ext")); backTransform(fm, "ext")
 confint(backTransform(fm, "col")); backTransform(fm, "col")  
 ```
@@ -445,15 +398,29 @@ fm
 ```{r}
 m1 <- nonparboot(fm, 
                  B = 10)
-predicted_occupancy <- data.frame(saison = c(1:5),
-                                  smoothed_occ = smoothed(fm)[2,],
-                                  SE = m1@smoothed.mean.bsse[2,])
 
-predicted_occupancy%>%
-  ggplot( aes(x=saison, y=smoothed_occ)) +
+mean_occ <- colMeans(smoothed(fm))
+
+predicted_occupancy <- data.frame(
+  saison = 1:3,
+  proba_occupation_lisee = mean_occ,
+  SE = m1@smoothed.mean.bsse[1, ]   # vérifier l’indice pour SE
+)
+predicted_occupancy %>%
+  mutate(saison = factor(
+    saison,
+    levels = 1:5,
+    labels = c("[2010 ; 2012]", 
+               "[2013 ; 2015]", 
+               "[2016 ; 2018]", 
+               "[2019 ; 2021]", 
+               "[2022 ; 2024]")
+  )) %>%
+  ggplot(aes(x = saison, y = proba_occupation_lisee, group = 1)) +
   geom_line() +
   geom_point() +
-  labs(title = "Probabilite d'occupation du Putois a travers les saisons")+
+  labs(title = "Probabilité d'occupation du Putois à travers les saisons",
+       x = "Saisons") +
   theme_bw()
 ```
 
@@ -542,3 +509,54 @@ plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
 ggpubr::annotate_figure(plot, 
                         top = ggpubr::text_grob("Presence du Putois"))
 ```
+
+
+```{r}
+# y : matrice/site x (saisons * visites) ou liste selon ta structure unmarked
+# Exemple si tu as un objet umf (unmarkedFrame) :
+y <- getY(umf)  # matrix: sites x (saisons*visits)
+
+n_sites <- nrow(y)
+n_visits_per_season <- 5
+n_seasons <- 3
+
+# reshape en array site x season x visit
+y_array <- array(y, dim = c(n_sites, n_seasons, n_visits_per_season))
+
+# nombre de detections par site (toutes saisons)
+det_per_site <- rowSums(y_array, dims = 2)  # somme sur season x visit
+table(det_per_site)                         # combien de sites avec 0,1,2,... detections
+
+# nombre de sites détectés par saison
+sites_detected_per_season <- sapply(1:n_seasons, function(t) {
+  sum(rowSums(y_array[, t, , drop = FALSE]) > 0)
+})
+sites_detected_per_season
+```
+```{r}
+# 1. résumé du modèle
+summary(fm)
+
+
+
+# 3. matrice de variance-covariance (regarde SE et corrélations)
+vc <- vcov(fm)
+diag(vc) # variances
+# pour voir corrélations entre paramètres (convertir en corr)
+corr <- cov2cor(vc)
+round(corr, 3)
+corrplot::corrplot(corr)
+# 4. warnings / convergence
+fm@opt$convergence
+fm@opt$message   # si available
+
+# 5. regarder estimates + SEs de gamma/epsilon
+coef(fm)         # vecteur des coefs
+
+
+est <- coef(fm)
+se  <- sqrt(diag(vcov(fm)))
+data.frame(param = names(est), est = est, se = se, lower = est - 1.96*se, upper = est + 1.96*se)
+
+```
+

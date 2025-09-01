@@ -242,7 +242,7 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 cat ~/.ssh/id_ed25519.pub
 # Ajouter clef ssh a github:
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEI6aYZzX0yFzmtgqyRuFgYbHI49FWBzV/RNTz+sELz9 valentine.cleach@gmail.com
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJaWSroBxK0IQswBQrxYPR6rUpm1IzNoVu5FM3j43nMx valentine.cleach@gmail.com
 # Dans bash a nouveau.
 ssh -T git@github.com
 git remote -v

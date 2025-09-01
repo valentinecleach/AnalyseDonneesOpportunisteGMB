@@ -255,23 +255,17 @@ backTransform(fm, "ext")
 Une croissance des sanglier au cours des periodes:
 ```{r}
 m1 <- nonparboot(fm, 
-                 B = 10)
-```
+                 B = 100)
 
-
-```{r}
 predicted_occupancy <- data.frame(saison = c(1:5),
                                   smoothed_occ = smoothed(fm)[2,],
                                   SE = m1@smoothed.mean.bsse[2,])
-```
 
-
-```{r}
 predicted_occupancy%>%
   ggplot( aes(x=saison, y=smoothed_occ)) +
   geom_line() +
   geom_point() +
-  labs(title = "Probabilite d'occupation du Sanglier a travers les saisons")+
+  labs(title = "Occupancy probability of the Wild boar across seaons")+
   theme_bw()
 ```
 
@@ -348,3 +342,28 @@ plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
 ggpubr::annotate_figure(plot, 
                         top = ggpubr::text_grob("Presence du Sanglier"))
 ```
+
+
+```{r}
+# Extract site x season occupancy probabilities (for state 2, occupied)
+site_occ <- smoothed(fm, type = "")[2, , ]  # [state, site, season]
+?smoothed
+# Convert to data.frame for ggplot
+library(reshape2)
+site_occ_long <- melt(site_occ)
+colnames(site_occ_long) <- c("state", "site", "season", "occupancy")
+site_occ_long <- subset(site_occ_long, state == 1) # 1 if your state 2 is "occupied", adjust if needed
+
+# OR if output is [site, season], then just:
+site_occ_long <- as.data.frame(site_occ)
+site_occ_long$site <- rownames(site_occ_long)
+site_occ_long <- reshape2::melt(site_occ_long, id.vars = "site", variable.name = "season", value.name = "occupancy")
+
+# Plot all sites
+ggplot(site_occ_long, aes(x = as.numeric(season), y = occupancy, group = site, color = site)) +
+  geom_line(alpha = 0.5) +
+  labs(title = "Occupancy probability for all sites across seasons") +
+  theme_bw() +
+  theme(legend.position = "none") # Hide legend if too many sites
+```
+
