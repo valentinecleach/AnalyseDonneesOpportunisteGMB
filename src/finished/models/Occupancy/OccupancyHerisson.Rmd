@@ -209,7 +209,7 @@ umf <- unmarked::unmarkedMultFrame(
 
 
 ```{r}
-fm <- colext(
+fm <- unmarked::colext(
   psiformula = ~ 1,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
@@ -332,14 +332,14 @@ fmList <- unmarked::fitList(fm0, fm1, fm2, fm3, fm4, fm5, fm6, fm7)
 unmarked::modSel(fmList)
 ```
 
-Ici on garde la variable de fm (\$ \\text{variable} \$), et on
+Ici on garde la variable de fm2 (\$ \\text{variable} \$), et on
 ajoute les autres.
 
 ```{r}
-fm0 <- fm6 
+fm0 <- fm2 
 
 fm1 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Y_10km,     # initial occupancy
+  psiformula = ~ X_10km + Y_10km,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -348,7 +348,7 @@ fm1 <- unmarked::colext(
   se = FALSE)
 
 fm2 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + X_10km,     # initial occupancy
+  psiformula = ~ X_10km + Dist_Eau,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -357,7 +357,7 @@ fm2 <- unmarked::colext(
   se = FALSE)
 
 fm3 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Eau,     # initial occupancy
+  psiformula = ~ X_10km + Dist_EcotoneArbore,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -366,7 +366,7 @@ fm3 <- unmarked::colext(
   se = FALSE)
 
 fm4 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral,     # initial occupancy
+  psiformula = ~ X_10km + Dnst_Cultures,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -375,7 +375,7 @@ fm4 <- unmarked::colext(
   se = FALSE)
 
 fm5 <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_EcotoneArbore,     # initial occupancy
+  psiformula = ~ X_10km + Ind_Diversite,     # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
@@ -394,25 +394,15 @@ unmarked::modSel(fmList)
 
 ```{r}
 fm <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Dist_Littoral, # initial occupancy
+  psiformula = ~ X_10km + Dist_EcotoneArbore, # initial occupancy
   gammaformula =  ~ 1,  # colonization
   epsilonformula = ~ 1, # extinction
   pformula = ~ pression_obs,  # detection
   data = umf, # data
   control = list(trace = 1),
   se = TRUE)
-```
 
-
-```{r}
-fm <- unmarked::colext(
-  psiformula = ~ Dnst_Cultures + Y_10km, # initial occupancy
-  gammaformula =  ~ 1,  # colonization
-  epsilonformula = ~ 1, # extinction
-  pformula = ~ pression_obs,  # detection
-  data = umf, # data
-  control = list(trace = 1),
-  se = TRUE)
+fm
 ```
 
 
@@ -420,11 +410,7 @@ fm <- unmarked::colext(
 
 ## Validation / Robustesse
 
-```{r}
-mb_test <- suppressWarnings(AICcmodavg::mb.gof.test(fm, nsim=30))
-```
-
-
+Mackenzie test pas okay. 
 ```{r}
 chisq <- function(fm) {
     umf <- fm@data
@@ -434,15 +420,16 @@ chisq <- function(fm) {
     sum((y-fv)^2/(fv*(1-fv)), na.rm=TRUE)
     }
 
-pb <- parboot(fm2, statistic=chisq, nsim=40, parallel=FALSE); pb
+pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
 ```
-
+pvalue : 0.9756098
 
 ## Interpretation 
 
 ```{r}
 confint(backTransform(fm, "ext")); backTransform(fm, "ext")
 confint(backTransform(fm, "col")); backTransform(fm, "col")  
+
 ```
 
 ```{r}

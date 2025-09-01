@@ -286,4 +286,101 @@ ggplot() +
 #############################################
 #############################################
 #############################################
+Total_et_Diro <- readr::read_csv(paste0(wd$data, 
+                                        "derived/Total_et_Diro.csv"),
+                                 locale = readr::locale(encoding = "UTF-8"))
+Total_et_Diro <- Total_et_Diro %>%
+  dplyr::select(-`...1`)%>%
+  dplyr::filter(date < as.Date("2025-01-01"))
 
+Total_et_Diro%>%
+  mutate(bdd_originale = as.factor(bdd_originale))%>%
+  select(bdd_originale)%>%
+  summary()
+
+comment_occurrence 
+
+GeoN %>%
+  filter(!is.na(comment_occurrence), 
+         technique_observation == "Inconnu",
+         comment_occurrence != "[ Commentaire :  - ]")%>%
+  select(comment_occurrence)%>%
+  print(n=342)
+
+VN%>%
+  mutate(etat_biologique = ifelse(((champs_additionnels == "{'death_cause': 'UNKNOWN'}") & (etat_biologique == "Trouve mort") & grepl("ROUT", toupper(comment_occurrence))), 
+                           "BAM",
+                           etat_biologique))%>%
+  filter(etat_biologique == "BAM")%>%
+  select(etat_biologique)%>%
+  count()
+  
+VN%>%
+  mutate(technique_observation = as.factor(technique_observation))%>%
+  select(comment_occurrence, technique_observation)%>%
+  summary()
+
+VN%>%
+  filter(technique_observation %in% c("Inconnu"))%>%
+  select(comment_occurrence, technique_observation)%>%
+  count()
+
+
+GeoN %>%
+  filter(technique_observation%in% c("Inconnu"))%>%
+  mutate(technique_observation = as.factor(technique_observation))%>%
+  select(technique_observation)%>%
+  count()
+
+50805 + 1873
+316 /52678 *100
+VN 53083
+GN 1922
+
+1922 + 53083
+VN %>%
+  filter(!is.na(comment_releve))
+VN <- VisioN_FB %>%
+  dplyr::mutate(across(
+    c(nom_valide,	nom_vernaculaire,
+      ordre,
+      observateurs,
+      comment_occurrence,
+      technique_observation,
+      etat_biologique),
+    ~stringi::stri_trans_general(., id = "Latin-ASCII")
+  ))%>%
+  dplyr::filter( !niveau_validation %in% c("Douteux","Invalide"))%>%
+  dplyr::filter(technique_observation != "Restes dans pelote de rejection")%>%
+  dplyr::mutate(technique_observation = ifelse(
+    !is.na(comment_occurrence) & technique_observation == "Inconnu",
+    ifelse(any(grepl("TAUPINIERE", toupper(gsub("[[:punct:]]", 
+                                                "", 
+                                                comment_occurrence))),
+               grepl("EMPREINTES", toupper(gsub(":punct:]]",
+                                                "",
+                                                comment_occurrence, 
+               ))),
+               grepl("TRACE", toupper(gsub(":punct:]]",
+                                           "",
+                                           comment_occurrence, 
+               )))),
+           "Indices",
+           technique_observation),
+    technique_observation))%>%
+  dplyr::mutate(technique_observation = ifelse(technique_observation=="Entendu",
+                                               "Entendu",
+                                               technique_observation),
+                technique_observation = ifelse(cd_nom == 60015, "Vu", technique_observation))%>%
+  dplyr::filter(!(cd_nom %in% c(194928, 197057, 61204)), 
+                # Rat Fisher et ecureil de Core
+                !(cd_nom %in% c(60249,198197)), 
+                # Taupes et Taupe d'Europe
+                !(cd_nom %in% c(99999004, 99999005, 99999006)), 
+                # NSP Carni
+                !(cd_nom %in% c(60831, 60582, 60822, 60579, 199752)))
+  # Carni Introduit
+  # Carni introduit : 60831 Genette 
+  # Introduit : chien viverrin, Raton laveur, Chacal dore, Putois domestique
+  
+  
