@@ -1,0 +1,22 @@
+---
+title: "Fin Stage"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Modèles Occupancy
+
+
+## Le lapin
+```{r}
+
+```
+
+
+
