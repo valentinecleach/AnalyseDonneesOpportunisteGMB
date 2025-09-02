@@ -79,75 +79,80 @@ carte_graphique_5 <- function(var_site = VariablesSite, fm, couleur = "black"){
   
   grid_10x10 <- cbind(grid_10x10, occ_prob)
   
+  LtoM <- colorRampPalette(c('white', couleur))
   
-  LtoM <-colorRampPalette(c('white',couleur))
-  
+  taille_petit_titre <- 12
   
   g1 <- ggplot() +
-    geom_sf(data = grid_10x10, aes(fill = X1))+
-    labs(title="De 2010 à 2012")+
-    scale_fill_gradient2(low=LtoM(0),
-                         high=LtoM(100),
+    geom_sf(data = grid_10x10, aes(fill = X1)) +
+    labs(title = "De 2010 à 2012") +
+    scale_fill_gradient2(low = LtoM(0),
+                         high = LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence")+
+                         name = "Probabilité de présence") +
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
-          axis.title = element_blank())
-  
+          axis.title = element_blank(),
+          plot.title = element_text(size = taille_petit_titre))
   
   g2 <- ggplot() +
-    geom_sf(data = grid_10x10, aes(fill = X2))+
-    labs(title="De 2013 à 2015")+
-    scale_fill_gradient2(low=LtoM(0),
-                         high=LtoM(100),
+    geom_sf(data = grid_10x10, aes(fill = X2)) +
+    labs(title = "De 2013 à 2015") +
+    scale_fill_gradient2(low = LtoM(0),
+                         high = LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence")+
+                         name = "Probabilité de présence") +
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
-          axis.title = element_blank())
+          axis.title = element_blank(),
+          plot.title = element_text(size = taille_petit_titre))
   
   g3 <- ggplot() +
-    geom_sf(data = grid_10x10, aes(fill = X3))+
-    labs(title="De 2016 à 2018")+
-    scale_fill_gradient2(low=LtoM(0),
-                         high=LtoM(100),
+    geom_sf(data = grid_10x10, aes(fill = X3)) +
+    labs(title = "De 2016 à 2018") +
+    scale_fill_gradient2(low = LtoM(0),
+                         high = LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence")+
+                         name = "Probabilité de présence") +
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
-          axis.title = element_blank())
+          axis.title = element_blank(),
+          plot.title = element_text(size = taille_petit_titre))
   
   g4 <- ggplot() +
-    geom_sf(data = grid_10x10, aes(fill = X4))+
-    labs(title="De 2019 à 2021")+
-    scale_fill_gradient2(low=LtoM(0),
-                         high=LtoM(100),
+    geom_sf(data = grid_10x10, aes(fill = X4)) +
+    labs(title = "De 2019 à 2021") +
+    scale_fill_gradient2(low = LtoM(0),
+                         high = LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence")+
+                         name = "Probabilité de présence") +
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
-          axis.title = element_blank())
-  
+          axis.title = element_blank(),
+          plot.title = element_text(size = taille_petit_titre))
   
   g5 <- ggplot() +
-    geom_sf(data = grid_10x10, aes(fill = X5))+
-    labs(title="De 2022 à 2024")+
-    scale_fill_gradient2(low=LtoM(0),
-                         high=LtoM(100),
+    geom_sf(data = grid_10x10, aes(fill = X5)) +
+    labs(title = "De 2022 à 2024") +
+    scale_fill_gradient2(low = LtoM(0),
+                         high = LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilite de presence")+
+                         name = "Probabilite de presence") +
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
-          axis.title = element_blank())
+          axis.title = element_blank(),
+          plot.title = element_text(size = taille_petit_titre))
   
-  
-  plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
-                            g2 + theme(legend.position = "none"),
-                            g3 + theme(legend.position = "none"),
-                            g4 + theme(legend.position = "none"),
-                            g5 + theme(legend.position = "none"),
-                            common.legend = TRUE,
-                            legend = "right")
+  plot <- ggpubr::ggarrange(
+    g1 + theme(legend.position = "none"),
+    g2 + theme(legend.position = "none"),
+    g3 + theme(legend.position = "none"),
+    g4 + theme(legend.position = "none"),
+    g5, 
+    nrow = 1, ncol = 5,
+    common.legend = TRUE,
+    legend = "bottom"
+  )
   
   return(plot)
 }
@@ -167,6 +172,7 @@ carte_graphique_3 <- function(var_site = VariablesSite,
   
   LtoM <-colorRampPalette(c('white',couleur))
   
+  taille_petit_titre <- 12
   
   g1 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X1))+
@@ -177,7 +183,8 @@ carte_graphique_3 <- function(var_site = VariablesSite,
                          name = "Probabilité de présence")+
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
-          axis.title = element_blank())
+          axis.title = element_blank(),
+          plot.title = element_text(size = taille_petit_titre))
   
   
   g2 <- ggplot() +
@@ -189,7 +196,8 @@ carte_graphique_3 <- function(var_site = VariablesSite,
                          name = "Probabilité de présence")+
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
-          axis.title = element_blank())
+          axis.title = element_blank(),
+          plot.title = element_text(size = taille_petit_titre))
   
   g3 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X3))+
@@ -200,13 +208,16 @@ carte_graphique_3 <- function(var_site = VariablesSite,
                          name = "Probabilité de présence")+
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
-          axis.title = element_blank())
+          axis.title = element_blank(),
+          plot.title = element_text(size = taille_petit_titre))
   
-  plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
-                            g2 + theme(legend.position = "none"),
-                            g3 + theme(legend.position = "none"),
-                            common.legend = TRUE,
-                            legend = "right")
+  plot <- ggpubr::ggarrange(
+    g1 + theme(legend.position = "none"),
+    g2 + theme(legend.position = "none"),
+    g3,
+    nrow = 1, ncol = 5,
+    common.legend = TRUE,
+    legend = "bottom")
   
   return(plot)
 }
@@ -263,8 +274,3 @@ proba_graphique_3 <- function(fm, couleur="black" ){
   
   return(plot)
 }
-
-plot <- proba_graphique_3(fm, couleur=couleur_lapin)
-plot +
-  labs(title = "Probabilite d'occupation du Lapin a travers les saisons",
-       x = "Saisons", y ="Probabilite d'occupation lisee")
