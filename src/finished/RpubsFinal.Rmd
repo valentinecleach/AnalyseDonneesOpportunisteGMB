@@ -182,7 +182,23 @@ site_covs_periodes_5 <- list(
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
 ```
 
-    tests :
+    graphiques :
+
+```{r}
+plot <- proba_graphique_5(fm, couleur=couleur_sanglier)
+    plot +
+      labs(title = "Probabilite d'occupation du Sanglier a travers les saisons",
+           x = "Saisons", y ="Probabilite d'occupation lisee")
+```
+
+
+```{r}
+plot <- carte_graphique_5(fm=fm, couleur=couleur_sanglier)
+    ggpubr::annotate_figure(plot, 
+                              top = ggpubr::text_grob("Presence du Sanglier"))
+```
+    
+     tests :
 
 ```{r}
     pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
@@ -192,19 +208,6 @@ site_covs_periodes_5 <- list(
     AICcmodavg::mb.gof.test(fm)
 ```
 
-    graphiques :
-
-```{r}
-    plot <- proba_graphique_5(fm, couleur=couleur_sanglier)
-    plot +
-      labs(title = "Probabilite d'occupation du Sanglier a travers les saisons",
-           x = "Saisons", y ="Probabilite d'occupation lisee")
-
-    plot <- carte_graphique_5(fm=fm, couleur=couleur_sanglier)
-    ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Presence du Sanglier"))
-```
-    
 ## Le renard roux
 ```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60585)
