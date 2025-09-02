@@ -512,26 +512,48 @@ ggpubr::annotate_figure(plot,
 
 
 ```{r}
-# y : matrice/site x (saisons * visites) ou liste selon ta structure unmarked
-# Exemple si tu as un objet umf (unmarkedFrame) :
-y <- getY(umf)  # matrix: sites x (saisons*visits)
 
+y <- getY(umf)
 n_sites <- nrow(y)
-n_visits_per_season <- 5
-n_seasons <- 3
+n_visits_par_periode <- 5
+n_periodes <- 3
 
-# reshape en array site x season x visit
-y_array <- array(y, dim = c(n_sites, n_seasons, n_visits_per_season))
 
-# nombre de detections par site (toutes saisons)
-det_per_site <- rowSums(y_array, dims = 2)  # somme sur season x visit
-table(det_per_site)                         # combien de sites avec 0,1,2,... detections
+y_array <- array(y, dim = c(n_sites, n_periodes, n_visits_par_periode))
 
-# nombre de sites détectés par saison
-sites_detected_per_season <- sapply(1:n_seasons, function(t) {
+seasonal_detection <- apply(y_array, c(1, n_periodes), function(x) any(x > 0))
+num_seasons_with_detection <- apply(seasonal_detection, 1, sum)
+table(num_seasons_with_detection)
+
+sites_detecte_par_periode <- sapply(1:n_seasons, function(t) {
   sum(rowSums(y_array[, t, , drop = FALSE]) > 0)
 })
-sites_detected_per_season
+sites_detecte_par_periode
+
+tables_detections <- function(umf, n_visits_par_periode, n_periodes){
+  y <- getY(umf)
+  n_sites <- nrow(y)
+  
+  stopifnot(ncol(y) == n_seasons * n_visits_per_season)
+
+  y_array <- array(y, dim = c(n_sites, n_periodes, n_visits_par_periode))
+  
+  detection_periodes <- apply(y_array, c(1, n_periodes), function(x) any(x > 0))
+  n_saisons_par_site <- apply(detection_periodes, 1, sum)
+  n_saisons_par_site <- table(n_saisons_par_site)
+
+
+  sites_detecte_par_periode <- sapply(1:n_periodes, function(t) {
+    sum(rowSums(y_array[, t, , drop = FALSE]) > 0)
+  })
+  
+  return(list(n_saisons_par_site, sites_detecte_par_periode))
+}
+
+tables_detections(umf, 
+                  n_visits_par_periode = 5,
+                  n_periodes = 3)
+
 ```
 ```{r}
 # 1. résumé du modèle

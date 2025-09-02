@@ -1,3 +1,11 @@
+#' Donne une matrice de detections Oui/Non pour une espèce par site et année
+#'
+#' @param num_cd_nom
+#' @param bdd
+#' @param var_site
+#'
+#' @return Une matrice detection / non detection
+#' 
 matrice_occu_detections <- function(num_cd_nom, bdd = Total, var_site = VariablesSite){
   BDD <- bdd %>%
     sf::st_join(var_site) %>%
@@ -31,6 +39,16 @@ matrice_occu_detections <- function(num_cd_nom, bdd = Total, var_site = Variable
   return(detection_matrice)
 }
 
+#' Donne la pression d'observation sans l'espèce qu'on étudie
+#'
+#' @param num_cd_nom espèce a ne pas garder
+#' @param Total
+#' @param var_site
+#'
+#' @return Une base de donnée de pression d'obs année par année, site par site
+#'
+#' @examples
+#' 
 pression_obs_bdd <- function(num_cd_nom, bdd = Total, var_site = VariablesSite){
   Autres <- bdd %>%
     sf::st_join(var_site) %>%
@@ -61,6 +79,16 @@ pression_obs_bdd <- function(num_cd_nom, bdd = Total, var_site = VariablesSite){
 }
 
 
+#' Donne le chi carree (pour les tests)
+#'
+#' @param 
+#' @param 
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+#' 
 chisq <- function(fm) {
   umf <- fm@data
   y <- umf@y
@@ -70,7 +98,19 @@ chisq <- function(fm) {
 }
 
 
-carte_graphique_5 <- function(var_site = VariablesSite, fm, couleur = "black"){
+
+#' Donne un graph de proba d'occupancy sur les sites pour 5 saisons
+#'
+#' @param var_site La bdd de variables
+#' @param fm
+#' @param couleur
+#'
+#' @return plot
+#' 
+carte_graphique_5 <- function(var_site = VariablesSite, 
+                              fm, 
+                              couleur = "black"){
+  
   grid_10x10 <- VariablesSite %>%
     transforme_carte()
   
@@ -158,9 +198,19 @@ carte_graphique_5 <- function(var_site = VariablesSite, fm, couleur = "black"){
 }
 
 
+
+#' Donne un graph de proba d'occupancy sur les sites pour 3 saisons
+#'
+#' @param var_site La bdd de variables
+#' @param fm
+#' @param couleur
+#'
+#' @return plot
+#' 
 carte_graphique_3 <- function(var_site = VariablesSite, 
                               fm, 
                               couleur = "black"){
+  
   grid_10x10 <- VariablesSite %>%
     transforme_carte()
   
@@ -215,7 +265,7 @@ carte_graphique_3 <- function(var_site = VariablesSite,
     g1 + theme(legend.position = "none"),
     g2 + theme(legend.position = "none"),
     g3,
-    nrow = 1, ncol = 5,
+    nrow = 1, ncol = 3,
     common.legend = TRUE,
     legend = "bottom")
   
@@ -223,6 +273,14 @@ carte_graphique_3 <- function(var_site = VariablesSite,
 }
 
 
+
+#' Donne un graph de proba d'occupancy lissé pour 5 saisons
+#'
+#' @param fm
+#' @param couleur
+#'
+#' @return plot
+#' 
 proba_graphique_5 <- function(fm, couleur = "black"){
   m1 <- nonparboot(fm, 
                    B = 10)
@@ -250,7 +308,16 @@ proba_graphique_5 <- function(fm, couleur = "black"){
   return(plot)
 }
 
+
+#' Donne un graph de proba d'occupancy lissé pour 3 saisons
+#'
+#' @param fm
+#' @param couleur
+#'
+#' @return plot
+#' 
 proba_graphique_3 <- function(fm, couleur="black" ){
+  
   m1 <- nonparboot(fm, 
                    B = 10)
   
@@ -273,4 +340,41 @@ proba_graphique_3 <- function(fm, couleur="black" ){
     theme(legend.position = "none")
   
   return(plot)
+}
+
+#' Donne des tables de detections selon l'umf, et le type de saisons etc.
+#'
+#' @param 
+#' @param 
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+#' 
+tables_detections <- function(umf, 
+                              n_visits_par_periode, 
+                              n_periodes){
+  
+  #Given
+  y <- getY(umf)
+  n_sites <- nrow(y)
+  
+  #When
+  stopifnot(ncol(y) == n_periodes * n_visits_par_periode)
+  
+  #Then
+  y_array <- array(y, dim = c(n_sites, n_periodes, n_visits_par_periode))
+  
+  # retourne le nombre de periodes par site
+  detection_periodes <- apply(y_array, c(1, n_periodes), function(x) any(x > 0))
+  n_periodes_par_site <- apply(detection_periodes, 1, sum)
+  n_periodes_par_site <- table(n_periodes_par_site)
+  
+  # retourne le nombre de sites détectés pour chaque periode
+  sites_detecte_par_periode <- sapply(1:n_periodes, function(t) {
+    sum(rowSums(y_array[, t, , drop = FALSE]) > 0)
+  })
+  
+  return(list(n_periodes_par_site, sites_detecte_par_periode))
 }
