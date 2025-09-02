@@ -131,6 +131,9 @@ Nous utilisons les memes variables d'environnement que pour les GLM, auxquelles 
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
+    tables_detections(umf, 
+                      n_visits_par_periode = 3, 
+                      n_periodes = 5)
 ```
 
 On observe de plus en plus de sites ou le sanglier est present :
@@ -211,6 +214,10 @@ plot +
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
+    
+    tables_detections(umf, 
+                      n_visits_par_periode = 3, 
+                      n_periodes = 5)
 ```
 
 ```{r}
@@ -288,6 +295,10 @@ graphiques :
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
+    
+    tables_detections(umf, 
+                      n_visits_par_periode = 3, 
+                      n_periodes = 5)
 ```
 
 ```{r}
@@ -364,6 +375,10 @@ graphiques :
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
+    
+    tables_detections(umf, 
+                      n_visits_par_periode = 3, 
+                      n_periodes = 5)
 ```
 
 ```{r}
@@ -440,6 +455,10 @@ graphiques :
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
+    
+    tables_detections(umf, 
+                      n_visits_par_periode = 5, 
+                      n_periodes = 3)
 ```
 
 ```{r}
@@ -516,6 +535,10 @@ graphiques :
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
+    
+    tables_detections(umf, 
+                      n_visits_par_periode = 5, 
+                      n_periodes = 3)
 ```
 
 ```{r}
@@ -592,6 +615,10 @@ plot +
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
+    
+    tables_detections(umf, 
+                      n_visits_par_periode = 5, 
+                      n_periodes = 3)
 ```
 
 ```{r}

@@ -367,7 +367,7 @@ tables_detections <- function(umf,
   y_array <- array(y, dim = c(n_sites, n_periodes, n_visits_par_periode))
   
   # retourne le nombre de periodes par site
-  detection_periodes <- apply(y_array, c(1, n_periodes), function(x) any(x > 0))
+  detection_periodes <- apply(y_array, c(1, 2), function(x) any(x > 0))
   n_periodes_par_site <- apply(detection_periodes, 1, sum)
   n_periodes_par_site <- table(n_periodes_par_site)
   
