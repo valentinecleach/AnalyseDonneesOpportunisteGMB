@@ -48,30 +48,30 @@ site_info <- site_info %>%
                        scale))
 ```
 
-On a utilisé définit nos sites par des mailles 10x10 sur l'ensemble de la Bretagne. On a retiré les sites dont l'aire est strictement inféreur à $10km^2$. On a donc eu 317 sites au total.
+On a utilise definit nos sites par des mailles 10x10 sur l'ensemble de la Bretagne. On a retire les sites dont l'aire est strictement infereur a $10km^2$. On a donc eu 317 sites au total.
 
 ```{r}
 VariablesSite%>%
-  ggplot()+geom_sf()+labs(title = "Sites utilisés pour nos analyses")
+  ggplot()+geom_sf()+labs(title = "Sites utilises pour nos analyses")
 ```
 
-# Régressions
+# Regressions
 
-On a fait des régressions linéaires avec la proportion de l'espèce sur un site chaque année $t$ en question avec d'autres espèces. On a inclut divers variables tel que :
+On a fait des regressions lineaires avec la proportion de l'espece sur un site chaque annee $t$ en question avec d'autres especes. On a inclut divers variables tel que :
 
--   l'année en qualitatif ou en quantitatif selon le cas, ainsi que l'année au carré si applicable.
+-   l'annee en qualitatif ou en quantitatif selon le cas, ainsi que l'annee au carre si applicable.
 
--   Des variables d'environnement tel que la distance au littoral, la densité de cultures, etc.
+-   Des variables d'environnement tel que la distance au littoral, la densite de cultures, etc.
 
--   La proportion a l'année précédente $t-1$, ainsi que l'année qui précède celle ci $t-2$, afin de réduire l'autocorrélation.
+-   La proportion a l'annee precedente $t-1$, ainsi que l'annee qui precede celle ci $t-2$, afin de reduire l'autocorrelation.
 
-Nous avons utilisé le BIC pour choisir le modèle optimale. Cependant, bien que la plupart des résultats étaient cohérents avec ce qui peux être observé, les modèles ne semblait pas valider les hypothèses nécéssaire aux GLM (résidus et différents tests).
+Nous avons utilise le BIC pour choisir le modele optimale. Cependant, bien que la plupart des resultats etaient coherents avec ce qui peux être observe, les modeles ne semblait pas valider les hypotheses necessaire aux GLM (residus et differents tests).
 
-De plus, comme nous utilisons une espèce témoin, ceci peut affecter le modèle. Nous sommes donc parti sur des modèles d'occupancy.
+De plus, comme nous utilisons une espece temoin, ceci peut affecter le modele. Nous sommes donc parti sur des modeles d'occupancy.
 
-# Modèles Occupancy
+# Modeles Occupancy
 
-On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui nous ont intéressé le plus étaient:
+On a fait differents modele d'occupancy sur differentes especes. Les especes qui nous ont interesse le plus etaient:
 
 -   Le sanglier
 
@@ -79,21 +79,22 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
 
 -   Le lapin
 
--   Le hérisson
+-   Le herisson
 
 -   Le putois
 
 -   L'hermine
 
--   La fouine (pas présenté ici)
+-   La fouine (pas presente ici)
 
-    En lisant de la biblio, les espèces moins fréquentamment repérés ont des meilleurs résultats avec des périodes plus longues. On a donc séparé les espèces soit en 5 périodes de 3 ans, ou alors 3 périodes de 5 ans. On a les mêmes variables d'environnement que pour les GLM. On ajoute la variable pression d'observation qui prends en compte le nombre d'observation autre que l'espèce de notre modèle, par site et par année.
+    En lisant de la biblio, les especes moins frequentamment reperes ont des meilleurs resultats avec des periodes plus longues. On a donc separe les especes soit en 5 periodes de 3 ans, ou alors 3 periodes de 5 ans. On a les mêmes variables d'environnement que pour les GLM. On ajoute la variable pression d'observation qui prends en compte le nombre d'observation autre que l'espece de notre modele, par site et par annee.
 
-    Variables pour définir les années :
+    Variables pour definir les annees :
 
-    ```{r}
-    quali_periodes_matrice_5 <- 
-      matrix(c('2010 - 2012','2013 - 2015', '2016 - 2018', '2019-2021', '2022 - 2024'),
+```{r}
+quali_periodes_matrice_5 <- 
+      matrix(c('2010 - 2012', '2013 - 2015', 
+               '2016 - 2018', '2019-2021', '2022 - 2024'),
              nrow = 317, 
              ncol = 5, 
              byrow = TRUE)
@@ -103,13 +104,11 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
       nrow=317,
       ncol=5, 
       byrow=TRUE)
+```
 
-    site_covs_periodes_5 <- list(
-      quanti_periodes = quanti_periodes_matrice_5,
-      quali_periodes = quanti_periodes_matrice_5
-    )
 
-    quali_periodes_matrice_3 <- 
+```{r}
+quali_periodes_matrice_3 <- 
       matrix(c('2010 - 2014','2015 - 2019', '2020 - 2024'),
              nrow = 317, 
              ncol = 3, 
@@ -117,35 +116,43 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
 
     quanti_periodes_matrice_3 <- matrix(
       1:3, 
-      nrow=nrow317,
+      nrow=317,
       ncol=3, 
       byrow=TRUE)
+```
+
+
+```{r}
+site_covs_periodes_5 <- list(
+      quanti_periodes = quanti_periodes_matrice_5,
+      quali_periodes = quanti_periodes_matrice_5
+    )
 
     site_covs_periodes_3 <- list(
       quanti_periodes = quanti_periodes_matrice_3,
       quali_periodes = quanti_periodes_matrice_3
     )
-    ```
+```
 
 ## Le sanglier
 
-    ```{r}
+```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60981)
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
-    ```
+```
 
     On observe que les sites sont de plus en plus nombreux :
 
-    ```{r}
+```{r}
     plot(umf,
-         main="Détection/Non Détection de Sanglier sur les sites de 2010 à 2024 inclus")
+         main="Detection/Non Detection de Sanglier sur les sites de 2010 a 2024 inclus")
 
     print(colSums(detection_matrice))
-    ```
+```
 
-    ```{r}
+```{r}
     pression_obs <- pression_obs_bdd(num_cd_nom = 60981)
 
     umf <- unmarked::unmarkedMultFrame(
@@ -164,57 +171,57 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
       data = umf, # data
       control = list(trace = 1),
       se = TRUE)
-    ```
+```
 
     coefficients : 
     
-    ```{r}
+```{r}
     fm
 
     backTransform(fm, "col"); confint(backTransform(fm, "col"))
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
-    ```
+```
 
     tests :
 
-    ```{r}
+```{r}
     pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
-    ```
+```
 
-    ```{r}
+```{r}
     AICcmodavg::mb.gof.test(fm)
-    ```
+```
 
     graphiques :
 
-    ```{r}
+```{r}
     plot <- proba_graphique_5(fm, couleur=couleur_sanglier)
     plot +
-      labs(title = "Probabilité d'occupation du Sanglier à travers les saisons",
-           x = "Saisons", y ="Probabilité d'occupation lisée")
+      labs(title = "Probabilite d'occupation du Sanglier a travers les saisons",
+           x = "Saisons", y ="Probabilite d'occupation lisee")
 
     plot <- carte_graphique_5(fm=fm, couleur=couleur_sanglier)
     ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Présence du Sanglier"))
-    ```
+                              top = ggpubr::text_grob("Presence du Sanglier"))
+```
     
 ## Le renard roux
-    ```{r}
+```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60585)
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
-    ```
+```
 
 
-    ```{r}
+```{r}
     plot(umf,
-         main="Détection/Non Détection du renard sur les sites de 2010 à 2024 inclus")
+         main="Detection/Non Detection du renard sur les sites de 2010 a 2024 inclus")
 
     print(colSums(detection_matrice))
-    ```
+```
 
-    ```{r}
+```{r}
     pression_obs <- pression_obs_bdd(num_cd_nom = 60585)
 
     umf <- unmarked::unmarkedMultFrame(
@@ -232,39 +239,39 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
     pformula = ~ pression_obs,  # detection
     data = umf, # data
     se = TRUE)
-    ```
+```
 
     coefficients : 
     
-    ```{r}
+```{r}
     fm
 
     backTransform(fm, "col"); confint(backTransform(fm, "col"))
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
-    ```
+```
 
     tests :
 
-    ```{r}
+```{r}
     pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
-    ```
+```
 
-    ```{r}
+```{r}
     AICcmodavg::mb.gof.test(fm)
-    ```
+```
 
     graphiques :
 
-    ```{r}
+```{r}
     plot <- proba_graphique_5(fm = fm, couleur=couleur_renard)
     plot +
-      labs(title = "Probabilité d'occupation du Renard à travers les saisons",
-           x = "Saisons", y ="Probabilité d'occupation lisée")
+      labs(title = "Probabilite d'occupation du Renard a travers les saisons",
+           x = "Saisons", y ="Probabilite d'occupation lisee")
 
     plot <- carte_graphique_5(fm=fm, couleur=couleur_renard)
     ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Présence du Renard"))
-    ```
+                              top = ggpubr::text_grob("Presence du Renard"))
+```
 
 ## Le lapin de garenne
 
@@ -273,16 +280,16 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
-    ```
+```
 
-    ```{r}
+```{r}
     plot(umf,
-         main="Détection/Non Détection de lapins sur les sites de 2010 à 2024 inclus")
+         main="Detection/Non Detection de lapins sur les sites de 2010 a 2024 inclus")
 
     print(colSums(detection_matrice))
-    ```
+```
 
-    ```{r}
+```{r}
     pression_obs <- pression_obs_bdd(num_cd_nom = 61714)
 
     umf <- unmarked::unmarkedMultFrame(
@@ -301,57 +308,57 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
     data = umf, # data
     control = list(trace = 1),
     se = TRUE)
-    ```
+```
     
     coefficients : 
     
-    ```{r}
+```{r}
     fm
 
     backTransform(fm, "col"); confint(backTransform(fm, "col"))
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
-    ```
+```
 
     tests :
 
-    ```{r}
+```{r}
     pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
-    ```
+```
 
-    ```{r}
+```{r}
     AICcmodavg::mb.gof.test(fm)
-    ```
+```
 
     graphiques :
 
-    ```{r}
+```{r}
     plot <- proba_graphique_5(fm, couleur=couleur_lapin)
     plot +
-      labs(title = "Probabilité d'occupation du Lapin à travers les saisons",
-           x = "Saisons", y ="Probabilité d'occupation lisée")
+      labs(title = "Probabilite d'occupation du Lapin a travers les saisons",
+           x = "Saisons", y ="Probabilite d'occupation lisee")
 
     plot <- carte_graphique_5(fm=fm, couleur=couleur_lapin)
     ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Présence du Lapin"))
-    ```
+                              top = ggpubr::text_grob("Presence du Lapin"))
+```
     
-## Le hérisson
+## Le herisson
     
-    ```{r}
+```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60015)
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
-    ```
+```
 
-    ```{r}
+```{r}
     plot(umf,
-         main="Détection/Non Détection de Hérissons sur les sites de 2010 à 2024 inclus")
+         main="Detection/Non Detection de Herissons sur les sites de 2010 a 2024 inclus")
 
     print(colSums(detection_matrice))
-    ```
+```
 
-    ```{r}
+```{r}
     pression_obs <- pression_obs_bdd(num_cd_nom = 60015)
 
     umf <- unmarked::unmarkedMultFrame(
@@ -370,57 +377,57 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
     data = umf, # data
     control = list(trace = 1),
     se = TRUE)
-    ```
+```
 
     coefficients : 
     
-    ```{r}
+```{r}
     fm
 
     backTransform(fm, "col"); confint(backTransform(fm, "col"))
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
-    ```
+```
 
     tests :
 
-    ```{r}
+```{r}
     pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
-    ```
+```
 
-    ```{r}
+```{r}
     AICcmodavg::mb.gof.test(fm)
-    ```
+```
 
     graphiques :
 
-    ```{r}
+```{r}
     plot <- proba_graphique_5(fm=fm, couleur=couleur_herisson)
     plot +
-      labs(title = "Probabilité d'occupation du Hérisson à travers les saisons",
-           x = "Saisons", y ="Probabilité d'occupation lisée")
+      labs(title = "Probabilite d'occupation du Herisson a travers les saisons",
+           x = "Saisons", y ="Probabilite d'occupation lisee")
 
     plot <- carte_graphique_5(fm=fm, couleur=couleur_herisson)
     ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Présence du Hérisson"))
-    ```
+                              top = ggpubr::text_grob("Presence du Herisson"))
+```
     
 ## Le putois
     
-    ```{r}
+```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60731)
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
-    ```
+```
 
-    ```{r}
+```{r}
     plot(umf,
-         main="Détection/Non Détection de Putois sur les sites de 2010 à 2024 inclus")
+         main="Detection/Non Detection de Putois sur les sites de 2010 a 2024 inclus")
 
     print(colSums(detection_matrice))
-    ```
+```
 
-    ```{r}
+```{r}
     pression_obs <- pression_obs_bdd(num_cd_nom = 60731)
 
     umf <- unmarked::unmarkedMultFrame(
@@ -439,58 +446,58 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
       data = umf, # data
       control = list(trace = 1),
       se = TRUE)    
-    ```
+```
 
     coefficients : 
     
-    ```{r}
+```{r}
     fm
 
     backTransform(fm, "col"); confint(backTransform(fm, "col"))
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
-    ```
+```
 
     tests :
 
-    ```{r}
+```{r}
     pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
-    ```
+```
 
-    ```{r}
+```{r}
     AICcmodavg::mb.gof.test(fm)
-    ```
+```
 
     graphiques :
 
-    ```{r}
+```{r}
     plot <- proba_graphique_3(fm=fm, couleur=couleur_putois)
     plot +
-      labs(title = "Probabilité d'occupation du Putois à travers les saisons",
-           x = "Saisons", y ="Probabilité d'occupation lisée")
+      labs(title = "Probabilite d'occupation du Putois a travers les saisons",
+           x = "Saisons", y ="Probabilite d'occupation lisee")
 
     plot <- carte_graphique_3(fm=fm, couleur=couleur_putois)
     ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Présence du Putois"))
-    ```
+                              top = ggpubr::text_grob("Presence du Putois"))
+```
     
     
 ## L'hermine
     
-    ```{r}
+```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60686)
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
-    ```
+```
 
-    ```{r}
+```{r}
     plot(umf,
-         main="Détection/Non Détection de l'hermine sur les sites de 2010 à 2024 inclus")
+         main="Detection/Non Detection de l'hermine sur les sites de 2010 a 2024 inclus")
 
     print(colSums(detection_matrice))
-    ```
+```
 
-    ```{r}
+```{r}
     pression_obs <- pression_obs_bdd(num_cd_nom = 60686)
 
     umf <- unmarked::unmarkedMultFrame(
@@ -509,37 +516,37 @@ On a fait différents modèle d'occupancy sur différentes espèces. Les espèces qui
       data = umf, # data
       control = list(trace = 1),
       se = TRUE)
-    ```
+```
 
     coefficients : 
     
-    ```{r}
+```{r}
     fm
 
     backTransform(fm, "col"); confint(backTransform(fm, "col"))
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
-    ```
+```
 
     tests :
 
-    ```{r}
+```{r}
     pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
-    ```
+```
 
-    ```{r}
+```{r}
     AICcmodavg::mb.gof.test(fm)
-    ```
+```
 
     graphiques :
 
-    ```{r}
+```{r}
     plot <- proba_graphique_5(fm=fm, couleur=couleur_hermine)
     plot +
-      labs(title = "Probabilité d'occupation de l'hermine à travers les saisons",
-           x = "Saisons", y ="Probabilité d'occupation lisée")
+      labs(title = "Probabilite d'occupation de l'hermine a travers les saisons",
+           x = "Saisons", y ="Probabilite d'occupation lisee")
 
     plot <- carte_graphique_5(fm=fm, couleur=couleur_hermine)
     ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Présence l'hermine"))
-    ```
+                              top = ggpubr::text_grob("Presence l'hermine"))
+```
     
