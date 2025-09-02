@@ -12,8 +12,8 @@ library(dplyr);library(ggplot2);library(sf);library(unmarked)
 set.seed(12345)
 
 couleur_sanglier = "#5B3A29"
-couleur_renard = "#FF874D"
-couleur_lapin = "#C19A6B"
+couleur_renard = "#CC5500"
+couleur_lapin = "#1B2A3A"
 couleur_herisson = "#2A3D00"
 couleur_putois = "#A67C2D"
 couleur_hermine = "#1B3A1A"
@@ -49,6 +49,7 @@ site_info <- site_info %>%
 ```
 
 On a defini nos sites par des mailles de 10kmx10km sur l'ensemble de la Bretagne. On a retire les sites dont l'aire est strictement inferieure a $10 km^2$. On obtient ainsi 317 sites au total.
+
 ```{r}
 VariablesSite%>%
   ggplot()+geom_sf()+labs(title = "Sites utilises pour nos analyses")
@@ -58,11 +59,9 @@ VariablesSite%>%
 
 On a fait des regressions lineaires avec la proportion de l'espece sur un site chaque annee $t$ en question, en lien avec d'autres especes. On a inclus diverses variables telles que :
 
-l'annee en qualitatif ou en quantitatif selon le cas, ainsi que l'annee au carre si applicable.
-
-des variables d'environnement comme la distance au littoral, la densite de cultures, etc.
-
-la proportion a l'annee precedente $t-1$, ainsi qu'a $t-2$, afin de reduire l'autocorrelation.
+-   l'annee en qualitatif ou en quantitatif selon le cas, ainsi que l'annee au carre si applicable.
+-   des variables d'environnement comme la distance au littoral, la densite de cultures, etc.
+-   la proportion a l'annee precedente $t-1$, ainsi qu'a $t-2$, afin de reduire l'autocorrelation.
 
 Nous avons utilise le BIC pour choisir le modele optimal. Cependant, bien que la plupart des resultats etaient coherents avec ce que l'on peut observer, les modeles ne semblaient pas valider les hypotheses necessaires aux GLM (residus et differents tests).
 
@@ -72,25 +71,17 @@ De plus, comme nous utilisons une espece temoin, cela peut affecter le modele. N
 
 Nous avons teste differents modeles d'occupancy sur plusieurs especes. Celles qui nous ont le plus interessees sont :
 
-- le sanglier
-
-- le renard
-
-- le lapin
-
-- le herisson
-
-- le putois
-
-- l'hermine
-
-- la fouine
+-   le sanglier ;
+-   le renard ;
+-   le lapin ;
+-   le herisson ;
+-   le putois ;
+-   l'hermine ;
+-   la fouine.
 
 Selon la bibliographie, les especes moins frequemment observees donnent de meilleurs resultats avec des periodes plus longues. Nous avons donc separe les especes soit en 5 periodes de 3 ans, soit en 3 periodes de 5 ans. Dans ce cas, le putois, l'hermine et la fouine sont les especes les moins facilement detectables qui aurons des périodes plus longues sur cette analyse.
 
 Nous utilisons les memes variables d'environnement que pour les GLM, auxquelles nous ajoutons la variable pression d'observation, qui prend en compte le nombre d'observations autres que l'espece etudiee, par site et par annee.
-
-    Variables pour definir les annees :
 
 ```{r}
     quali_periodes_matrice_5 <- 
@@ -107,7 +98,6 @@ Nous utilisons les memes variables d'environnement que pour les GLM, auxquelles 
       byrow=TRUE)
 ```
 
-
 ```{r}
     quali_periodes_matrice_3 <- 
       matrix(c('2010 - 2014','2015 - 2019', '2020 - 2024'),
@@ -122,16 +112,15 @@ Nous utilisons les memes variables d'environnement que pour les GLM, auxquelles 
       byrow=TRUE)
 ```
 
-
 ```{r}
     site_covs_periodes_5 <- list(
       quanti_periodes = quanti_periodes_matrice_5,
-      quali_periodes = quanti_periodes_matrice_5
+      quali_periodes = quali_periodes_matrice_5
     )
 
     site_covs_periodes_3 <- list(
       quanti_periodes = quanti_periodes_matrice_3,
-      quali_periodes = quanti_periodes_matrice_3
+      quali_periodes = quali_periodes_matrice_3
     )
 ```
 
@@ -144,7 +133,7 @@ Nous utilisons les memes variables d'environnement que pour les GLM, auxquelles 
                              siteCovs = site_info)
 ```
 
-    On observe que les sites sont de plus en plus nombreux :
+On observe de plus en plus de sites ou le sanglier est present :
 
 ```{r}
     plot(umf,
@@ -174,8 +163,8 @@ Nous utilisons les memes variables d'environnement que pour les GLM, auxquelles 
       se = TRUE)
 ```
 
-    coefficients : 
-    
+coefficients :
+
 ```{r}
     fm
 
@@ -183,12 +172,25 @@ Nous utilisons les memes variables d'environnement que pour les GLM, auxquelles 
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
 ```
 
-    graphiques :
+tests :
+
+```{r echo=T, results='hide'}
+    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE) 
+```
+
+```{r}
+    pb 
+```
+
+```{r}
+    AICcmodavg::mb.gof.test(fm)
+```
+
+graphiques :
 
 ```{r echo=T, results='hide'}
 plot <- proba_graphique_5(fm, couleur=couleur_sanglier)
 ```
-
 
 ```{r}
 plot +
@@ -196,31 +198,20 @@ plot +
            x = "Saisons", y ="Probabilite d'occupation lisee")
 ```
 
-
 ```{r}
     plot <- carte_graphique_5(fm=fm, couleur=couleur_sanglier)
     ggpubr::annotate_figure(plot, 
                               top = ggpubr::text_grob("Presence du sanglier"))
 ```
-    
-     tests :
-
-```{r}
-    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
-```
-
-```{r}
-    AICcmodavg::mb.gof.test(fm)
-```
 
 ## Le renard roux
+
 ```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60585)
 
     umf <- unmarkedFrameOccu(y = detection_matrice, 
                              siteCovs = site_info)
 ```
-
 
 ```{r}
     plot(umf,
@@ -242,47 +233,52 @@ plot +
 
     fm <- unmarked::colext(
     psiformula = ~ 1,     # initial occupancy
-    gammaformula =  ~ 1,  # colonization
-    epsilonformula = ~ 1, # extinction
+    gammaformula =  ~ quali_periodes,  # colonization
+    epsilonformula = ~ quali_periodes, # extinction
     pformula = ~ pression_obs,  # detection
     data = umf, # data
     se = TRUE)
 ```
 
-    coefficients : 
-    
+coefficients :
+
 ```{r}
     fm
 
-    backTransform(fm, "col"); confint(backTransform(fm, "col"))
-    backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
+    confint((fm_quali)[2])
+    confint((fm_quali)[3])
 ```
 
-    tests :
+tests :
+
+```{r echo=T, results='hide'}
+    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE) 
+```
 
 ```{r}
-    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
+    pb 
 ```
 
 ```{r}
     AICcmodavg::mb.gof.test(fm)
 ```
 
-    graphiques :
+graphiques :
 
 ```{r echo=T, results='hide'}
-plot <- proba_graphique_5(fm = fm, couleur=couleur_renard)
+    plot <- proba_graphique_5(fm = fm, couleur=couleur_renard)
 ```
 
-
 ```{r}
-plot +
-      labs(title = "Probabilite d'occupation du renard a travers les saisons",
-           x = "Saisons", y ="Probabilite d'occupation lisee")
-
+    plot +
+          labs(title = "Probabilite d'occupation du renard a travers les saisons",
+               x = "Saisons", y ="Probabilite d'occupation lisee")
+    
     plot <- carte_graphique_5(fm=fm, couleur=couleur_renard)
-    ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Presence du renard"))
+    ggpubr::annotate_figure(plot,
+                            top = ggpubr::text_grob("Présence du renard", 
+                                                    size = 16, 
+                                                    face = "bold"))
 ```
 
 ## Le lapin de garenne
@@ -321,9 +317,9 @@ plot +
     control = list(trace = 1),
     se = TRUE)
 ```
-    
-    coefficients : 
-    
+
+coefficients :
+
 ```{r}
     fm
 
@@ -331,35 +327,38 @@ plot +
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
 ```
 
-    tests :
+tests :
+
+```{r echo=T, results='hide'}
+    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE) 
+```
 
 ```{r}
-    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
+    pb 
 ```
 
 ```{r}
     AICcmodavg::mb.gof.test(fm)
 ```
 
-    graphiques :
+graphiques :
 
 ```{r echo=T, results='hide'}
-plot <- proba_graphique_5(fm, couleur=couleur_lapin)
+    plot <- proba_graphique_5(fm, couleur=couleur_lapin)
 ```
-
 
 ```{r}
-plot +
-      labs(title = "Probabilite d'occupation du lapin a travers les saisons",
-           x = "Saisons", y ="Probabilite d'occupation lisee")
-
-    plot <- carte_graphique_5(fm=fm, couleur=couleur_lapin)
-    ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Presence du lapin"))
+    plot +
+          labs(title = "Probabilite d'occupation du lapin a travers les saisons",
+               x = "Saisons", y ="Probabilite d'occupation lisee")
+    
+        plot <- carte_graphique_5(fm=fm, couleur=couleur_lapin)
+        ggpubr::annotate_figure(plot, 
+                                  top = ggpubr::text_grob("Presence du lapin"))
 ```
-    
+
 ## Le herisson
-    
+
 ```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60015)
 
@@ -395,8 +394,8 @@ plot +
     se = TRUE)
 ```
 
-    coefficients : 
-    
+coefficients :
+
 ```{r}
     fm
 
@@ -404,35 +403,38 @@ plot +
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
 ```
 
-    tests :
+tests :
+
+```{r echo=T, results='hide'}
+    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE) 
+```
 
 ```{r}
-    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
+    pb 
 ```
 
 ```{r}
     AICcmodavg::mb.gof.test(fm)
 ```
 
-    graphiques :
+graphiques :
 
 ```{r echo=T, results='hide'}
-plot <- proba_graphique_5(fm=fm, couleur=couleur_herisson)
+    plot <- proba_graphique_5(fm=fm, couleur=couleur_herisson)
 ```
-
 
 ```{r}
-plot +
-      labs(title = "Probabilite d'occupation du herisson a travers les saisons",
-           x = "Saisons", y ="Probabilite d'occupation lisee")
-
-    plot <- carte_graphique_5(fm=fm, couleur=couleur_herisson)
-    ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Presence du herisson"))
+    plot +
+          labs(title = "Probabilite d'occupation du herisson a travers les saisons",
+               x = "Saisons", y ="Probabilite d'occupation lisee")
+    
+        plot <- carte_graphique_5(fm=fm, couleur=couleur_herisson)
+        ggpubr::annotate_figure(plot, 
+                                  top = ggpubr::text_grob("Presence du herisson"))
 ```
-    
+
 ## Le putois
-    
+
 ```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60731)
 
@@ -468,8 +470,8 @@ plot +
       se = TRUE)    
 ```
 
-    coefficients : 
-    
+coefficients :
+
 ```{r}
     fm
 
@@ -477,36 +479,38 @@ plot +
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
 ```
 
-    tests :
+tests :
+
+```{r echo=T, results='hide'}
+    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE) 
+```
 
 ```{r}
-    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
+    pb 
 ```
 
 ```{r}
     AICcmodavg::mb.gof.test(fm)
 ```
 
-    graphiques :
+graphiques :
 
 ```{r echo=T, results='hide'}
-plot <- proba_graphique_3(fm=fm, couleur=couleur_putois)
+    plot <- proba_graphique_3(fm=fm, couleur=couleur_putois)
 ```
-
 
 ```{r}
-plot +
-      labs(title = "Probabilite d'occupation du putois a travers les saisons",
-           x = "Saisons", y ="Probabilite d'occupation lisee")
-
-    plot <- carte_graphique_3(fm=fm, couleur=couleur_putois)
-    ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Presence du putois"))
+    plot +
+          labs(title = "Probabilite d'occupation du putois a travers les saisons",
+               x = "Saisons", y ="Probabilite d'occupation lisee")
+    
+        plot <- carte_graphique_3(fm=fm, couleur=couleur_putois)
+        ggpubr::annotate_figure(plot, 
+                                  top = ggpubr::text_grob("Presence du putois"))
 ```
-    
-    
+
 ## L'hermine
-    
+
 ```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60686)
 
@@ -542,8 +546,8 @@ plot +
       se = TRUE)
 ```
 
-    coefficients : 
-    
+coefficients :
+
 ```{r}
     fm
 
@@ -551,22 +555,25 @@ plot +
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
 ```
 
-    tests :
+tests :
+
+```{r echo=T, results='hide'}
+    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE)
+```
 
 ```{r}
-    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
+    pb
 ```
 
 ```{r}
     AICcmodavg::mb.gof.test(fm)
 ```
 
-    graphiques :
+graphiques :
 
 ```{r echo=T, results='hide'}
 plot <- proba_graphique_3(fm=fm, couleur=couleur_hermine)
 ```
-
 
 ```{r}
 plot +
@@ -577,10 +584,9 @@ plot +
     ggpubr::annotate_figure(plot, 
                               top = ggpubr::text_grob("Presence de l'hermine"))
 ```
-    
 
 ## La fouine
-    
+
 ```{r}
     detection_matrice <- matrice_occu_detections(num_cd_nom = 60674)
 
@@ -616,8 +622,8 @@ plot +
       se = TRUE)
 ```
 
-    coefficients : 
-    
+coefficients :
+
 ```{r}
     fm
 
@@ -625,31 +631,32 @@ plot +
     backTransform(fm, "ext"); confint(backTransform(fm, "ext"))
 ```
 
-    tests :
+tests :
+
+```{r echo=T, results='hide'}
+    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE) 
+```
 
 ```{r}
-    pb <- parboot(fm, statistic=chisq, nsim=40, parallel=FALSE); pb
+    pb 
 ```
 
 ```{r}
     AICcmodavg::mb.gof.test(fm)
 ```
 
-    graphiques :
+graphiques :
 
 ```{r echo=T, results='hide'}
-plot <- proba_graphique_3(fm=fm, couleur=couleur_fouine)
+    plot <- proba_graphique_3(fm=fm, couleur=couleur_fouine)
 ```
-
 
 ```{r}
-plot +
-      labs(title = "Probabilite d'occupation de la fouine a travers les saisons",
-           x = "Saisons", y ="Probabilite d'occupation lisee")
-
-    plot <- carte_graphique_3(fm=fm, couleur=couleur_fouine)
-    ggpubr::annotate_figure(plot, 
-                              top = ggpubr::text_grob("Presence de la fouine"))
+    plot +
+          labs(title = "Probabilite d'occupation de la fouine a travers les saisons",
+               x = "Saisons", y ="Probabilite d'occupation lisee")
+    
+        plot <- carte_graphique_3(fm=fm, couleur=couleur_fouine)
+        ggpubr::annotate_figure(plot, 
+                                  top = ggpubr::text_grob("Presence de la fouine"))
 ```
-    
-    

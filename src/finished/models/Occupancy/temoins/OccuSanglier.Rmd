@@ -218,6 +218,7 @@ fm <- unmarked::colext(
 ```
 
 ## Tests d'hypotheses -> 
+
 indépendance des sites?
 
 
@@ -263,21 +264,15 @@ predicted_occupancy <- data.frame(saison = c(1:5),
 couleur_sanglier = "#5B3A29"
 
 predicted_occupancy%>%
-  ggplot( aes(x=saison, y=smoothed_occ, col =couleur_sanglier)) +
-  geom_line() +
-  geom_point() +
+  ggplot( aes(x=saison, y=smoothed_occ)) +
+  geom_line(col = couleur_sanglier) +
+  geom_point(col = couleur_sanglier) +
   labs(title = "Occupancy probability of the Wild boar across seaons")+
   theme_bw()
 ```
 
 
 Les sangliers semblent se deplacer legerement sur le territoire.
-```{r}
-plot <- carte_graphique(fm=fm, couleur=couleur_sanglier)
-ggpubr::annotate_figure(plot, 
-                          top = ggpubr::text_grob("Présence du Sanglier"))
-```
-
 
 ```{r}
 plot <- carte_graphique(fm=fm, couleur=couleur_sanglier)
