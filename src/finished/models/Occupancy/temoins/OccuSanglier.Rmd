@@ -14,7 +14,6 @@ editor_options:
 
 ```{r}
 library(dplyr);library(ggplot2);library(sf);library(unmarked)
-theme_set(theme_light(base_size = 16))
 set.seed(12345)
 ```
 
@@ -274,99 +273,17 @@ predicted_occupancy%>%
 
 Les sangliers semblent se deplacer legerement sur le territoire.
 ```{r}
-grid_10x10 <- st_read(paste0(wd$data, 
-                             "derived/VariablesSite.shp")) %>%
-  transforme_carte()
-
-rf <- unmarked::ranef(fm)
-occ_prob <- unmarked::bup(rf, stat="mean")
-
-grid_10x10 <- cbind(grid_10x10, occ_prob)
-
-
-LtoM <-colorRampPalette(c('white','darkorange4'))
-
-
-g1 <- ggplot() +
-  geom_sf(data = grid_10x10, aes(fill = X1))+
-  labs(title="De 2010 a 2012")+
-  scale_fill_gradient2(low=LtoM(0),
-                       high=LtoM(100),
-                       limits = c(0, 1),
-                       name = "Probabilite de presence")+
-  theme(axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title = element_blank())
-
-
-g2 <- ggplot() +
-  geom_sf(data = grid_10x10, aes(fill = X2))+
-  labs(title="De 2013 a 2015")+
-  scale_fill_gradient2(low=LtoM(0),
-                       high=LtoM(100),
-                       limits = c(0, 1),
-                       name = "Probabilite de presence")+
-  theme(axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title = element_blank())
-
-g3 <- ggplot() +
-  geom_sf(data = grid_10x10, aes(fill = X4))+
-  labs(title="De 2019 a 2021")+
-  scale_fill_gradient2(low=LtoM(0),
-                       high=LtoM(100),
-                       limits = c(0, 1),
-                       name = "Probabilite de presence")+
-  theme(axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title = element_blank())
-
-
-g4 <- ggplot() +
-  geom_sf(data = grid_10x10, aes(fill = X5))+
-  labs(title="De 2022 a 2024")+
-  scale_fill_gradient2(low=LtoM(0),
-                       high=LtoM(100),
-                       limits = c(0, 1),
-                       name = "Probabilite de presence")+
-  theme(axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title = element_blank())
-
-
-plot <- ggpubr::ggarrange(g1 + theme(legend.position = "none"),
-                          g2 + theme(legend.position = "none"),
-                          g3 + theme(legend.position = "none"),
-                          g4 + theme(legend.position = "none"),
-                          common.legend = TRUE,
-                          legend = "right")
-
+plot <- carte_graphique(fm=fm, couleur=couleur_sanglier)
 ggpubr::annotate_figure(plot, 
-                        top = ggpubr::text_grob("Presence du Sanglier"))
+                          top = ggpubr::text_grob("Présence du Sanglier"))
 ```
 
 
 ```{r}
-# Extract site x season occupancy probabilities (for state 2, occupied)
-site_occ <- smoothed(fm, type = "")[2, , ]  # [state, site, season]
-?smoothed
-# Convert to data.frame for ggplot
-library(reshape2)
-site_occ_long <- melt(site_occ)
-colnames(site_occ_long) <- c("state", "site", "season", "occupancy")
-site_occ_long <- subset(site_occ_long, state == 1) # 1 if your state 2 is "occupied", adjust if needed
-
-# OR if output is [site, season], then just:
-site_occ_long <- as.data.frame(site_occ)
-site_occ_long$site <- rownames(site_occ_long)
-site_occ_long <- reshape2::melt(site_occ_long, id.vars = "site", variable.name = "season", value.name = "occupancy")
-
-# Plot all sites
-ggplot(site_occ_long, aes(x = as.numeric(season), y = occupancy, group = site, color = site)) +
-  geom_line(alpha = 0.5) +
-  labs(title = "Occupancy probability for all sites across seasons") +
-  theme_bw() +
-  theme(legend.position = "none") # Hide legend if too many sites
+plot <- carte_graphique(fm=fm, couleur=couleur_sanglier)
+ggpubr::annotate_figure(plot, 
+                          top = ggpubr::text_grob("Présence du Sanglier"))
+  
 ```
 
 

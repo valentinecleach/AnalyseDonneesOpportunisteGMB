@@ -125,6 +125,14 @@ rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/SiteCovariates.Rmd")
                                        "models/Occupancy/SiteCovariates.html"),
                   encoding="UTF-8")
 
+
+rmarkdown::render(paste0(wd$src, "finished/RpubsFinal.Rmd"),
+                  output_file = paste0(wd$output, 
+                                       "models/Occupancy/RpubsFinal.html"),
+                  encoding="UTF-8")
+knitr::knit(paste0(wd$src, "finished/RpubsFinal.Rmd"))
+
+
 ################################
 ######## Brouillons GLM ########
 ################################
