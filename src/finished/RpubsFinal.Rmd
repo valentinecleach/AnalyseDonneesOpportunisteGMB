@@ -79,7 +79,7 @@ Nous avons teste differents modeles d'occupancy sur plusieurs especes. Celles qu
 -   l'hermine ;
 -   la fouine.
 
-Selon la bibliographie, les especes moins frequemment observees donnent de meilleurs resultats avec des periodes plus longues. Nous avons donc separe les especes soit en 5 periodes de 3 ans, soit en 3 periodes de 5 ans. Dans ce cas, le putois, l'hermine et la fouine sont les especes les moins facilement detectables qui aurons des périodes plus longues sur cette analyse.
+Selon la bibliographie, les especes moins frequemment observees donnent de meilleurs resultats avec des periodes plus longues. Nous avons donc separe les especes soit en 5 periodes de 3 ans, soit en 3 periodes de 5 ans. Dans ce cas, le putois, l'hermine et la fouine sont les especes les moins facilement detectables qui aurons des periodes plus longues sur cette analyse.
 
 Nous utilisons les memes variables d'environnement que pour les GLM, auxquelles nous ajoutons la variable pression d'observation, qui prend en compte le nombre d'observations autres que l'espece etudiee, par site et par annee.
 
@@ -276,7 +276,7 @@ graphiques :
     
     plot <- carte_graphique_5(fm=fm, couleur=couleur_renard)
     ggpubr::annotate_figure(plot,
-                            top = ggpubr::text_grob("Présence du renard", 
+                            top = ggpubr::text_grob("Presence du renard", 
                                                     size = 16, 
                                                     face = "bold"))
 ```
