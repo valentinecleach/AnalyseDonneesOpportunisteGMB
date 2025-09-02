@@ -154,7 +154,8 @@ carte_graphique_5 <- function(var_site = VariablesSite, fm, couleur = "black"){
 
 
 carte_graphique_3 <- function(var_site = VariablesSite, 
-                              fm, couleur = "black"){
+                              fm, 
+                              couleur = "black"){
   grid_10x10 <- VariablesSite %>%
     transforme_carte()
   
@@ -213,7 +214,7 @@ carte_graphique_3 <- function(var_site = VariablesSite,
 
 proba_graphique_5 <- function(fm, couleur = "black"){
   m1 <- nonparboot(fm, 
-                   B = 100)
+                   B = 10)
   
   predicted_occupancy <- data.frame(saison = c(1:5),
                                     smoothed_occ = smoothed(fm)[2,],
@@ -229,9 +230,9 @@ proba_graphique_5 <- function(fm, couleur = "black"){
                  "[2019 ; 2021]", 
                  "[2022 ; 2024]")
     )) %>%
-    ggplot(aes(x = saison, y = smoothed_occ, group = 1, col = couleur)) +
-    geom_line() +
-    geom_point() +
+    ggplot(aes(x = saison, y = smoothed_occ, group = 1)) +
+    geom_line(color = couleur) +
+    geom_point(color = couleur) +
     theme_bw()+
     theme(legend.position = "none")
   
@@ -240,7 +241,7 @@ proba_graphique_5 <- function(fm, couleur = "black"){
 
 proba_graphique_3 <- function(fm, couleur="black" ){
   m1 <- nonparboot(fm, 
-                   B = 100)
+                   B = 10)
   
   predicted_occupancy <- data.frame(saison = c(1:3),
                                     smoothed_occ = smoothed(fm)[2,],
@@ -254,11 +255,16 @@ proba_graphique_3 <- function(fm, couleur="black" ){
                  "[2015 ; 2019]", 
                  "[2020 ; 2024]")
     )) %>%
-    ggplot(aes(x = saison, y = smoothed_occ, group = 1, col = couleur)) +
-    geom_line() +
-    geom_point() +
+    ggplot(aes(x = saison, y = smoothed_occ, group = 1)) +
+    geom_line(color = couleur) +
+    geom_point(color = couleur) +
     theme_bw()+
     theme(legend.position = "none")
   
   return(plot)
 }
+
+plot <- proba_graphique_3(fm, couleur=couleur_lapin)
+plot +
+  labs(title = "Probabilite d'occupation du Lapin a travers les saisons",
+       x = "Saisons", y ="Probabilite d'occupation lisee")
