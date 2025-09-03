@@ -1,4 +1,4 @@
-#' Donne une matrice de detections Oui/Non pour une espèce par site et année
+#' Donne une matrice de detections Oui/Non pour une espece par site et annee
 #'
 #' @param num_cd_nom
 #' @param bdd
@@ -39,13 +39,13 @@ matrice_occu_detections <- function(num_cd_nom, bdd = Total, var_site = Variable
   return(detection_matrice)
 }
 
-#' Donne la pression d'observation sans l'espèce qu'on étudie
+#' Donne la pression d'observation sans l'espece qu'on etudie
 #'
-#' @param num_cd_nom espèce a ne pas garder
+#' @param num_cd_nom espece a ne pas garder
 #' @param Total
 #' @param var_site
 #'
-#' @return Une base de donnée de pression d'obs année par année, site par site
+#' @return Une base de donnee de pression d'obs annee par annee, site par site
 #'
 #' @examples
 #' 
@@ -125,11 +125,11 @@ carte_graphique_5 <- function(var_site = VariablesSite,
   
   g1 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X1)) +
-    labs(title = "De 2010 à 2012") +
+    labs(title = "De 2010 a 2012") +
     scale_fill_gradient2(low = LtoM(0),
                          high = LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence") +
+                         name = "Probabilite de presence") +
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
           axis.title = element_blank(),
@@ -137,11 +137,11 @@ carte_graphique_5 <- function(var_site = VariablesSite,
   
   g2 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X2)) +
-    labs(title = "De 2013 à 2015") +
+    labs(title = "De 2013 a 2015") +
     scale_fill_gradient2(low = LtoM(0),
                          high = LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence") +
+                         name = "Probabilite de presence") +
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
           axis.title = element_blank(),
@@ -149,11 +149,11 @@ carte_graphique_5 <- function(var_site = VariablesSite,
   
   g3 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X3)) +
-    labs(title = "De 2016 à 2018") +
+    labs(title = "De 2016 a 2018") +
     scale_fill_gradient2(low = LtoM(0),
                          high = LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence") +
+                         name = "Probabilite de presence") +
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
           axis.title = element_blank(),
@@ -161,11 +161,11 @@ carte_graphique_5 <- function(var_site = VariablesSite,
   
   g4 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X4)) +
-    labs(title = "De 2019 à 2021") +
+    labs(title = "De 2019 a 2021") +
     scale_fill_gradient2(low = LtoM(0),
                          high = LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence") +
+                         name = "Probabilite de presence") +
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
           axis.title = element_blank(),
@@ -173,7 +173,7 @@ carte_graphique_5 <- function(var_site = VariablesSite,
   
   g5 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X5)) +
-    labs(title = "De 2022 à 2024") +
+    labs(title = "De 2022 a 2024") +
     scale_fill_gradient2(low = LtoM(0),
                          high = LtoM(100),
                          limits = c(0, 1),
@@ -226,11 +226,11 @@ carte_graphique_3 <- function(var_site = VariablesSite,
   
   g1 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X1))+
-    labs(title="De 2010 à 2014")+
+    labs(title="De 2010 a 2014")+
     scale_fill_gradient2(low=LtoM(0),
                          high=LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence")+
+                         name = "Probabilite de presence")+
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
           axis.title = element_blank(),
@@ -239,11 +239,11 @@ carte_graphique_3 <- function(var_site = VariablesSite,
   
   g2 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X2))+
-    labs(title="De 2015 à 2019")+
+    labs(title="De 2015 a 2019")+
     scale_fill_gradient2(low=LtoM(0),
                          high=LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence")+
+                         name = "Probabilite de presence")+
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
           axis.title = element_blank(),
@@ -251,11 +251,11 @@ carte_graphique_3 <- function(var_site = VariablesSite,
   
   g3 <- ggplot() +
     geom_sf(data = grid_10x10, aes(fill = X3))+
-    labs(title="De 2020 à 2024")+
+    labs(title="De 2020 a 2024")+
     scale_fill_gradient2(low=LtoM(0),
                          high=LtoM(100),
                          limits = c(0, 1),
-                         name = "Probabilité de présence")+
+                         name = "Probabilite de presence")+
     theme(axis.text = element_blank(),
           axis.ticks = element_blank(),
           axis.title = element_blank(),
@@ -274,7 +274,7 @@ carte_graphique_3 <- function(var_site = VariablesSite,
 
 
 
-#' Donne un graph de proba d'occupancy lissé pour 5 saisons
+#' Donne un graph de proba d'occupancy lisse pour 5 saisons
 #'
 #' @param fm
 #' @param couleur
@@ -309,7 +309,7 @@ proba_graphique_5 <- function(fm, couleur = "black"){
 }
 
 
-#' Donne un graph de proba d'occupancy lissé pour 3 saisons
+#' Donne un graph de proba d'occupancy lisse pour 3 saisons
 #'
 #' @param fm
 #' @param couleur
@@ -371,7 +371,7 @@ tables_detections <- function(umf,
   n_periodes_par_site <- apply(detection_periodes, 1, sum)
   n_periodes_par_site <- table(n_periodes_par_site)
   
-  # retourne le nombre de sites détectés pour chaque periode
+  # retourne le nombre de sites detectes pour chaque periode
   sites_detecte_par_periode <- sapply(1:n_periodes, function(t) {
     sum(rowSums(y_array[, t, , drop = FALSE]) > 0)
   })

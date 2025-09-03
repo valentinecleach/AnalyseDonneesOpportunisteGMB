@@ -20,24 +20,12 @@ set.seed(12345)
 
 # Importations
 Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
-
 ```
 
 
 ```{r, inlcude = FALSE} 
 Total <- Total %>%
-  dplyr::mutate_at(c("bdd_rgn", 
-              "ett_blg", "tchnq_b", 
-              "communs", "obsrvtr", 
-              "famille", "ordre", 
-              "nm_vrnc", "nom_vld"), 
-            .funs = as.factor)%>%
-  dplyr::rename(bdd_originale = bdd_rgn,
-         etat_biologique = ett_blg,
-         technique_observation = tchnq_b,
-         nom_vernaculaire = nm_vrnc,
-         nom_valide = nom_vld,
-         observateurs = obsrvtr)
+  transform_Total()
 ```
 
 ```{r}
@@ -46,6 +34,9 @@ couleur  <- c("Carnivora" = "orangered3",
               "Eulipotyphla" = "bisque4", 
               "Lagomorpha" = "#CC8C3C", 
               "Rodentia" = "darkorange")
+
+VN <- "VisioNature"
+GN <- "GeoNature"
 ```
 
 Toutes nos donnees concernent uniquement la Bretagne continentale, hors Loire-Atlantique.
@@ -54,9 +45,11 @@ Toutes nos donnees concernent uniquement la Bretagne continentale, hors Loire-At
 
 ```{r repartition-etat-bio-techniques, warning = FALSE, echo=FALSE, out.width="50%"}
 Total%>%
-  dplyr::filter(date > params$date_min,
-         bdd_originale == VN)%>%
-  ggplot2::ggplot(aes(technique_observation, fill=etat_biologique))+
+  dplyr::filter(
+    date > params$date_min,
+    bdd_originale == VN)%>%
+  ggplot2::ggplot(aes(technique_observation, 
+                      fill=etat_biologique))+
   geom_bar(position="dodge")+
   theme_bw()+
   scale_fill_grey(start = 0.2,
@@ -65,11 +58,13 @@ Total%>%
   labs(title = "1a. Repartition de l'etat biologique selon les techniques d'observations",
        subtitle = paste(VN))
 
+
 Total%>%
-  dplyr::filter(bdd_originale == GN,
-         date > params$date_min)%>%
+  dplyr::filter(
+    bdd_originale == GN,
+    date > params$date_min)%>%
   ggplot2::ggplot(aes(technique_observation, 
-             fill=etat_biologique))+
+                      fill=etat_biologique))+
   geom_bar(position="dodge")+
   theme_bw()+
   scale_fill_grey(start = 0.2,
@@ -84,19 +79,21 @@ Nous remarquons toujours beaucoup de donnees de VisioNature dont la technique d'
 ```{r repartition-etat-bio-ordes, warning = FALSE, echo=FALSE, out.width="50%"}
 Total%>%
   dplyr::filter(bdd_originale == VN,
-         date > params$date_min)%>%
-  ggplot2::ggplot(aes(technique_observation, fill=ordre))+
+                date > params$date_min)%>%
+  ggplot2::ggplot(aes(technique_observation, 
+                      fill=ordre))+
   geom_bar(position="dodge")+
   theme_bw()+
   labs(title = "2a. Repartition de l'etat biologique selon les ordres",
        subtitle = paste(VN))+
-  scale_fill_manual(values = couleur, name = "Ordre")
+  scale_fill_manual(values = couleur, 
+                    name = "Ordre")
 
 Total%>%
   dplyr::filter(bdd_originale == GN,
-         date > params$date_min)%>%
+                date > params$date_min)%>%
   ggplot2::ggplot(aes(technique_observation, 
-             fill=ordre))+
+                      fill=ordre))+
   geom_bar(position="dodge")+
   theme_bw()+
   labs(title = "2b. Repartition de l'etat biologique selon les ordres",    
@@ -104,7 +101,7 @@ Total%>%
   scale_fill_manual(values = couleur, name = "Ordre")
 ```
 
-GeoNature observe principalement des indices de rodents et de carnivores.
+GeoNature observe principalement des indices de rongeurs et de carnivores.
 Les lagomorphes sont peu remarques avec les indices, compares aux autres dans VisioNature et GeoNature.
 
 ```{r}

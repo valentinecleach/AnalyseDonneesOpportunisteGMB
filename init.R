@@ -26,13 +26,4 @@ suppressPackageStartupMessages(
   invisible(lapply(to_load, function(pkg) library(pkg, character.only = TRUE)))
 )
 
-# Source project functions
-safe_source <- function(file) {
-  tryCatch(source(file), error = function(e) message("Error in ", file, ": ", e$message))
-}
-if (dir.exists("src/functions")) {
-  function_files <- list.files("src/functions", full.names = TRUE, pattern = "\\.R$")
-  invisible(lapply(function_files, safe_source))
-}
-
-message("Project packages installed, loaded, and functions sourced.")
+message("Project packages installed, and loaded")

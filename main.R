@@ -4,10 +4,10 @@ options(encoding = 'UTF-8')
 source("init.R")
 wd <- set_wd()
 
-library(dplyr);library(sf);library(ggplot2)
-library(unmarked)
+library(dplyr);library(sf);library(ggplot2);library(unmarked)
 
-wd <- set_wd()
+devtools::load_all()
+
 set.seed(12345)
 
 Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
@@ -34,13 +34,16 @@ rmarkdown::render(paste0(wd$src, "finished/cleaning/Diro.Rmd"),
                   output_file = paste0(wd$output, "cleaning/Diro.html"),
                   encoding="UTF-8")
 
-rmarkdown::render(paste0(wd$src, "finished/cleaning/Total_sites.Rmd"), 
-                  output_file = paste0(wd$output, "cleaning/Total_sites.html"),
-                  encoding="UTF-8")
-
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Sites.Rmd"), 
                   output_file = paste0(wd$output, "cleaning/Sites.html"),
                   encoding="UTF-8")
+
+# Creation de la base de donnée Total propre
+knitr::knit(paste0(wd$src, "finished/cleaning/Total.Rmd"))
+# Creation de la base de donnée Diro
+knitr::knit(paste0(wd$src, "finished/cleaning/Diro.Rmd"))
+# Creation d'une base de donnée Avec les sites, et les variables
+knitr::knit(paste0(wd$src, "finished/cleaning/Sites.Rmd"))
 
 #### Stats Desc ####
 rmarkdown::render(paste0(wd$src, "finished/stats_desc/Repartitions.Rmd"), 
@@ -294,6 +297,3 @@ ggplot() +
 #############################################
 #############################################
 #############################################
-
-View(VariablesSite)
-  

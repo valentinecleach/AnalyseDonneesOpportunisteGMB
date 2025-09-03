@@ -46,12 +46,13 @@ Ce projet a été codé avec R 4.5.0
 
 1.  Tout d'abord, importer les bases de données manquantes.
 
-2.  Puis, dans src -\> functions -\> divers.R, dans la fonction set_wd, changer le chemin de vos fichiers pour qu'elle correspondent a votre Working Directory. <br>
+2.  Puis, dans R -\> divers.R, dans la fonction set_wd, changer le chemin de vos fichiers pour qu'elle correspondent a votre Working Directory. <br>
 
 3.  Ensuite, ouvrir le main.R, pour lancer les deux commandes suivantes:<br>
 
 ``` r
 source("init.R")
+devtools::load_all()
 wd <- set_wd()
 ```
 
