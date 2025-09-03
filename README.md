@@ -26,7 +26,9 @@
 
 ## Le projet
 
-Ce projet est réalisé pendant un stage d'ingénieur en data science au sein du Groupe Mammologique Breton en 2025. Il est encadré par Franck Simonnet.
+Ce projet est réalisé pendant un stage d'ingénieur en data science de 3 mois au sein du Groupe Mammalogique Breton en 2025. Il est encadré par Franck Simonnet. Il a pour mission d'étudier 2 bases de données participatives (VisioNature et GeoNature) afin de voir s'il est possible d'en tirer des informations de tendances temporelles. La base de donnée DIR Ouest a également été utilisé afin d'apporter des informations sur les collisions routières. Le rapport suivant explique les choix et apporte des explications au code fourni dans ce répertoire:
+
+*Insérer_lien_vers_le_rapport*
 
 <p align="right">
 
@@ -55,7 +57,7 @@ wd <- set_wd()
 
 Le fichier init.R installera certains packages et importera les fonctions nécéssaire au lancement du code.
 
-4.  Vous pourrez enfin lancer, a l'aide de `{r} knitr::knit()` les fichiers qui vous intéressent, sans devoir telecharger de packages ou autre.
+4.  Vous pourrez enfin lancer, a l'aide de `{r} knitr::knit()` les fichiers qui vous intéressent, sans devoir télecharger de packages ou autre.
 
 <p align="right">
 
