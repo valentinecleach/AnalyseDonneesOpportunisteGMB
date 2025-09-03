@@ -45,6 +45,7 @@ knitr::knit(paste0(wd$src, "finished/cleaning/Diro.Rmd"))
 # Creation d'une base de donnée Avec les sites, et les variables
 knitr::knit(paste0(wd$src, "finished/cleaning/Sites.Rmd"))
 
+rm(params)
 #### Stats Desc ####
 rmarkdown::render(paste0(wd$src, "finished/stats_desc/Repartitions.Rmd"), 
                   output_file = paste0(wd$output, "stats_desc/Repartitions.html"),
