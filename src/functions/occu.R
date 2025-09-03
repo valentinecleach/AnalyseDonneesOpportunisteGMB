@@ -378,3 +378,6 @@ tables_detections <- function(umf,
   
   return(list(n_periodes_par_site, sites_detecte_par_periode))
 }
+
+
+plogis(0.602)
