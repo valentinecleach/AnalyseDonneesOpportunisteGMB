@@ -20,7 +20,7 @@ repartition_espece <- function(bdd = Total, nom_ordre,
     dplyr::filter(ordre == nom_ordre,
            date > params$date_min)
   
-  grps <- fct_lump(bdd_filtre$nom_vernaculaire, prop = 0.03)
+  grps <- forcats::fct_lump(bdd_filtre$nom_vernaculaire, prop = 0.03)
   
   if (length(unique(grps)) > 5) {
     bdd_filtre <- bdd_filtre %>%
@@ -31,11 +31,11 @@ repartition_espece <- function(bdd = Total, nom_ordre,
   }
   
   p <- bdd_filtre %>%
-    dplyr::mutate(nom_vernaculaire_grp = fct_infreq(nom_vernaculaire_grp)) %>% 
+    dplyr::mutate(nom_vernaculaire_grp = forcats::fct_infreq(nom_vernaculaire_grp)) %>% 
     ggplot(aes(x = {{ repartition }}, fill = nom_vernaculaire_grp)) +
     geom_bar(position = "dodge") +
     coord_flip()+
-    scale_fill_discrete(labels = label_wrap(40)) +
+    scale_fill_discrete(labels = scales::label_wrap(40)) +
     theme_bw()+
     labs(title = paste("Barplot de la ", 
                        pour_titre1, 
