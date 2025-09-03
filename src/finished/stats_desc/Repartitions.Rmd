@@ -168,7 +168,6 @@ Nous nous sommes demandes a quoi ressemblerait la repartition des ordres sans la
 Ca ne change pas drastiquement la distribution.
 
 ```{r repartition-especes, fig.width=10, fig.height=7}
-
 Total%>%
   dplyr::filter(date > params$date_min,
          bdd_originale == "GeoNature")%>%
@@ -183,7 +182,7 @@ Total%>%
         subtitle = paste("GeoNature"),
     y = "Nombre d'observations", x = "Nom vernaculaire"
   ) +
-  scale_x_discrete(labels = label_wrap(40)) +
+  scale_x_discrete(labels = scales::label_wrap(40)) +
   theme_bw()+
   theme(axis.text=element_text(size=8))+
   scale_colour_manual(values=couleur)+
@@ -203,7 +202,7 @@ Total%>%
         subtitle = paste(GN),
     y = "Nombre d'observations", x = "Nom vernaculaire"
   ) +
-  scale_x_discrete(labels = label_wrap(40)) +
+  scale_x_discrete(labels = scales::label_wrap(40)) +
   theme_bw()+
   theme(axis.text=element_text(size=8))+
   scale_colour_manual(values=couleur)+
@@ -386,7 +385,7 @@ Total%>%
     fill = "Espece"
   ) +
   theme_minimal()+
-  scale_fill_viridis_d(labels = label_wrap(40))+
+  scale_fill_viridis_d(labels = scales::label_wrap(40))+
   theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
   
 ```
