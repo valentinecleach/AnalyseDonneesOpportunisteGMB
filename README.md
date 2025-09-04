@@ -58,7 +58,7 @@ wd <- set_wd()
 
 Le fichier init.R installera certains packages et importera les fonctions nécéssaire au lancement du code.
 
-4.  Vous pourrez enfin lancer, a l'aide de `{r} knitr::knit()` les fichiers qui vous intéressent, sans devoir télecharger de packages ou autre.
+4.  Vous pourrez enfin lancer, a l'aide de `{r} rmarkdown::render()` les fichiers qui vous intéressent, sans devoir télécharger de package ou autre. Vous aurez ensuite le fichier dans le dossier "output"
 
 <p align="right">
 
