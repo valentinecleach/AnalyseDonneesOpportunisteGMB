@@ -35,7 +35,7 @@ repartition_espece_cluster <- function(bdd = Total, cluster){
       title = paste0("Repartition des espaces du cluster ", cluster),
       x = "Nom vernaculaire"
     ) +
-    scale_x_discrete(labels = label_wrap(40)) +
+    scale_x_discrete(labels = scales::label_wrap(40)) +
     theme_bw() +
     theme(axis.text = element_text(size = 8))
 }

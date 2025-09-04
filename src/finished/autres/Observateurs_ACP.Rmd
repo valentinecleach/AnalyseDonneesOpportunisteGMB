@@ -1,10 +1,25 @@
+---
+title: "Analyse des observateurs et ACP"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+params:
+  date_min: '2010-01-01'
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
 # ACP
 ```{r, include=FALSE}
 set.seed(12345)
 
-Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
-Total <- transform_Total()
-Total_notsf <- Total %>%
+Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))%>%
+  transform_Total()
+
+Total_not_sf <- Total%>%  
   sf::st_drop_geometry()
 ```
 
@@ -28,7 +43,6 @@ max_etat_bio <- Total_notsf %>%
 max_bdd <- Total_notsf %>%
   dplyr::group_by(observateurs) %>%
   dplyr::summarise(bdd_max = collapse::fmode(bdd_originale))
-
 ```
 
 ```{r}
@@ -39,15 +53,20 @@ Observateurs <- nb_observations %>%
                    by = "observateurs") %>%
   dplyr::left_join(max_bdd, 
                    by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Carnivora"), 
+  dplyr::left_join(nb_ordre(bdd = Total_notsf,
+                            nom_ordre = "Carnivora"), 
                    by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Cetartiodactyla"), 
+  dplyr::left_join(nb_ordre(bdd = Total_notsf, 
+                            nom_ordre = "Cetartiodactyla"), 
                    by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Eulipotyphla"), 
+  dplyr::left_join(nb_ordre(bdd = Total_notsf, 
+                            nom_ordre = "Eulipotyphla"), 
                    by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Lagomorpha"), 
+  dplyr::left_join(nb_ordre(bdd = Total_notsf, 
+                            nom_ordre = "Lagomorpha"), 
                    by = "observateurs") %>%
-  dplyr::left_join(nb_ordre(nom_ordre = "Rodentia"), 
+  dplyr::left_join(nb_ordre(bdd = Total_notsf, 
+                            nom_ordre = "Rodentia"), 
                    by = "observateurs")
 ```
 
@@ -79,8 +98,6 @@ Observateurs <- Observateurs %>%
          tech_obs_max = paste("Tech d'obs: ", tech_obs_max, sep = ""),
          etat_bio_max = paste("Etat bio: ", etat_bio_max, sep = "")
          )
-
-
 ```
 
 ```{r}
@@ -89,7 +106,6 @@ Observateurs$shannon <- vegan::diversity(Observateurs[,7:11])
 Observateurs$Pielou <- Observateurs$shannon / log(vegan::specnumber(Observateurs[,7:11]))
 Observateurs <- Observateurs %>%
   dplyr::mutate(Pielou = ifelse(shannon == 0, 0, Pielou))
-
 ```
 
 On se demande a quoi ressemble la repartition des Indice de Pielou
@@ -245,8 +261,8 @@ utils::write.csv(Observateurs_clust, paste0(wd$data, "derived/Observateurs.csv")
 ```
 
 ```{r}
-repartition_espece_cluster(cluster = 1)
-repartition_espece_cluster(cluster = 2)
-repartition_espece_cluster(cluster = 3)
+repartition_espece_cluster(bdd = Total, cluster = 1)
+repartition_espece_cluster(bdd = Total, cluster = 2)
+repartition_espece_cluster(bdd = Total, cluster = 3)
 ```
 

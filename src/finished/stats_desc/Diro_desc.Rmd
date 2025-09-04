@@ -65,7 +65,7 @@ diro <- diro_sf%>%
 ```{r}
 diro%>% 
   ggplot()+
-  geom_bar(aes(x=fct_infreq(espece), fill="#FFDB58"))+
+  geom_bar(aes(x=forcats::fct_infreq(espece), fill="#FFDB58"))+
   coord_flip()+theme_bw()+
   labs(title = "1. Repartition des especes de DIR Ouest",
        x = "Espece",
@@ -77,7 +77,7 @@ diro%>%
 diro%>%
   dplyr::mutate(
     year = as.numeric(format(date, "%Y")),
-    nom_vernaculaire_grp = fct_lump(espece, prop = 0.03)
+    nom_vernaculaire_grp = forcats::fct_lump(espece, prop = 0.03)
   ) %>%
   ggplot2::ggplot(aes(year, fill = nom_vernaculaire_grp)) +
   geom_bar(position = "fill") +
@@ -94,7 +94,7 @@ diro%>%
 ```{r}
 
 diro%>%
-  ggplot2::ggplot(aes(as.factor(wday(date, 
+  ggplot2::ggplot(aes(as.factor(lubridate::wday(date, 
                             week_start = getOption("lubridate.week.start", 1))),
                       fill="#FFDB58"))+
   labs(title="3. Barplot des observation selon le jour de la semaine",
@@ -115,7 +115,8 @@ diro%>%
 ```{r}
 
 diro %>%
-  dplyr::mutate(jour_annee = qday(date)+(quarter(date,with_year = FALSE)-1)*91)%>%
+  dplyr::mutate(jour_annee = lubridate::qday(date)
+                +(lubridate::quarter(date,with_year = FALSE)-1)*91)%>%
   ggplot2::ggplot(aes(jour_annee, fill="#FFDB58")) +
   labs(title="4. Frequence des observations selon le jour de l'annee",
        y="Proportion",
@@ -127,7 +128,8 @@ diro %>%
 ```{r}
 
 diro%>%
-    ggplot2::ggplot(aes(factor(month(date)), fill="#FFDB58"))+
+    ggplot2::ggplot(aes(factor(lubridate::month(date)), 
+                        fill="#FFDB58"))+
     labs(title="5. Barplot des observation selon le mois",
          y="Nombre d'observations",
          x="Mois")+ 
@@ -198,9 +200,9 @@ repartition_espece_geo <- function(bdd = diro_sf, nom_espece, num_graph=1){
 return(g)
 }
 
-repartition_espece_geo(nom_espece = "renard", num_graph = 8)
-repartition_espece_geo(nom_espece = "martre", num_graph = 9)
-repartition_espece_geo(nom_espece = "fouine", num_graph = 10)
-repartition_espece_geo(nom_espece = "putois", num_graph = 11)
+repartition_espece_geo(bdd = diro_sf, nom_espece = "renard", num_graph = 8)
+repartition_espece_geo(bdd = diro_sf, nom_espece = "martre", num_graph = 9)
+repartition_espece_geo(bdd = diro_sf, nom_espece = "fouine", num_graph = 10)
+repartition_espece_geo(bdd = diro_sf, nom_espece = "putois", num_graph = 11)
 ```
 

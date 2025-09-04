@@ -1,3 +1,17 @@
+---
+title: "Analyse descriptive des observateurs <opportunistes du GMB"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+params:
+  date_min: '2010-01-01'
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
 ## 3. Representation cartographique des donnees
 
 ```{r, include=FALSE}
@@ -5,11 +19,21 @@ set.seed(12345)
 
 Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
 
-carte_bretagne <- sf::st_read(paste0(wd$data,
-                                     "masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
+carte_bretagne <- sf::st_read(paste0(wd$data, "masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
   
-Total <- transform_Total()
-carte_bretagne <- transforme_carte(carte_bretagne)
+Total <- Total%>%
+  transform_Total()
+carte_bretagne <- carte_bretagne%>%
+  transforme_carte()
+
+VN <- "VisioNature"
+GN <- "GeoNature"
+
+couleur  <- c("Carnivora" = "orangered3",
+              "Cetartiodactyla" = "#225d00", 
+              "Eulipotyphla" = "bisque4", 
+              "Lagomorpha" = "#CC8C3C", 
+              "Rodentia" = "darkorange")
 ```
 
 ## 4. Etude des observateurs
@@ -96,22 +120,22 @@ Nous pouvons imaginer que c'est les observations de tous les membres qui ont sup
 Pour etudier facilement leur donnees, nous creons une fonction qui donne rapidement quelques graphiques.
 
 ```{r stats-observateur, fig.width=10, fig.height=7}
-stats_observateur(nom_obs="Bellier_Daniel", 
+stats_observateur(nom_obs="BELLIER_DANIEL", 
                   carte=carte_bretagne)
 
-stats_observateur(nom_obs="Chapuis_Martine", 
+stats_observateur(nom_obs="CHAPUIS_MARTINE", 
                   carte=carte_bretagne)
 
-stats_observateur(nom_obs="Seite_Francois",
+stats_observateur(nom_obs="SEITE_FRANCOIS",
                   carte=carte_bretagne)
 
-stats_observateur(nom_obs="Deleted_Deleted",
+stats_observateur(nom_obs="DELETED_DELETED",
                   carte=carte_bretagne)
 
-stats_observateur(nom_obs="Simonnet_Franck", 
+stats_observateur(nom_obs="SIMONNET_FRANCK", 
                   carte=carte_bretagne)
 
-stats_observateur(nom_obs="Le_Campion_Thomas",
+stats_observateur(nom_obs="LE_CAMPION_THOMAS",
                   carte=carte_bretagne)
 
 ```
