@@ -43,7 +43,7 @@ carte_bretagne <- sf::st_read(paste0(wd$data, "masques/Bretagne_Conti_Buffer/bre
   transforme_carte()
 
 diro_conti <- diro_sf%>%
-  sf::st_intersection(carte_bretagne_44)
+  sf::st_intersection(carte_bretagne)
 
 diro_sf <- diro_conti%>%
   dplyr::filter(deppr != 44)

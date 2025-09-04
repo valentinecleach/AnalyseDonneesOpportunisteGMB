@@ -1,32 +1,18 @@
-rm(list=setdiff(ls(), "Total"))
-options(encoding = 'UTF-8')
-
 source("init.R")
-wd <- set_wd()
 
 library(dplyr);library(sf);library(ggplot2);library(unmarked)
-
-devtools::load_all()
-
 set.seed(12345)
 
-Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
-                     options = "ENCODING=UTF8")
-Total <- Total%>%
-  transform_Total()
+devtools::load_all()
+wd <- set_wd()
 
-VariablesSite <- sf::st_read(paste0(wd$data, "derived/VariablesSite.shp"),
-                             options = "ENCODING=UTF8")
-VariablesSite <- VariablesSite%>%
-  transform_VarSites()
-
-################################
-######## KNIT / RENDER #########
-################################
+#########################
+######## RENDER #########
+#########################
 
 #### Nettoyage de donnees ####
 
-# Creation de la base de donnée Total propre
+# Creation de la base de donnee Total propre
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Total.Rmd"), 
                   output_file = paste0(wd$output, "cleaning/Total.html"),
                   encoding="UTF-8")
@@ -36,13 +22,13 @@ rmarkdown::render(paste0(wd$src, "finished/cleaning/Diro.Rmd"),
                   output_file = paste0(wd$output, "cleaning/Diro.html"),
                   encoding="UTF-8")
 
-# Creation d'une base de donnée Avec les sites, et les variables
+# Creation d'une base de donnee Avec les sites, et les variables
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Sites.Rmd"), 
                   output_file = paste0(wd$output, "cleaning/Sites.html"),
                   encoding="UTF-8")
 
-rm(params)
 #### Stats Desc ####
+
 rmarkdown::render(paste0(wd$src, "finished/stats_desc/Repartitions.Rmd"), 
                   output_file = paste0(wd$output, "stats_desc/Repartitions.html"),
                   encoding="UTF-8")
@@ -77,7 +63,6 @@ rmarkdown::render(paste0(wd$src,
                                        "models/glm/debuts.html"),
                   encoding="UTF-8")
 
-
 rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lineaire/Reg_Lin_CollisionsRoutieres.Rmd"),
                   output_file = paste0(wd$output, 
                                        "models/glm/Reg_Lin_CollisionsRoutieres.html"),
@@ -93,7 +78,7 @@ rmarkdown::render(paste0(wd$src, "finished/models/Reg_Lineaire/Reg_Lin_Collision
                                        "models/glm/Reg_Lin_DIRO.html"),
                   encoding="UTF-8")
 
-##### occupancy #####
+##### Occupancy #####
 
 rmarkdown::render(paste0(wd$src, "finished/models/Occupancy/OccupancyLapin.Rmd"),
                   output_file = paste0(wd$output, 
@@ -125,12 +110,12 @@ rmarkdown::render(paste0(wd$src, "finished/RpubsFinal.Rmd"),
                   output_file = paste0(wd$output, 
                                        "models/Occupancy/RpubsFinal.html"),
                   encoding="UTF-8")
-knitr::knit(paste0(wd$src, "finished/RpubsFinal.Rmd"))
 
 
-########################
+#########################
 ### Unkown key etapes ###
-########################
+#########################
+
 # Dans Bash
 ls ~/.ssh/id_ed25519.pub 
 ssh-keygen -t ed25519 -C "valentine.cleach@gmail.com"
@@ -155,25 +140,25 @@ library(unmarked);library(dplyr);library(sf);library(ggplot2)
 grille_10x10 <- sf::st_read(
   paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
 )
-RegionBretagneConti <- sf::st_read(
-  paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
-)
+carte_bretagne <- sf::st_read(
+  paste0(wd$data, "masques/Bretagne_Conti_Buffer/bretagne.shp")
+  )%>%
+  transforme_carte()
 
 tab <- Total %>%
   dplyr::filter(cd_nom == 61714)%>%
   transforme_carte()
 grille_10x10 <- grille_10x10%>%
   transforme_carte()
-RegionBretagneConti <- RegionBretagneConti%>%
-  transforme_carte()
 
 grille_10x10$density <- lengths(sf::st_intersects(grille_10x10, 
                                                   tab))
+
 grille_10x10 <- sf::st_intersection(grille_10x10, 
-                                    RegionBretagneConti)
+                                    carte_bretagne)
 
 ggplot() +
-  geom_sf(data = RegionBretagneConti) + 
+  geom_sf(data = carte_bretagne) + 
   labs(title = paste0(". Densite des observations du lapin de garenne en bretagne")) +
   geom_sf(data = grille_10x10, aes(fill = density)) +
   scale_fill_gradient(low="white", high="orangered3") +
@@ -182,3 +167,94 @@ ggplot() +
 #############################################
 #############################################
 #############################################
+
+Total <- sf::st_read(paste0(wd$data, "derived/Total.shp"),
+                     options = "ENCODING=UTF8") %>%
+  transform_Total()
+
+Diro <- sf::st_read(paste0(wd$data, "derived/diro.shp"))
+
+
+p1 <- Total%>%
+  dplyr::filter(date>=as.Date("2000-01-01"),
+                bdd_originale == VN)%>%
+  ggplot2::ggplot(aes(date))+
+  labs(title=paste("Densité des observations depuis 2010 de", VN))+ 
+  theme_bw()+
+  geom_line(stat="density", color="#8B4513")
+
+
+p2 <- Total%>%
+  dplyr::filter(date>=as.Date("2000-01-01"),
+                bdd_originale == GN)%>%
+  ggplot2::ggplot(aes(date))+
+  labs(title=paste("Densité des observations depuis 2010 de", GN))+ 
+  theme_bw()+
+  geom_line(stat="density", color="#8B4513")
+
+p3 <- Total%>%
+  dplyr::filter(date>=as.Date("2000-01-01"))%>%
+  ggplot2::ggplot(aes(date))+
+  labs(title=paste("Densité des observations depuis 2010 \nde", VN, "et", GN))+ 
+  theme_bw()+
+  geom_line(stat="density", color="#8B4513")
+
+p4 <- Diro%>%
+  ggplot2::ggplot(aes(date))+
+  labs(title=paste("Densité des observations depuis 2010 de la DIR Ouest"),
+       y = "Densité", x = "Date")+ 
+  theme_bw()+
+  geom_line(stat="density", color="#8B4513")
+
+
+p1 <- Total%>%
+  dplyr::filter(date>=as.Date("2000-01-01"),
+                bdd_originale == VN)%>%
+  ggplot2::ggplot(aes(date))+
+  labs(title=paste("Densité des observations depuis 2000 de", VN),
+       y = "Densité", x = "Date")+ 
+  theme_bw()+
+  geom_density(color="#8B4513")
+  
+
+p2 <- Total%>%
+  dplyr::filter(date>=as.Date("2000-01-01"),
+                bdd_originale == GN)%>%
+  ggplot2::ggplot(aes(date))+
+  labs(title=paste("Densité des observations depuis 2000 de", GN),
+       y = "Densité", x = "Date")+ 
+  theme_bw()+
+  geom_density(color="#8B4513")
+  
+p3 <- Total%>%
+  dplyr::filter(date>=as.Date("2010-01-01"))%>%
+  ggplot2::ggplot(aes(date))+
+  labs(title=paste("Densité des observations depuis 2010 de", VN, "et \nde", GN),
+       y = "Densité", x = "Date")+ 
+  theme_bw()+
+  geom_density(color="#8B4513")
+  
+p4 <- Diro%>%
+  ggplot2::ggplot(aes(date))+
+  labs(title=paste("Densité des observations de la DIR Ouest"),
+       y = "Densité", x = "Date")+ 
+  theme_bw()+
+  geom_density(color="#8B4513")
+  
+
+dim(Diro)
+count(unique(Total%>%filter(bdd_originale==GN, date>as.Date("2010-01-01"), date<as.Date("2025-01-01"))))
+24759
+160754, 86958, 73796
+
+86958 + 73796
+dim(Total%>%filter(bdd_originale==GN))
+ggpubr::ggarrange(p1,p2,p3,p4)
+
+VN <- "VisioNature"
+GN <- "GeoNature"
+
+rm(list=setdiff(ls(), "Total"))
+
+View(Total)
+
