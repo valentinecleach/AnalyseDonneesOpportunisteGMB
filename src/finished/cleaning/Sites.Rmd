@@ -17,13 +17,8 @@ library(sf); library(dplyr); library(ggplot2)
 grille_10x10 <- sf::st_read(
   paste0(wd$data, "masques/Grille_10x10/Grille_10X10.shp")
 )
-RegionBretagneConti <- sf::st_read(
-  paste0(wd$data, "masques/RegionBretagneConti/RegionBretagneConti.shp")
-)
-RegionBretagneConti <- RegionBretagneConti %>%
-  transforme_carte() %>%
-  sf::st_transform(2154) %>%
-  sf::st_buffer(dist = 200) %>%
+RegionBretagneConti <- sf::st_read(paste0(wd$data, "masques/Bretagne_Conti_Buffer/bretagne.shp")
+                              )%>%
   transforme_carte()
 
 grille_10x10 <- grille_10x10 %>%

@@ -44,7 +44,19 @@ Ce projet est réalisé pendant un stage d'ingénieur en data science de 3 mois au 
 
 Ce projet a été codé avec R 4.5.0
 
-1.  Tout d'abord, importer les bases de données manquantes.
+1.  Tout d'abord, importer les bases de données manquantes. Les données utilisées sont
+
+    -   MasqueBretagneConti
+
+    -   Famille de paysage
+
+    -   Variables structurantes.
+
+    -   DIRO
+
+    -   GN, GN rongeurs, ..
+
+    -   VN, VN rongeurs ...
 
 2.  Puis, dans R -\> divers.R, dans la fonction set_wd, changer le chemin de vos fichiers pour qu'elle correspondent a votre Working Directory. <br>
 

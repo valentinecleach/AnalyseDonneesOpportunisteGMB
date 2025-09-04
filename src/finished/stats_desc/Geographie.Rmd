@@ -20,7 +20,9 @@ set.seed(12345)
 
 # Importations
 Total <- sf::st_read(paste0(wd$data,"derived/Total.shp"))
-carte_bretagne <- sf::st_read(paste0(wd$data, "masques/DepartementsOuest/LIM_ADM_DepartementsOuest.shp"))
+carte_bretagne <- sf::st_read(
+  paste0(wd$data, 
+         "masques/Bretagne_Conti_Buffer/bretagne.shp"))
 
 Total <- Total%>% 
   transform_Total()

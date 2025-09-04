@@ -59,3 +59,11 @@ plot(distance_raster)
 writeRaster(distance_raster, 
             paste0(wd$data, "masques/VariablesStructurates/Distance_Littoral.tif"), 
             overwrite = TRUE)
+
+bretagne <- giscoR::gisco_get_nuts(resolution = "01", 
+                                   country = "France", 
+                                   nuts_level = 2) %>%
+  subset(NUTS_NAME == "Bretagne") %>% 
+  sf::st_transform(crs=2154)%>%
+  sf::st_buffer(dist=200)%>%
+  transforme_carte()
