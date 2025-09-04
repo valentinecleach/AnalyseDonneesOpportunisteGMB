@@ -1,7 +1,12 @@
-# Analyse de donnees opportunistes pour rechercher une potentielle tendance d'évolution temporelle de populations de mammifères en Bretagne
+<a name="readme-top"></a>
+
+# Analyse de donnees opportunistes pour rechercher une potentielle tendance d'évolution temporelle de populations de mammifères en Bretagne 
+
 
 <hr style="border: 1px solid #000;">
 
+
+\
 <!-- TABLE OF CONTENTS -->
 
 <details>
@@ -32,7 +37,7 @@ Ce projet est réalisé pendant un stage d'ingénieur en data science de 3 mois au 
 
 <p align="right">
 
-(<a href="#readme-top">remonter</a>)
+(<a href="#readme-top">Remonter</a>)
 
 </p>
 
@@ -46,17 +51,17 @@ Ce projet a été codé avec R 4.5.0
 
 1.  Tout d'abord, importer les bases de données manquantes. Les données utilisées sont
 
-    -   MasqueBretagneConti
+    -   MasqueBretagneConti OU Une carte de la Bretagne continentale avec un buffer de 200m dessus. (Un fichier existe pour le transformer)
 
-    -   Famille de paysage
+    -   Les famille de paysage
 
-    -   Variables structurantes.
+    -   Variables structurantes (la distance au littoral n'est pas nécessaire, du code existe dans un fichier pour le créer)
 
-    -   DIRO
+    -   Base de donné de collisions routières de la DIR Ouest
 
-    -   GN, GN rongeurs, ..
+    -   GeoNature, GeoNature rongeurs, ..
 
-    -   VN, VN rongeurs ...
+    -   VisioNature, VisioNatures rongeurs ...
 
 2.  Puis, dans R -\> divers.R, dans la fonction set_wd, changer le chemin de vos fichiers pour qu'elle correspondent a votre Working Directory. <br>
 
@@ -68,13 +73,13 @@ devtools::load_all()
 wd <- set_wd()
 ```
 
-Le fichier init.R installera certains packages et importera les fonctions nécéssaire au lancement du code.
+Le fichier "init.R" installera certains packages. `{r} devtools::load_all()` lancera les fonctions nécessaire.
 
-4.  Vous pourrez enfin lancer, a l'aide de `{r} rmarkdown::render()` les fichiers qui vous intéressent, sans devoir télécharger de package ou autre. Vous aurez ensuite le fichier dans le dossier "output"
+4.  Vous pourrez enfin lancer, a l'aide de `{r} rmarkdown::render()` les fichiers qui vous intéressent, sans devoir télécharger de package ou autre. Vous aurez ensuite le fichier a ouvrir depuis le dossier "output".
 
 <p align="right">
 
-(<a href="#readme-top">remonter</a>)
+(<a href="#readme-top">Remonter</a>)
 
 </p>
 
@@ -90,6 +95,6 @@ Lien du projet: <https://github.com/valentinecleach/AnalyseDonneesOpportunisteGM
 
 <p align="right">
 
-(<a href="#readme-top">remonter</a>)
+(<a href="#readme-top">Remonter</a>)
 
 </p>
