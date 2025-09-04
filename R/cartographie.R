@@ -44,4 +44,3 @@ graph_ordre_tranche_annee <- function(bdd = Total, ordre_voulu){
 
 
 
-

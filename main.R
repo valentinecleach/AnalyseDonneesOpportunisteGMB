@@ -25,25 +25,21 @@ VariablesSite <- VariablesSite%>%
 ################################
 
 #### Nettoyage de donnees ####
-# Total:
+
+# Creation de la base de donnée Total propre
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Total.Rmd"), 
                   output_file = paste0(wd$output, "cleaning/Total.html"),
                   encoding="UTF-8")
 
+# Creation de la base de donnee Diro
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Diro.Rmd"), 
                   output_file = paste0(wd$output, "cleaning/Diro.html"),
                   encoding="UTF-8")
 
+# Creation d'une base de donnée Avec les sites, et les variables
 rmarkdown::render(paste0(wd$src, "finished/cleaning/Sites.Rmd"), 
                   output_file = paste0(wd$output, "cleaning/Sites.html"),
                   encoding="UTF-8")
-
-# Creation de la base de donnée Total propre
-knitr::knit(paste0(wd$src, "finished/cleaning/Total.Rmd"))
-# Creation de la base de donnée Diro
-knitr::knit(paste0(wd$src, "finished/cleaning/Diro.Rmd"))
-# Creation d'une base de donnée Avec les sites, et les variables
-knitr::knit(paste0(wd$src, "finished/cleaning/Sites.Rmd"))
 
 rm(params)
 #### Stats Desc ####
@@ -58,7 +54,7 @@ rmarkdown::render(paste0(wd$src, "finished/stats_desc/Geographie.Rmd"),
 rmarkdown::render(paste0(wd$src, "finished/stats_desc/Observateurs.Rmd"), 
                   output_file = paste0(wd$output, "stats_desc/Observateurs.html"),
                   encoding="UTF-8")
-
+View(Total)
 #### Classification ####
 
 rmarkdown::render(paste0(wd$src, 
