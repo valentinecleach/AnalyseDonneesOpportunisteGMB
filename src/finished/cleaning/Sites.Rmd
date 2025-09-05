@@ -156,7 +156,7 @@ grille_10x10 %>%
   count()
 
 22/339
-# Suppression d'environ 6% des sites, réparti aléatoirement sur la bordure de la bretagne. 
+# Suppression d'environ 6% des sites, reparti aleatoirement sur la bordure de la Bretagne. 
 
 grille_10x10 <- grille_10x10 %>%
   dplyr::filter(aire_km2 >= 10)
