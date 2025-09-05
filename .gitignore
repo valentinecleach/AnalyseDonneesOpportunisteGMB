@@ -5,6 +5,8 @@
 .csv
 .dbf
 .rda
+.cpg 
+.gz
 
 *.dbf
 *.csv
@@ -17,3 +19,4 @@
 *.tif
 *.cpg
 *.png
+*.gz
